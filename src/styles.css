@@ -146,21 +146,21 @@
 
 @utility racing-stripe {
   position: relative;
-}
-@utility racing-stripe::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    90deg,
-    transparent 0 40px,
-    var(--racing-red) 40px 44px,
-    transparent 44px 60px,
-    var(--mclaren-orange) 60px 64px,
-    transparent 64px 100px
-  );
-  opacity: 0.15;
-  pointer-events: none;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent 0 40px,
+      var(--racing-red) 40px 44px,
+      transparent 44px 60px,
+      var(--mclaren-orange) 60px 64px,
+      transparent 64px 100px
+    );
+    opacity: 0.15;
+    pointer-events: none;
+  }
 }
 
 @layer base {
