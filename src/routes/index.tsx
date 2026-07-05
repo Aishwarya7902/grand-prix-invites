@@ -79,7 +79,7 @@ function Index() {
 
   return (
     <div className="relative min-h-screen bg-background">
-      {intro && <CountdownIntro onDone={() => setIntro(false)} />}
+      {intro && <CinematicIntro racerName={RACER_NAME} onDone={() => setIntro(false)} />}
 
       {/* HERO */}
       <section className="relative flex min-h-screen items-center overflow-hidden">
