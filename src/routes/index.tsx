@@ -16,30 +16,8 @@ const RACE_TIME = "4:00 PM — Green Flag";
 const VENUE = "Speedway Grand Ballroom, Bandra";
 const DRESS_CODE = "Racing Colors — Red, Orange, Neon";
 
-function CountdownIntro({ onDone }: { onDone: () => void }) {
-  const [n, setN] = useState<number | string>(3);
-  useEffect(() => {
-    const seq: (number | string)[] = [3, 2, 1, "GO!"];
-    let i = 0;
-    const id = setInterval(() => {
-      i++;
-      if (i >= seq.length) { clearInterval(id); setTimeout(onDone, 600); return; }
-      setN(seq[i]);
-    }, 700);
-    return () => clearInterval(id);
-  }, [onDone]);
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
-      <div className="absolute inset-0 opacity-40" style={{ background: "radial-gradient(circle at center, var(--racing-red), transparent 60%)" }} />
-      <div className="relative text-center">
-        <div className="mb-6 font-mono text-xs tracking-[0.4em] text-muted-foreground uppercase">Engines Running</div>
-        <div key={String(n)} className="animate-countdown font-display text-[10rem] leading-none text-fire drop-shadow-[0_0_40px_rgba(255,60,40,0.6)] md:text-[12rem]">
-          {n}
-        </div>
-      </div>
-    </div>
-  );
-}
+
+
 
 function SpeedMarquee({ text }: { text: string }) {
   const items = Array.from({ length: 8 }, (_, i) => i);
