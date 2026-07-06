@@ -162,7 +162,7 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
             </div>
             <div className="mt-6 text-center font-display uppercase leading-[0.95]"
               style={{ textShadow: "0 0 24px rgba(255,60,40,0.7)" }}>
-              <div className="text-3xl text-fire md:text-5xl">GRAND PRIX</div>
+              <div className="text-3xl text-fire md:text-5xl">GRAND CELEBRATION</div>
               <div className="mt-1 text-3xl text-white md:text-5xl">CHAMPIONSHIP</div>
             </div>
             <div className="mt-6 border-t border-primary/30 pt-4 text-center font-mono text-xs uppercase tracking-[0.5em] text-accent">
