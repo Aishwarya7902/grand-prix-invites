@@ -59,17 +59,14 @@ function DashItem({ label, value, icon: Icon }: { label: string; value: string; 
   );
 }
 
-const INTRO_STORAGE_KEY = "gp-intro-seen-v1";
+// Dev: always play the intro on every load. To reintroduce "skip for returning
+// visitors" later, gate the initial `useState(true)` on a stored flag and set it
+// inside `finishIntro`.
+const ALWAYS_PLAY_INTRO = true;
 
 function Index() {
-  const [intro, setIntro] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem(INTRO_STORAGE_KEY) !== "1";
-  });
-  const finishIntro = () => {
-    try { window.localStorage.setItem(INTRO_STORAGE_KEY, "1"); } catch {}
-    setIntro(false);
-  };
+  const [intro, setIntro] = useState(ALWAYS_PLAY_INTRO);
+  const finishIntro = () => setIntro(false);
 
   const checkpoints = [
     { icon: Users, title: "Driver Check-In", time: "4:00 PM", desc: "Sign your racing license and grab your helmet." },
