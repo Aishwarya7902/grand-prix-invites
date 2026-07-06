@@ -100,7 +100,7 @@ function Index() {
         <div className="absolute inset-x-0 top-0 z-10">
           <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
             <div className="flex items-center gap-2 font-display text-xl tracking-widest text-foreground">
-              <Flag className="h-5 w-5 text-primary" /> GRAND PRIX
+              <Flag className="h-5 w-5 text-primary" /> GRAND CELEBRATION
             </div>
             <div className="hidden gap-6 font-mono text-xs uppercase tracking-widest text-muted-foreground md:flex">
               <a href="#invitation" className="hover:text-accent">Invitation</a>
@@ -120,7 +120,7 @@ function Index() {
             <h1 className="font-display text-6xl uppercase leading-[0.9] text-foreground md:text-8xl">
               {RACER_NAME}'s <br />
               <span className="text-fire">10th Birthday</span> <br />
-              Grand Prix
+              Grand Celebration
             </h1>
             <p className="mt-6 max-w-xl text-lg text-muted-foreground">
               You're on the VIP list, driver. Lock in your helmet, warm up the tyres and prepare for the fastest championship of the year.
@@ -210,7 +210,7 @@ function Index() {
               <div className="relative flex flex-col justify-between bg-primary p-8 text-primary-foreground">
                 <div>
                   <div className="font-mono text-[10px] uppercase tracking-[0.3em] opacity-80">Championship Pass</div>
-                  <div className="mt-2 font-display text-3xl">GRAND PRIX</div>
+                  <div className="mt-2 font-display text-3xl">GRAND CELEBRATION</div>
                   <div className="font-display text-6xl leading-none">10</div>
                   <div className="mt-1 font-mono text-xs uppercase tracking-widest opacity-80">Round · Season 2026</div>
                 </div>
@@ -393,7 +393,7 @@ function Index() {
       <footer className="border-t border-border bg-background py-10">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-6 md:flex-row md:justify-between">
           <div className="flex items-center gap-3 font-display text-lg tracking-widest text-foreground">
-            <Flag className="h-4 w-4 text-primary" /> {RACER_NAME}'S GRAND PRIX · 2026
+            <Flag className="h-4 w-4 text-primary" /> {RACER_NAME}'S GRAND CELEBRATION · 2026
           </div>
           <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
             © Race Crew · All laps reserved

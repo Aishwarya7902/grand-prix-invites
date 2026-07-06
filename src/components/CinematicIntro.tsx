@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 /**
- * Story-driven cinematic intro (~18s).
+ * Story-driven cinematic intro (~27s).
  *
  * Narrative arc:
  *   Championship Announcement → Champion Found → Car Arrives →
@@ -12,30 +12,30 @@ import { useEffect, useMemo, useState } from "react";
  */
 
 type StageKey =
-  | "announce"   // stadium LED powers on: "Grand Prix Championship — Today's Special Event"
+  | "announce"   // stadium LED powers on: "Grand Celebration Championship — Today's Special Event"
   | "champion"   // "Searching for today's champion…" → "Champion Found · Driver #10 · AARAV"
   | "arrival"    // Car #10 rolls in with birthday livery
   | "lights"     // F1 start lights → GO
   | "race"       // Progression through Training → Mountain → City → Final Straight
   | "finish"     // Finish line, fireworks, "CHAMPION · DRIVER #10 · AARAV"
   | "years"      // "Celebrating 10 Amazing Years"
-  | "reveal";    // Welcome to AARAV's 10th Birthday Grand Prix (with paddock banners)
+  | "reveal";    // Welcome to AARAV's 10th Birthday Grand Celebration (with paddock banners)
 
 // Reveal stage has no end — it holds until the user clicks the CTA.
 const STAGES: { key: StageKey; at: number; end: number }[] = [
-  { key: "announce", at:     0, end:  2200 },
-  { key: "champion", at:  2000, end:  4600 },
-  { key: "arrival",  at:  4400, end:  6400 },
-  { key: "lights",   at:  6200, end:  7800 },
-  { key: "race",     at:  7600, end: 10600 },
-  { key: "finish",   at: 10400, end: 12200 },
-  { key: "years",    at: 12000, end: 13400 },
-  { key: "reveal",   at: 13200, end: 10_000_000 },
+  { key: "announce", at:     0, end:  3500 },
+  { key: "champion", at:  3200, end:  7800 },
+  { key: "arrival",  at:  7400, end: 11000 },
+  { key: "lights",   at: 10600, end: 14000 },
+  { key: "race",     at: 13600, end: 19500 },
+  { key: "finish",   at: 19000, end: 22800 },
+  { key: "years",    at: 22400, end: 26000 },
+  { key: "reveal",   at: 25600, end: 10_000_000 },
 ];
-const CTA_READY_AT = 14200; // when the title has fully settled
+const CTA_READY_AT = 27500; // when the title has fully settled
 const CELEBRATION_MS = 3600;
 const FADE = 550;
-const SKIP_AT = 2500;
+const SKIP_AT = 4000;
 const EASE = "cubic-bezier(0.65, 0, 0.35, 1)";
 
 const CIRCUITS = [
@@ -162,7 +162,7 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
             </div>
             <div className="mt-6 text-center font-display uppercase leading-[0.95]"
               style={{ textShadow: "0 0 24px rgba(255,60,40,0.7)" }}>
-              <div className="text-3xl text-fire md:text-5xl">GRAND PRIX</div>
+              <div className="text-3xl text-fire md:text-5xl">GRAND CELEBRATION</div>
               <div className="mt-1 text-3xl text-white md:text-5xl">CHAMPIONSHIP</div>
             </div>
             <div className="mt-6 border-t border-primary/30 pt-4 text-center font-mono text-xs uppercase tracking-[0.5em] text-accent">
@@ -270,7 +270,7 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
         ))}
         {/* rolling car (right → center) */}
         <div className="absolute bottom-[22%] left-1/2 -translate-x-1/2"
-          style={{ animation: `ci-arrive 2200ms ${EASE} both` }}>
+          style={{ animation: `ci-arrive 3200ms ${EASE} both` }}>
           {/* car "silhouette" plate with birthday livery */}
           <div className="relative flex h-24 w-64 items-center justify-center border-2 border-primary bg-gradient-to-r from-primary via-fire to-accent shadow-[0_20px_60px_rgba(255,60,40,0.5)]">
             {/* confetti decals */}
@@ -507,7 +507,7 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
               10<span className="text-white/90">TH</span> BIRTHDAY
             </div>
             <div className="mt-3 font-display text-4xl uppercase tracking-[0.15em] text-white md:text-6xl">
-              GRAND PRIX
+              GRAND CELEBRATION
             </div>
             <div className="mx-auto mt-6 h-2 w-64 checker-flag opacity-80" />
             <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.5em] text-white/60">
@@ -612,7 +612,7 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
                 10<span className="text-white/90">TH</span> BIRTHDAY
               </div>
               <div className="mt-3 font-display text-4xl uppercase tracking-[0.15em] text-white md:text-6xl">
-                GRAND PRIX
+                GRAND CELEBRATION
               </div>
             </div>
           </div>
