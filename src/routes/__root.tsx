@@ -77,10 +77,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Aarav's 10th Birthday Grand Prix — VIP Race Invitation" },
+      { title: "Aarav's 10th Birthday Grand Celebration — VIP Race Invitation" },
       { name: "description", content: "You're invited to Aarav's Ultimate Racing Championship — a high-octane 10th birthday celebration. Grab your VIP race pass and join the grid." },
       { name: "author", content: "Aarav's Race Crew" },
-      { property: "og:title", content: "Aarav's 10th Birthday Grand Prix" },
+      { property: "og:title", content: "Aarav's 10th Birthday Grand Celebration" },
       { property: "og:description", content: "VIP race invitation to the Ultimate Racing Championship — Aarav's 10th Birthday." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
