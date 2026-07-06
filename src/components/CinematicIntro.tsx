@@ -23,19 +23,19 @@ type StageKey =
 
 // Reveal stage has no end — it holds until the user clicks the CTA.
 const STAGES: { key: StageKey; at: number; end: number }[] = [
-  { key: "announce", at:     0, end:  2200 },
-  { key: "champion", at:  2000, end:  4600 },
-  { key: "arrival",  at:  4400, end:  6400 },
-  { key: "lights",   at:  6200, end:  7800 },
-  { key: "race",     at:  7600, end: 10600 },
-  { key: "finish",   at: 10400, end: 12200 },
-  { key: "years",    at: 12000, end: 13400 },
-  { key: "reveal",   at: 13200, end: 10_000_000 },
+  { key: "announce", at:     0, end:  3500 },
+  { key: "champion", at:  3200, end:  7800 },
+  { key: "arrival",  at:  7400, end: 11000 },
+  { key: "lights",   at: 10600, end: 14000 },
+  { key: "race",     at: 13600, end: 19500 },
+  { key: "finish",   at: 19000, end: 22800 },
+  { key: "years",    at: 22400, end: 26000 },
+  { key: "reveal",   at: 25600, end: 10_000_000 },
 ];
-const CTA_READY_AT = 14200; // when the title has fully settled
+const CTA_READY_AT = 27500; // when the title has fully settled
 const CELEBRATION_MS = 3600;
 const FADE = 550;
-const SKIP_AT = 2500;
+const SKIP_AT = 4000;
 const EASE = "cubic-bezier(0.65, 0, 0.35, 1)";
 
 const CIRCUITS = [
