@@ -65,24 +65,21 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
   const [running, setRunning] = useState(true);
   const t = useElapsed(running);
   const [showSkip, setShowSkip] = useState(false);
+  const [celebrating, setCelebrating] = useState(false);
 
   useEffect(() => {
     const id = window.setTimeout(() => setShowSkip(true), SKIP_AT);
     return () => clearTimeout(id);
   }, []);
 
-  useEffect(() => {
-    const id = window.setTimeout(() => {
-      setRunning(false);
-      onDone();
-    }, TOTAL);
-    return () => clearTimeout(id);
-  }, [onDone]);
+  // No auto-exit: reveal holds until the user clicks "Enter Celebration".
 
   const opacityFor = (key: StageKey) => {
     const s = STAGES.find((x) => x.key === key)!;
-    if (t < s.at || t > s.end) return 0;
+    if (t < s.at) return 0;
     if (t < s.at + FADE) return (t - s.at) / FADE;
+    if (key === "reveal") return 1; // hold indefinitely
+    if (t > s.end) return 0;
     if (t > s.end - FADE) return Math.max(0, (s.end - t) / FADE);
     return 1;
   };
@@ -108,9 +105,20 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
   const champPhase: "search" | "match" | "reveal" =
     champP < 0.45 ? "search" : champP < 0.7 ? "match" : "reveal";
 
+  const ctaReady = t >= CTA_READY_AT && !celebrating;
+
   const skip = () => {
     setRunning(false);
     onDone();
+  };
+
+  const enterCelebration = () => {
+    if (celebrating) return;
+    setCelebrating(true);
+    window.setTimeout(() => {
+      setRunning(false);
+      onDone();
+    }, CELEBRATION_MS);
   };
 
   return (
