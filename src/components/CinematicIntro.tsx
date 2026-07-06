@@ -1,45 +1,47 @@
 import { useEffect, useMemo, useState } from "react";
 
 /**
- * Premium cinematic intro (~14s). Every phase overlaps its neighbours with a
- * cross-fade so transitions feel like a film cut on an easing curve rather than
- * a hard scene swap.
+ * Story-driven cinematic intro (~18s).
+ *
+ * Narrative arc:
+ *   Championship Announcement → Champion Found → Car Arrives →
+ *   Race Progression → Finish Line & Fireworks → "10 Amazing Years" →
+ *   Birthday Invitation Reveal.
+ *
+ * The race is a storytelling device. The birthday is the destination.
  */
 
-type StageKey = "boot" | "dashboard" | "headlights" | "lights" | "launch" | "cuts" | "arena";
+type StageKey =
+  | "announce"   // stadium LED powers on: "Grand Prix Championship — Today's Special Event"
+  | "champion"   // "Searching for today's champion…" → "Champion Found · Driver #10 · AARAV"
+  | "arrival"    // Car #10 rolls in with birthday livery
+  | "lights"     // F1 start lights → GO
+  | "race"       // Progression through Training → Mountain → City → Final Straight
+  | "finish"     // Finish line, fireworks, "CHAMPION · DRIVER #10 · AARAV"
+  | "years"      // "Celebrating 10 Amazing Years"
+  | "reveal";    // Welcome to AARAV's 10th Birthday Grand Prix (with paddock banners)
 
-// Absolute timeline (ms). Each stage fades in at `at`, fully visible by `at + fadeIn`,
-// starts fading out at `end - fadeOut`, gone by `end`.
 const STAGES: { key: StageKey; at: number; end: number }[] = [
-  { key: "boot",       at:     0, end:  2200 },
-  { key: "dashboard",  at:  1900, end:  4900 },
-  { key: "headlights", at:  4600, end:  7400 },
-  { key: "lights",     at:  7100, end:  9600 },
-  { key: "launch",     at:  9300, end: 10800 },
-  { key: "cuts",       at: 10600, end: 13400 },
-  { key: "arena",      at: 13100, end: 16600 },
+  { key: "announce", at:     0, end:  2800 },
+  { key: "champion", at:  2500, end:  5800 },
+  { key: "arrival",  at:  5500, end:  7800 },
+  { key: "lights",   at:  7500, end:  9200 },
+  { key: "race",     at:  9000, end: 12600 },
+  { key: "finish",   at: 12300, end: 14800 },
+  { key: "years",    at: 14500, end: 16400 },
+  { key: "reveal",   at: 16100, end: 19200 },
 ];
-const TOTAL = 16600; // ~13.5s of active scenes + 3s title hold before onDone
-const FADE = 550;    // cross-fade window
+const TOTAL = 19200;
+const FADE = 550;
 const SKIP_AT = 2500;
-
-const CUTS = [
-  { label: "REAR CHASE", loc: "TUNNEL" },
-  { label: "DRONE SHOT", loc: "BRIDGE" },
-  { label: "SIDE TRACK", loc: "NIGHT HIGHWAY" },
-  { label: "COCKPIT",    loc: "PIT LANE" },
-];
-
-const BOOT_LINES = [
-  "▓░░░░░░░░░░░  INITIALIZING RACE SYSTEMS",
-  "▓▓▓▓░░░░░░░  LOADING TELEMETRY",
-  "▓▓▓▓▓▓▓░░░░  CALIBRATING DRIVER #10",
-  "▓▓▓▓▓▓▓▓▓▓▓  SYSTEMS ONLINE",
-];
-
-const SYSTEMS = ["RPM", "SPEEDO", "FUEL", "GEAR", "ABS", "TC", "ENGINE", "NITRO"];
-
 const EASE = "cubic-bezier(0.65, 0, 0.35, 1)";
+
+const CIRCUITS = [
+  { label: "STAGE 01", loc: "TRAINING TRACK" },
+  { label: "STAGE 02", loc: "MOUNTAIN PASS" },
+  { label: "STAGE 03", loc: "CITY CIRCUIT" },
+  { label: "STAGE 04", loc: "FINAL STRAIGHT" },
+];
 
 function useElapsed(active: boolean) {
   const [t, setT] = useState(0);
@@ -87,30 +89,22 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
     return Math.max(0, Math.min(1, (t - s.at) / (s.end - s.at)));
   };
 
-  // Derived per-scene state
-  const bootLine = Math.min(BOOT_LINES.length - 1, Math.floor(stageProgress("boot") * BOOT_LINES.length));
-  const sysOn = Math.min(SYSTEMS.length, Math.floor(stageProgress("dashboard") * (SYSTEMS.length + 1)));
-  // RPM: slow sweep up over 70% of the dashboard stage, then settle to idle
-  const rpm = (() => {
-    const p = stageProgress("dashboard");
-    if (p < 0.75) return (p / 0.75) * 0.95;
-    return 0.95 - (p - 0.75) * 2.6; // settle to ~idle
-  })();
-  const rpmClamped = Math.max(0.05, Math.min(1, rpm));
-
-  // F1 start lights: 5 reds light up sequentially, hold, then all-out → GO
+  // F1 lights: 5 reds fill 0–60%, hold, GO at 90%
   const light = (() => {
     const p = stageProgress("lights");
-    // 5 reds fill over first 60% of scene, hold, then GO at 90%
     if (p < 0.6) return Math.min(5, Math.floor((p / 0.6) * 5) + 1);
     if (p < 0.9) return 5;
     return 6;
   })();
 
-  const cut = Math.min(CUTS.length - 1, Math.floor(stageProgress("cuts") * CUTS.length));
-  const cutsSpeed = 90 + stageProgress("cuts") * 240; // 90 → 330
-  const launchSpeed = Math.round(stageProgress("launch") * 90);
-  const speed = Math.round(t > STAGES.find((s) => s.key === "cuts")!.at ? cutsSpeed : launchSpeed);
+  const circuit = Math.min(CIRCUITS.length - 1, Math.floor(stageProgress("race") * CIRCUITS.length));
+  const raceSpeed = 120 + Math.round(stageProgress("race") * 220); // 120 → 340
+  const lapPct = Math.round(stageProgress("race") * 100);
+
+  // champion phase micro-states
+  const champP = stageProgress("champion");
+  const champPhase: "search" | "match" | "reveal" =
+    champP < 0.45 ? "search" : champP < 0.7 ? "match" : "reveal";
 
   const skip = () => {
     setRunning(false);
@@ -119,7 +113,7 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
 
   return (
     <div className="fixed inset-0 z-[100] overflow-hidden bg-black text-foreground">
-      {/* SKIP — appears after ~2.5s */}
+      {/* SKIP */}
       <button
         onClick={skip}
         className="absolute right-4 top-4 z-50 border border-white/20 bg-black/40 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.35em] text-white/70 backdrop-blur transition-all hover:border-white/60 hover:text-white"
@@ -137,119 +131,162 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
       <div className="pointer-events-none absolute inset-0"
         style={{ background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.85) 100%)" }} />
 
-      {/* ─────────── PHASE 1 · BOOT ─────────── */}
+      {/* ─────────── 1 · ANNOUNCEMENT (Stadium LED powers on) ─────────── */}
       <div className="absolute inset-0 flex items-center justify-center"
-        style={{ opacity: opacityFor("boot"), transition: `opacity ${FADE}ms ${EASE}` }}>
-        <div className="w-full max-w-lg px-6 font-mono text-[11px] text-primary/90">
-          <div className="mb-4 flex items-center gap-2 text-[10px] uppercase tracking-[0.4em] text-white/50">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-            GRAND PRIX OS · v10.0
-          </div>
-          {BOOT_LINES.slice(0, bootLine + 1).map((l, i) => (
-            <div key={i} className="mb-1" style={{ animation: `ci-line-in 500ms ${EASE} both` }}>
-              <span className="text-white/40">$</span> {l}
+        style={{ opacity: opacityFor("announce"), transition: `opacity ${FADE}ms ${EASE}` }}>
+        <div className="absolute inset-0"
+          style={{ background: "radial-gradient(ellipse at center, rgba(30,10,10,0.55), #000 70%)" }} />
+        {/* stadium LED board */}
+        <div className="relative mx-auto w-[92%] max-w-3xl"
+          style={{ animation: `ci-led-boot 1600ms ${EASE} both` }}>
+          <div className="border-2 border-primary/60 bg-black p-8 shadow-[0_0_80px_rgba(255,60,40,0.35)]"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(0deg, rgba(255,60,40,0.05) 0 2px, transparent 2px 4px)",
+            }}>
+            <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.4em] text-white/50">
+              <span className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" /> LIVE
+              </span>
+              <span>SEASON 2026 · ROUND 10</span>
             </div>
-          ))}
-          <div className="mt-3">
-            <span className="text-white/40">$</span>
-            <span className="ml-2 inline-block h-3 w-2 translate-y-0.5 animate-pulse bg-primary" />
+            <div className="mt-6 text-center font-display uppercase leading-[0.95]"
+              style={{ textShadow: "0 0 24px rgba(255,60,40,0.7)" }}>
+              <div className="text-3xl text-fire md:text-5xl">GRAND PRIX</div>
+              <div className="mt-1 text-3xl text-white md:text-5xl">CHAMPIONSHIP</div>
+            </div>
+            <div className="mt-6 border-t border-primary/30 pt-4 text-center font-mono text-xs uppercase tracking-[0.5em] text-accent">
+              Today&apos;s Special Event
+            </div>
+            {/* scanlines */}
+            <div className="pointer-events-none absolute inset-0"
+              style={{ background: "repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 3px)" }} />
           </div>
-          <div className="absolute left-6 top-6 font-mono text-[9px] uppercase tracking-widest text-white/40">◉ REC · 00:00</div>
-          <div className="absolute bottom-6 right-6 font-mono text-[9px] uppercase tracking-widest text-white/40">DRIVER #10</div>
+          <div className="absolute -bottom-6 left-1/2 h-2 w-40 -translate-x-1/2 checker-flag opacity-70" />
         </div>
       </div>
 
-      {/* ─────────── PHASE 2 · DASHBOARD ─────────── */}
+      {/* ─────────── 2 · CHAMPION FOUND ─────────── */}
       <div className="absolute inset-0 flex items-center justify-center"
-        style={{ opacity: opacityFor("dashboard"), transition: `opacity ${FADE}ms ${EASE}` }}>
-        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, rgba(30,10,10,0.9), #000 70%)" }} />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/5 to-transparent" />
-        <div className="relative grid w-full max-w-5xl grid-cols-3 items-center gap-6 px-6">
-          <div className="space-y-2">
-            {SYSTEMS.slice(0, 4).map((s, i) => (
-              <SysRow key={s} label={s} on={sysOn > i} />
-            ))}
-          </div>
-          <div className="relative mx-auto flex aspect-square w-full max-w-[280px] items-center justify-center rounded-full border-2 border-primary/40 bg-black shadow-[0_0_60px_rgba(255,60,40,0.35)_inset]">
-            <svg viewBox="0 0 200 200" className="absolute inset-0 h-full w-full">
-              {Array.from({ length: 21 }).map((_, i) => {
-                const a = (-135 + i * 13.5) * (Math.PI / 180);
-                const x1 = 100 + Math.cos(a) * 82;
-                const y1 = 100 + Math.sin(a) * 82;
-                const x2 = 100 + Math.cos(a) * (i > 14 ? 68 : 74);
-                const y2 = 100 + Math.sin(a) * (i > 14 ? 68 : 74);
-                return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={i > 14 ? "#ff3c28" : "#888"} strokeWidth={i % 5 === 0 ? 2 : 1} />;
-              })}
-              <line
-                x1="100" y1="100"
-                x2={100 + Math.cos((-135 + rpmClamped * 270) * (Math.PI / 180)) * 78}
-                y2={100 + Math.sin((-135 + rpmClamped * 270) * (Math.PI / 180)) * 78}
-                stroke="#ff3c28" strokeWidth="3" strokeLinecap="round"
-                style={{ filter: "drop-shadow(0 0 6px #ff3c28)", transition: `all 120ms ${EASE}` }}
-              />
-              <circle cx="100" cy="100" r="6" fill="#ff3c28" />
-            </svg>
-            <div className="absolute bottom-8 text-center">
-              <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/50">RPM ×1000</div>
-              <div className="font-display text-3xl text-fire tabular-nums">{Math.round(rpmClamped * 12)}</div>
+        style={{ opacity: opacityFor("champion"), transition: `opacity ${FADE}ms ${EASE}` }}>
+        <div className="absolute inset-0"
+          style={{ background: "radial-gradient(ellipse at center, rgba(30,10,10,0.75), #000 70%)" }} />
+        <div className="relative w-[92%] max-w-2xl">
+          {/* SEARCH */}
+          {champPhase === "search" && (
+            <div style={{ animation: `ci-line-in 450ms ${EASE} both` }}>
+              <div className="mb-4 font-mono text-[10px] uppercase tracking-[0.5em] text-accent">
+                <span className="mr-2 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
+                Championship Database
+              </div>
+              <div className="font-display text-2xl uppercase text-white md:text-4xl">
+                Searching for today&apos;s champion
+                <span className="text-fire">…</span>
+              </div>
+              <div className="mt-6 h-1.5 w-full overflow-hidden border border-white/15 bg-black">
+                <div className="h-full bg-gradient-to-r from-primary via-accent to-primary"
+                  style={{ width: `${Math.min(100, (champP / 0.45) * 100)}%`, transition: `width 200ms linear` }} />
+              </div>
+              <div className="mt-3 space-y-1 font-mono text-[10px] uppercase tracking-widest text-white/40">
+                <div>▸ Scanning grid · 128 drivers</div>
+                <div>▸ Cross-referencing calendar · birthday flag</div>
+                <div>▸ Match probability rising…</div>
+              </div>
             </div>
-          </div>
-          <div className="space-y-2 text-right">
-            {SYSTEMS.slice(4).map((s, i) => (
-              <SysRow key={s} label={s} on={sysOn > i + 4} right />
-            ))}
-          </div>
-        </div>
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 font-mono text-[10px] uppercase tracking-[0.5em] text-white/40">
-          Car #10 · Systems Online
+          )}
+          {/* MATCH */}
+          {champPhase === "match" && (
+            <div style={{ animation: `ci-line-in 350ms ${EASE} both` }}>
+              <div className="mb-4 font-mono text-[10px] uppercase tracking-[0.5em] text-accent">
+                Match Detected
+              </div>
+              <div className="grid grid-cols-[auto_1fr] items-center gap-6">
+                <div className="relative flex h-24 w-24 items-center justify-center border-2 border-primary bg-black md:h-32 md:w-32"
+                  style={{ boxShadow: "0 0 40px rgba(255,60,40,0.5)" }}>
+                  <div className="font-display text-4xl text-fire md:text-6xl">#10</div>
+                  <div className="absolute -top-2 left-2 border border-accent bg-black px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-widest text-accent">
+                    CAR
+                  </div>
+                </div>
+                <div>
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-white/50">Champion Profile</div>
+                  <div className="font-display text-2xl uppercase text-white md:text-3xl">Verifying identity</div>
+                  <div className="mt-3 space-y-0.5 font-mono text-[10px] uppercase tracking-widest text-primary">
+                    <div>▓▓▓▓▓▓▓▓▓░ 92%</div>
+                    <div className="text-white/50">Age · 10 · confirmed</div>
+                    <div className="text-white/50">Class · Birthday Champion</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* REVEAL */}
+          {champPhase === "reveal" && (
+            <div className="text-center" style={{ animation: `ci-title 700ms ${EASE} both` }}>
+              <div className="font-mono text-[10px] uppercase tracking-[0.5em] text-accent md:text-xs">Champion Found</div>
+              <div className="mt-3 font-mono text-xs uppercase tracking-[0.4em] text-white/60">Driver #10</div>
+              <div className="mt-4 font-display text-6xl uppercase leading-[0.9] text-white md:text-8xl"
+                style={{ textShadow: "0 0 40px rgba(255,60,40,0.6)" }}>
+                {racerName.toUpperCase()}
+              </div>
+              <div className="mx-auto mt-6 h-1 w-40 checker-flag opacity-80" />
+            </div>
+          )}
         </div>
       </div>
 
-      {/* ─────────── PHASE 3 · HEADLIGHTS ─────────── */}
+      {/* ─────────── 3 · CAR ARRIVAL (with birthday livery) ─────────── */}
       <div className="absolute inset-0 overflow-hidden"
-        style={{ opacity: opacityFor("headlights"), transition: `opacity ${FADE}ms ${EASE}` }}>
-        <div className="absolute inset-x-0 bottom-0 h-2/3"
-          style={{ background: "linear-gradient(180deg, transparent, rgba(255,255,255,0.05) 60%, rgba(255,180,120,0.08) 100%)" }} />
-        <div className="absolute inset-0 opacity-70"
-          style={{
-            background: "radial-gradient(ellipse at 30% 70%, rgba(200,200,220,0.28), transparent 55%), radial-gradient(ellipse at 70% 80%, rgba(180,180,200,0.22), transparent 60%)",
-            animation: `ci-fog 4s ${EASE} both`,
-          }} />
-        {[0, 1].map((i) => (
-          <div
-            key={i}
-            className="absolute top-1/2 h-24 w-24 -translate-y-1/2 rounded-full"
+        style={{ opacity: opacityFor("arrival"), transition: `opacity ${FADE}ms ${EASE}` }}>
+        <div className="absolute inset-0"
+          style={{ background: "linear-gradient(180deg, #0a0505 0%, #1a0a0a 60%, #050505 100%)" }} />
+        {/* pit lane light strips */}
+        {[25, 50, 75].map((y, i) => (
+          <div key={i} className="absolute inset-x-0 h-px"
             style={{
-              left: `calc(50% + ${i === 0 ? -80 : 80}px - 48px)`,
-              background: "radial-gradient(circle, #fff, rgba(255,240,200,0.9) 30%, rgba(255,180,80,0.2) 60%, transparent 75%)",
-              boxShadow: "0 0 120px 40px rgba(255,220,150,0.5)",
-              animation: `ci-headlight 2200ms ${EASE} ${300 + i * 200}ms both`,
-            }}
-          />
+              top: `${y}%`,
+              background: "linear-gradient(90deg, transparent, rgba(255,60,40,0.6), transparent)",
+              animation: `ci-strip 1400ms ${EASE} ${i * 120}ms both`,
+            }} />
         ))}
-        <div className="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2"
-          style={{
-            background: "linear-gradient(90deg, transparent, rgba(255,240,200,0.8), transparent)",
-            animation: `ci-flare 2200ms ${EASE} 900ms both`,
-          }} />
-        {Array.from({ length: 14 }).map((_, i) => (
-          <div
-            key={i}
-            className="absolute h-16 w-16 rounded-full bg-white/10 blur-2xl"
+        {/* fog / smoke */}
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className="absolute h-24 w-24 rounded-full bg-white/8 blur-2xl"
             style={{
-              left: `${8 + i * 7}%`,
-              bottom: `${(i * 13) % 40}%`,
+              left: `${10 + i * 9}%`,
+              bottom: `${(i * 17) % 35}%`,
               animation: `ci-smoke-drift ${4 + (i % 3)}s ${EASE} ${i * 0.15}s infinite`,
-            }}
-          />
+            }} />
         ))}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 font-mono text-[10px] uppercase tracking-[0.5em] text-white/40"
-          style={{ animation: `ci-line-in 800ms ${EASE} 1400ms both` }}>
-          Car #10 · Standing By
+        {/* rolling car (right → center) */}
+        <div className="absolute bottom-[22%] left-1/2 -translate-x-1/2"
+          style={{ animation: `ci-arrive 2200ms ${EASE} both` }}>
+          {/* car "silhouette" plate with birthday livery */}
+          <div className="relative flex h-24 w-64 items-center justify-center border-2 border-primary bg-gradient-to-r from-primary via-fire to-accent shadow-[0_20px_60px_rgba(255,60,40,0.5)]">
+            {/* confetti decals */}
+            {[15, 40, 65, 82].map((x, i) => (
+              <span key={i} className="absolute h-2 w-2 rotate-45"
+                style={{ left: `${x}%`, top: `${15 + (i * 17) % 60}%`, background: ["#fff", "#00ff88", "#ffa040", "#fff"][i] }} />
+            ))}
+            <div className="absolute inset-y-2 left-2 w-2 checker-flag opacity-90" />
+            <div className="absolute inset-y-2 right-2 w-2 checker-flag opacity-90" />
+            <div className="font-display text-5xl text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">#10</div>
+            <div className="absolute -top-3 right-4 border border-white bg-black px-2 py-0.5 font-mono text-[8px] uppercase tracking-widest text-white">
+              BIRTHDAY CHAMPION
+            </div>
+          </div>
+          {/* ground shadow */}
+          <div className="mx-auto mt-2 h-3 w-72 rounded-full bg-black/70 blur-md" />
+        </div>
+        {/* label */}
+        <div className="absolute inset-x-0 top-10 text-center"
+          style={{ animation: `ci-line-in 700ms ${EASE} 300ms both` }}>
+          <div className="font-mono text-[10px] uppercase tracking-[0.5em] text-accent">Car #10 Entering the Grid</div>
+          <div className="mt-1 font-display text-2xl uppercase text-white md:text-3xl">{racerName.toUpperCase()} · CHAMPION LIVERY</div>
         </div>
       </div>
 
-      {/* ─────────── PHASE 4 · RACE START LIGHTS ─────────── */}
+      {/* ─────────── 4 · RACE START LIGHTS ─────────── */}
       <div className="absolute inset-0 flex flex-col items-center justify-center"
         style={{ opacity: opacityFor("lights"), transition: `opacity ${FADE}ms ${EASE}` }}>
         <div className="absolute inset-0"
@@ -282,101 +319,123 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
         </div>
         <div className="mt-10 h-20">
           {light === 6 && (
-            <div
-              className="font-display text-6xl uppercase md:text-8xl"
-              style={{ color: "#00ff88", textShadow: "0 0 50px #00ff88", animation: `ci-go 700ms ${EASE} both` }}
-            >
+            <div className="font-display text-6xl uppercase md:text-8xl"
+              style={{ color: "#00ff88", textShadow: "0 0 50px #00ff88", animation: `ci-go 700ms ${EASE} both` }}>
               GO
             </div>
           )}
         </div>
       </div>
 
-      {/* ─────────── PHASE 5 · TIRE LAUNCH ─────────── */}
+      {/* ─────────── 5 · RACE PROGRESSION ─────────── */}
       <div className="absolute inset-0 overflow-hidden"
-        style={{ opacity: opacityFor("launch"), transition: `opacity ${FADE}ms ${EASE}` }}>
-        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, #050505 40%, #1a0a0a 100%)" }} />
-        <div className="absolute inset-x-0 bottom-0 h-3/4"
-          style={{
-            background: "radial-gradient(ellipse at 50% 90%, rgba(240,240,255,0.9), rgba(200,200,220,0.35) 40%, transparent 70%)",
-            animation: `ci-tire-smoke 1400ms ${EASE} both`,
-          }} />
-        {[-1, 1].map((s) => (
-          <div key={s} className="absolute bottom-[8%] h-24 w-24 rounded-full border-4 border-white/20 bg-black"
-            style={{
-              left: `calc(50% + ${s * 80}px - 48px)`,
-              boxShadow: "inset 0 0 20px rgba(255,60,40,0.6), 0 0 30px rgba(255,60,40,0.4)",
-              animation: "ci-spin 0.18s linear infinite",
-            }}>
-            <div className="absolute inset-2 rounded-full border-2 border-dashed border-white/30" />
-          </div>
-        ))}
-        {Array.from({ length: 22 }).map((_, i) => (
-          <div key={i} className="absolute h-1.5 w-1.5 rounded-full bg-orange-300/80"
-            style={{
-              bottom: "12%",
-              left: "50%",
-              animation: `ci-rock 1200ms ${EASE} ${i * 0.05}s forwards`,
-              ["--rx" as string]: `${(i - 11) * 32}px`,
-              ["--ry" as string]: `${-90 - (i % 6) * 22}px`,
-            }} />
-        ))}
-        <div className="absolute left-6 top-6 font-mono text-xs text-primary"
-          style={{ animation: `ci-line-in 500ms ${EASE} 300ms both` }}>
-          SPEED · <span className="font-display text-2xl text-fire tabular-nums">{launchSpeed}</span> KM/H
-        </div>
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 font-display text-4xl uppercase text-fire"
-          style={{ animation: `ci-line-in 600ms ${EASE} 200ms both`, textShadow: "0 0 20px rgba(255,60,40,0.7)" }}>
-          #10 LAUNCH
-        </div>
-      </div>
-
-      {/* ─────────── PHASES 6 + 7 · CAMERA CUTS + HUD ─────────── */}
-      <div className="absolute inset-0 overflow-hidden"
-        style={{ opacity: opacityFor("cuts"), transition: `opacity ${FADE}ms ${EASE}` }}>
-        <CutScene index={cut} />
+        style={{ opacity: opacityFor("race"), transition: `opacity ${FADE}ms ${EASE}` }}>
+        <CircuitScene index={circuit} />
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-6 top-6 border border-primary/40 bg-black/50 px-3 py-2 backdrop-blur">
             <div className="font-mono text-[9px] uppercase tracking-widest text-white/50">Speed KM/H</div>
-            <div className="font-display text-3xl text-fire tabular-nums">{speed}</div>
+            <div className="font-display text-3xl text-fire tabular-nums">{raceSpeed}</div>
           </div>
           <div className="absolute right-6 top-6 border border-accent/40 bg-black/50 px-3 py-2 text-right backdrop-blur">
-            <div className="font-mono text-[9px] uppercase tracking-widest text-white/50">Lap</div>
-            <div className="font-display text-2xl text-accent tabular-nums">01 / 10</div>
+            <div className="font-mono text-[9px] uppercase tracking-widest text-white/50">Progress</div>
+            <div className="font-display text-2xl text-accent tabular-nums">{lapPct}%</div>
           </div>
-          <div className="absolute bottom-6 left-6 space-y-2">
-            <div className="border border-white/20 bg-black/50 px-3 py-1 backdrop-blur">
-              <div className="font-mono text-[9px] uppercase tracking-widest text-white/50">Gear</div>
-              <div className="font-display text-2xl text-white">{Math.min(6, Math.max(1, Math.floor(speed / 55)))}</div>
+          <div className="absolute bottom-6 left-6">
+            <div className="font-mono text-[9px] uppercase tracking-widest text-white/50">Journey</div>
+            <div className="mt-1 flex items-center gap-1.5">
+              {CIRCUITS.map((_, i) => (
+                <div key={i} className="h-1 w-8 border border-white/20"
+                  style={{ background: i <= circuit ? "#ff3c28" : "transparent" }} />
+              ))}
             </div>
-            <div className="w-40">
-              <div className="mb-1 flex justify-between font-mono text-[9px] uppercase tracking-widest text-white/50">
-                <span>Nitro</span><span>{Math.min(100, Math.max(0, Math.round((speed - 80) / 2.6)))}%</span>
-              </div>
-              <div className="h-1.5 border border-white/20 bg-black/50">
-                <div className="h-full bg-gradient-to-r from-primary to-accent"
-                  style={{ width: `${Math.min(100, Math.max(0, Math.round((speed - 80) / 2.6)))}%`, transition: `width 200ms ${EASE}` }} />
-              </div>
-            </div>
-          </div>
-          <div className="absolute bottom-6 right-6 h-24 w-32 border border-white/20 bg-black/60 p-1 backdrop-blur">
-            <svg viewBox="0 0 120 80" className="h-full w-full">
-              <path d="M10,60 C20,10 60,10 70,40 C80,70 110,60 110,30" stroke="#ff3c28" strokeWidth="2" fill="none" />
-              <circle cx={10 + (cut / (CUTS.length - 1)) * 100} cy={60 - (cut / (CUTS.length - 1)) * 30} r="4" fill="#00ff88"
-                style={{ transition: `all 500ms ${EASE}` }}>
-                <animate attributeName="r" values="3;5;3" dur="1.1s" repeatCount="indefinite" />
-              </circle>
-            </svg>
           </div>
           <div className="absolute left-1/2 top-6 -translate-x-1/2 font-mono text-[10px] uppercase tracking-[0.4em] text-white/60">
-            ◉ CAM · {CUTS[cut].label}
+            ◉ CAR #10 · {CIRCUITS[circuit].label}
           </div>
         </div>
       </div>
 
-      {/* ─────────── PHASE 8 · ARENA / GATE ─────────── */}
+      {/* ─────────── 6 · FINISH LINE + FIREWORKS ─────────── */}
       <div className="absolute inset-0 overflow-hidden"
-        style={{ opacity: opacityFor("arena"), transition: `opacity ${FADE}ms ${EASE}` }}>
+        style={{ opacity: opacityFor("finish"), transition: `opacity ${FADE}ms ${EASE}` }}>
+        <div className="absolute inset-0"
+          style={{ background: "radial-gradient(ellipse at 50% 60%, rgba(255,60,40,0.4), #000 70%)" }} />
+        {/* checker banner sweeps down */}
+        <div className="absolute inset-x-0 top-0 h-20 checker-flag"
+          style={{ animation: `ci-banner 900ms ${EASE} both` }} />
+        <div className="absolute inset-x-0 bottom-0 h-20 checker-flag"
+          style={{ animation: `ci-banner 900ms ${EASE} both` }} />
+        {/* fireworks */}
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="absolute h-4 w-4 rounded-full"
+            style={{
+              left: `${15 + i * 18}%`,
+              top: `${20 + (i % 3) * 15}%`,
+              background: ["#ff3c28", "#ffa040", "#00ff88", "#fff", "#ffcc40"][i],
+              boxShadow: `0 0 60px 20px ${["#ff3c28", "#ffa040", "#00ff88", "#fff", "#ffcc40"][i]}`,
+              animation: `ci-firework 1600ms ${EASE} ${i * 180}ms both`,
+            }} />
+        ))}
+        {/* confetti */}
+        {Array.from({ length: 40 }).map((_, i) => (
+          <div key={i} className="absolute h-2 w-1"
+            style={{
+              left: `${(i * 37) % 100}%`,
+              top: "-5%",
+              background: ["#ff3c28", "#ffa040", "#ffffff", "#00ff88"][i % 4],
+              animation: `ci-confetti ${2.4 + (i % 3) * 0.4}s linear ${i * 0.04}s infinite`,
+            }} />
+        ))}
+        {/* Champion LED */}
+        <div className="absolute inset-0 flex items-center justify-center"
+          style={{ animation: `ci-title 900ms ${EASE} 400ms both` }}>
+          <div className="border-4 border-primary bg-black px-10 py-8 text-center shadow-[0_0_120px_rgba(255,60,40,0.6)]"
+            style={{ backgroundImage: "repeating-linear-gradient(0deg, rgba(255,60,40,0.05) 0 2px, transparent 2px 4px)" }}>
+            <div className="font-display text-6xl md:text-7xl">🏆</div>
+            <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.5em] text-accent">Race Complete</div>
+            <div className="mt-3 font-display text-4xl uppercase text-white md:text-6xl"
+              style={{ textShadow: "0 0 30px rgba(255,60,40,0.7)" }}>
+              CHAMPION
+            </div>
+            <div className="mt-1 font-mono text-xs uppercase tracking-[0.4em] text-white/70">Driver #10</div>
+            <div className="mt-2 font-display text-5xl uppercase text-fire md:text-7xl"
+              style={{ textShadow: "0 0 40px rgba(255,60,40,0.8)" }}>
+              {racerName.toUpperCase()}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ─────────── 7 · CELEBRATING 10 AMAZING YEARS ─────────── */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center"
+        style={{ opacity: opacityFor("years"), transition: `opacity ${FADE}ms ${EASE}` }}>
+        <div className="absolute inset-0"
+          style={{ background: "radial-gradient(ellipse at center, rgba(60,20,20,0.7), #000 70%)" }} />
+        {/* soft confetti drift */}
+        {Array.from({ length: 18 }).map((_, i) => (
+          <div key={i} className="absolute h-2 w-1"
+            style={{
+              left: `${(i * 53) % 100}%`,
+              top: "-5%",
+              background: ["#ff3c28", "#ffa040", "#ffffff", "#00ff88"][i % 4],
+              animation: `ci-confetti ${4 + (i % 3)}s linear ${i * 0.1}s infinite`,
+              opacity: 0.7,
+            }} />
+        ))}
+        <div className="relative text-center" style={{ animation: `ci-title 900ms ${EASE} both` }}>
+          <div className="font-mono text-xs uppercase tracking-[0.5em] text-accent">Celebrating</div>
+          <div className="mt-4 font-display uppercase leading-[0.9] text-white">
+            <span className="block text-8xl text-fire drop-shadow-[0_0_40px_rgba(255,60,40,0.7)] md:text-[10rem]">10</span>
+            <span className="mt-2 block text-3xl text-white md:text-5xl">Amazing Years</span>
+          </div>
+          <div className="mx-auto mt-6 h-1 w-40 checker-flag opacity-80" />
+        </div>
+      </div>
+
+      {/* ─────────── 8 · INVITATION REVEAL (paddock + banners) ─────────── */}
+      <div className="absolute inset-0 overflow-hidden"
+        style={{ opacity: opacityFor("reveal"), transition: `opacity ${FADE}ms ${EASE}` }}>
+        {/* searchlights */}
         {[0, 1, 2].map((i) => (
           <div key={i} className="absolute left-1/2 top-0 h-[120%] w-40 origin-top -translate-x-1/2"
             style={{
@@ -386,55 +445,53 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
               filter: "blur(6px)",
             }} />
         ))}
-        <div className="absolute inset-x-0 bottom-0 h-24"
+        {/* stadium floor / crowd bar */}
+        <div className="absolute inset-x-0 bottom-0 h-28"
           style={{
-            background: "repeating-linear-gradient(90deg, #000 0 10px, #0a0a0a 10px 18px, #000 18px 24px)",
-            maskImage: "radial-gradient(ellipse at 50% 100%, black 60%, transparent 100%)",
+            background: "repeating-linear-gradient(90deg, #0a0505 0 6px, #1a0a0a 6px 12px)",
+            boxShadow: "inset 0 20px 40px rgba(0,0,0,0.7)",
           }} />
-        {Array.from({ length: 34 }).map((_, i) => (
-          <div key={i} className="absolute h-2 w-1"
-            style={{
-              left: `${(i * 37) % 100}%`,
-              top: "-5%",
-              background: ["#ff3c28", "#ffa040", "#ffffff", "#00ff88"][i % 4],
-              animation: `ci-confetti ${3 + (i % 3)}s linear ${i * 0.06}s infinite`,
-            }} />
-        ))}
-        <div className="absolute inset-0"
-          style={{
-            background: "radial-gradient(circle at center, rgba(255,220,120,0.9), rgba(255,80,40,0.3) 30%, transparent 60%)",
-            animation: `ci-gate-glow 2600ms ${EASE} 600ms both`,
-          }} />
-        <div className="absolute inset-y-0 left-0 w-1/2 origin-left"
-          style={{
-            background: "linear-gradient(90deg, #0a0a0a, #1a1a1a 60%, #2a1010)",
-            borderRight: "4px solid #ff3c28",
-            boxShadow: "8px 0 40px rgba(255,60,40,0.5)",
-            animation: `ci-gate-left 2400ms ${EASE} 900ms both`,
-          }}>
-          <div className="absolute inset-y-0 right-0 w-2 checker-flag opacity-80" />
-        </div>
-        <div className="absolute inset-y-0 right-0 w-1/2 origin-right"
-          style={{
-            background: "linear-gradient(-90deg, #0a0a0a, #1a1a1a 60%, #2a1010)",
-            borderLeft: "4px solid #ff3c28",
-            boxShadow: "-8px 0 40px rgba(255,60,40,0.5)",
-            animation: `ci-gate-right 2400ms ${EASE} 900ms both`,
-          }}>
-          <div className="absolute inset-y-0 left-0 w-2 checker-flag opacity-80" />
-        </div>
-        <div className="absolute inset-x-0 top-4 z-10 flex justify-center"
-          style={{ animation: `ci-line-in 700ms ${EASE} 2500ms both` }}>
-          <div className="border border-accent/50 bg-black/70 px-4 py-1 font-mono text-[10px] uppercase tracking-[0.4em] text-accent backdrop-blur">
-            ◉ CHAMPION DRIVER · #10
+        {/* Happy Birthday banner */}
+        <div className="absolute inset-x-0 top-6 z-10 flex justify-center"
+          style={{ animation: `ci-line-in 800ms ${EASE} 300ms both` }}>
+          <div className="border border-accent/60 bg-black/70 px-6 py-2 font-mono text-xs uppercase tracking-[0.5em] text-accent backdrop-blur">
+            🎉 HAPPY BIRTHDAY {racerName.toUpperCase()} 🎉
           </div>
         </div>
+        {/* balloons integrated w/ racing colors */}
+        {[10, 22, 78, 90].map((x, i) => (
+          <div key={i} className="absolute h-8 w-6 rounded-full"
+            style={{
+              left: `${x}%`,
+              bottom: `${20 + (i * 9) % 22}%`,
+              background: ["#ff3c28", "#ffa040", "#00ff88", "#fff"][i],
+              boxShadow: "0 0 16px rgba(255,60,40,0.4)",
+              animation: `ci-float ${3 + i * 0.4}s ${EASE} ${i * 0.2}s infinite`,
+            }} />
+        ))}
+        {/* confetti */}
+        {Array.from({ length: 26 }).map((_, i) => (
+          <div key={i} className="absolute h-2 w-1"
+            style={{
+              left: `${(i * 41) % 100}%`,
+              top: "-5%",
+              background: ["#ff3c28", "#ffa040", "#ffffff", "#00ff88"][i % 4],
+              animation: `ci-confetti ${3 + (i % 3)}s linear ${i * 0.08}s infinite`,
+            }} />
+        ))}
+        {/* gate glow */}
+        <div className="absolute inset-0"
+          style={{
+            background: "radial-gradient(circle at center, rgba(255,220,120,0.7), rgba(255,80,40,0.25) 30%, transparent 60%)",
+            animation: `ci-gate-glow 2600ms ${EASE} 200ms both`,
+          }} />
+        {/* Title */}
         <div className="absolute inset-0 flex items-center justify-center"
-          style={{ animation: `ci-title 1400ms ${EASE} 2700ms both` }}>
+          style={{ animation: `ci-title 1400ms ${EASE} 600ms both` }}>
           <div className="text-center">
             <div className="font-mono text-xs uppercase tracking-[0.5em] text-accent md:text-sm">Welcome To</div>
             <div className="mt-4 font-display text-6xl uppercase leading-[0.9] text-white md:text-8xl">
-              {racerName.toUpperCase()}'S
+              {racerName.toUpperCase()}&apos;S
             </div>
             <div className="mt-2 font-display text-5xl uppercase leading-[0.9] text-fire drop-shadow-[0_0_40px_rgba(255,60,40,0.6)] md:text-7xl">
               10<span className="text-white/90">TH</span> BIRTHDAY
@@ -443,6 +500,9 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
               GRAND PRIX
             </div>
             <div className="mx-auto mt-6 h-2 w-64 checker-flag opacity-80" />
+            <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.5em] text-white/60">
+              You&apos;re invited to the celebration
+            </div>
           </div>
         </div>
       </div>
@@ -454,32 +514,24 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
           45% { transform: scale(1); opacity: 1; filter: blur(0); }
           100% { transform: scale(1); opacity: 1; }
         }
-        @keyframes ci-headlight {
-          0% { opacity: 0; transform: translateY(-50%) scale(0.3); filter: blur(24px); }
-          70% { opacity: 1; transform: translateY(-50%) scale(1.05); filter: blur(0); }
-          100% { opacity: 1; transform: translateY(-50%) scale(1); }
-        }
-        @keyframes ci-flare {
-          0% { opacity: 0; transform: translateY(-50%) scaleX(0); }
-          50% { opacity: 1; transform: translateY(-50%) scaleX(1); }
-          100% { opacity: 0.4; transform: translateY(-50%) scaleX(1); }
-        }
-        @keyframes ci-fog {
-          0% { opacity: 0; transform: translateX(-14px); }
-          100% { opacity: 0.75; transform: translateX(14px); }
+        @keyframes ci-led-boot {
+          0% { opacity: 0; transform: scale(0.94); filter: blur(14px) brightness(0.4); }
+          40% { opacity: 1; filter: blur(0) brightness(1.2); }
+          60% { filter: brightness(0.7); }
+          100% { opacity: 1; transform: scale(1); filter: blur(0) brightness(1); }
         }
         @keyframes ci-smoke-drift {
           0%, 100% { transform: translate(0,0) scale(1); opacity: 0.3; }
           50% { transform: translate(24px,-34px) scale(1.4); opacity: 0.6; }
         }
-        @keyframes ci-tire-smoke {
-          0% { opacity: 0; transform: scale(0.6) translateY(30%); }
-          100% { opacity: 0.9; transform: scale(1) translateY(0); }
+        @keyframes ci-arrive {
+          0% { transform: translate(120%, 0) scale(0.7); opacity: 0; filter: blur(6px); }
+          60% { transform: translate(-50%, 0) scale(1); opacity: 1; filter: blur(0); }
+          100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
         }
-        @keyframes ci-spin { to { transform: rotate(360deg); } }
-        @keyframes ci-rock {
-          0% { transform: translate(0,0) scale(1); opacity: 1; }
-          100% { transform: translate(var(--rx), var(--ry)) scale(0.3); opacity: 0; }
+        @keyframes ci-strip {
+          from { opacity: 0; transform: scaleX(0.3); }
+          to   { opacity: 1; transform: scaleX(1); }
         }
         @keyframes ci-streak {
           from { transform: translateX(0) scaleX(1); }
@@ -493,9 +545,20 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
           0%   { transform: translateY(0) rotate(0); opacity: 1; }
           100% { transform: translateY(110vh) rotate(720deg); opacity: 0.6; }
         }
-        @keyframes ci-gate-glow  { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes ci-gate-left  { from { transform: translateX(0); } to { transform: translateX(-105%); } }
-        @keyframes ci-gate-right { from { transform: translateX(0); } to { transform: translateX(105%); } }
+        @keyframes ci-firework {
+          0%   { transform: scale(0.2); opacity: 0; }
+          40%  { transform: scale(1.4); opacity: 1; }
+          100% { transform: scale(2.6); opacity: 0; }
+        }
+        @keyframes ci-banner {
+          from { transform: translateY(-100%); }
+          to   { transform: translateY(0); }
+        }
+        @keyframes ci-float {
+          0%, 100% { transform: translateY(0); }
+          50%      { transform: translateY(-14px); }
+        }
+        @keyframes ci-gate-glow { from { opacity: 0; } to { opacity: 1; } }
         @keyframes ci-title {
           0%   { opacity: 0; transform: scale(0.9); filter: blur(20px); }
           100% { opacity: 1; transform: scale(1); filter: blur(0); }
@@ -510,39 +573,19 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
   );
 }
 
-function SysRow({ label, on, right }: { label: string; on: boolean; right?: boolean }) {
-  return (
-    <div className={`flex items-center gap-3 ${right ? "justify-end" : ""}`}
-      style={{ transition: `opacity 300ms ${EASE}` }}>
-      {right && (
-        <span className={`font-display text-lg tabular-nums transition-colors ${on ? "text-fire" : "text-white/15"}`}>
-          {on ? "ONLINE" : "----"}
-        </span>
-      )}
-      <div className={`h-2 w-2 rounded-full transition-all ${on ? "bg-primary shadow-[0_0_10px_#ff3c28]" : "bg-white/10"}`} />
-      <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/50">{label}</div>
-      {!right && (
-        <span className={`font-display text-lg tabular-nums transition-colors ${on ? "text-fire" : "text-white/15"}`}>
-          {on ? "ONLINE" : "----"}
-        </span>
-      )}
-    </div>
-  );
-}
-
-function CutScene({ index }: { index: number }) {
-  const cut = CUTS[index];
-  const streaks = useMemo(() => Array.from({ length: 28 }), []);
+function CircuitScene({ index }: { index: number }) {
+  const stop = CIRCUITS[index];
+  const streaks = useMemo(() => Array.from({ length: 26 }), []);
   const bg = (() => {
-    switch (cut.loc) {
-      case "TUNNEL":
-        return "radial-gradient(ellipse at center, rgba(255,220,150,0.35), transparent 45%), linear-gradient(180deg, #0a0a12 0%, #050508 100%)";
-      case "BRIDGE":
-        return "linear-gradient(180deg, #0a1220 0%, #05080f 60%, #1a0a0a 100%)";
-      case "NIGHT HIGHWAY":
-        return "radial-gradient(ellipse at 50% 40%, rgba(255,60,40,0.25), transparent 55%), #000";
-      case "PIT LANE":
-        return "linear-gradient(180deg, #1a0a0a 0%, #2a1414 40%, #0a0505 100%)";
+    switch (stop.loc) {
+      case "TRAINING TRACK":
+        return "radial-gradient(ellipse at center, rgba(0,210,140,0.18), transparent 55%), linear-gradient(180deg, #05100a 0%, #050505 100%)";
+      case "MOUNTAIN PASS":
+        return "linear-gradient(180deg, #0a0f1a 0%, #1a1010 60%, #050505 100%)";
+      case "CITY CIRCUIT":
+        return "radial-gradient(ellipse at 50% 40%, rgba(255,60,40,0.28), transparent 55%), linear-gradient(180deg, #0a0510 0%, #000 100%)";
+      case "FINAL STRAIGHT":
+        return "radial-gradient(ellipse at 50% 60%, rgba(255,220,120,0.35), transparent 55%), linear-gradient(180deg, #150808 0%, #000 100%)";
       default:
         return "#000";
     }
@@ -554,7 +597,7 @@ function CutScene({ index }: { index: number }) {
         style={{ background: "radial-gradient(ellipse at center, rgba(255,60,40,0.35), transparent 70%)" }} />
       {streaks.map((_, i) => {
         const top = (i * 137) % 100;
-        const dur = 0.35 + ((i * 13) % 40) / 80; // slower streaks — more filmic
+        const dur = 0.35 + ((i * 13) % 40) / 80;
         const delay = ((i * 71) % 100) / 100;
         const hue = i % 5 === 0 ? "#ff3c28" : i % 4 === 0 ? "#ffa040" : "#ffffff";
         return (
@@ -575,21 +618,22 @@ function CutScene({ index }: { index: number }) {
       })}
       <div className="pointer-events-none absolute inset-0"
         style={{ background: "radial-gradient(ellipse at center, transparent 32%, rgba(0,0,0,0.78) 92%)" }} />
-      {/* car silhouette travelling naturally across the frame */}
-      <div className="absolute bottom-[14%] left-1/2 h-20 w-56"
-        style={{
-          background: "radial-gradient(ellipse at center, rgba(255,60,40,0.85), transparent 70%)",
-          filter: "blur(4px)",
-          animation: `ci-car-travel 2.6s ${EASE} both`,
-        }} />
-      <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2 font-display text-2xl text-white"
-        style={{ textShadow: "0 0 10px rgba(0,0,0,0.9)" }}>#10</div>
+      {/* Car #10 travelling naturally across the frame with birthday livery hint */}
+      <div className="absolute bottom-[16%] left-1/2"
+        style={{ animation: `ci-car-travel 3s ${EASE} both`, transform: "translate(-50%, 0)" }}>
+        <div className="relative flex h-14 w-40 items-center justify-center border-2 border-primary bg-gradient-to-r from-primary via-fire to-accent shadow-[0_10px_40px_rgba(255,60,40,0.6)]">
+          <div className="font-display text-2xl text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">#10</div>
+          <div className="absolute inset-y-1 left-1 w-1.5 checker-flag opacity-90" />
+          <div className="absolute inset-y-1 right-1 w-1.5 checker-flag opacity-90" />
+        </div>
+        <div className="mx-auto mt-1 h-2 w-44 rounded-full bg-black/70 blur-md" />
+      </div>
       <div className="absolute inset-x-0 bottom-24 text-center"
         style={{ animation: `ci-line-in 700ms ${EASE} 150ms both` }}>
-        <div className="font-mono text-[10px] uppercase tracking-[0.6em] text-white/50">Now Entering</div>
+        <div className="font-mono text-[10px] uppercase tracking-[0.6em] text-white/50">Now Racing</div>
         <div className="mt-2 font-display text-4xl uppercase text-white md:text-6xl"
           style={{ textShadow: "0 0 30px rgba(255,60,40,0.8)" }}>
-          {cut.loc}
+          {stop.loc}
         </div>
       </div>
     </div>
