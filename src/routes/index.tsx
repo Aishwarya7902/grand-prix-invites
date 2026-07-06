@@ -59,8 +59,17 @@ function DashItem({ label, value, icon: Icon }: { label: string; value: string; 
   );
 }
 
+const INTRO_STORAGE_KEY = "gp-intro-seen-v1";
+
 function Index() {
-  const [intro, setIntro] = useState(true);
+  const [intro, setIntro] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem(INTRO_STORAGE_KEY) !== "1";
+  });
+  const finishIntro = () => {
+    try { window.localStorage.setItem(INTRO_STORAGE_KEY, "1"); } catch {}
+    setIntro(false);
+  };
 
   const checkpoints = [
     { icon: Users, title: "Driver Check-In", time: "4:00 PM", desc: "Sign your racing license and grab your helmet." },
@@ -79,7 +88,7 @@ function Index() {
 
   return (
     <div className="relative min-h-screen bg-background">
-      {intro && <CinematicIntro racerName={RACER_NAME} onDone={() => setIntro(false)} />}
+      {intro && <CinematicIntro racerName={RACER_NAME} onDone={finishIntro} />}
 
       {/* HERO */}
       <section className="relative flex min-h-screen items-center overflow-hidden">
