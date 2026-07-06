@@ -21,17 +21,19 @@ type StageKey =
   | "years"      // "Celebrating 10 Amazing Years"
   | "reveal";    // Welcome to AARAV's 10th Birthday Grand Prix (with paddock banners)
 
+// Reveal stage has no end — it holds until the user clicks the CTA.
 const STAGES: { key: StageKey; at: number; end: number }[] = [
-  { key: "announce", at:     0, end:  2800 },
-  { key: "champion", at:  2500, end:  5800 },
-  { key: "arrival",  at:  5500, end:  7800 },
-  { key: "lights",   at:  7500, end:  9200 },
-  { key: "race",     at:  9000, end: 12600 },
-  { key: "finish",   at: 12300, end: 14800 },
-  { key: "years",    at: 14500, end: 16400 },
-  { key: "reveal",   at: 16100, end: 19200 },
+  { key: "announce", at:     0, end:  2200 },
+  { key: "champion", at:  2000, end:  4600 },
+  { key: "arrival",  at:  4400, end:  6400 },
+  { key: "lights",   at:  6200, end:  7800 },
+  { key: "race",     at:  7600, end: 10600 },
+  { key: "finish",   at: 10400, end: 12200 },
+  { key: "years",    at: 12000, end: 13400 },
+  { key: "reveal",   at: 13200, end: 10_000_000 },
 ];
-const TOTAL = 19200;
+const CTA_READY_AT = 14200; // when the title has fully settled
+const CELEBRATION_MS = 3600;
 const FADE = 550;
 const SKIP_AT = 2500;
 const EASE = "cubic-bezier(0.65, 0, 0.35, 1)";
@@ -63,24 +65,21 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
   const [running, setRunning] = useState(true);
   const t = useElapsed(running);
   const [showSkip, setShowSkip] = useState(false);
+  const [celebrating, setCelebrating] = useState(false);
 
   useEffect(() => {
     const id = window.setTimeout(() => setShowSkip(true), SKIP_AT);
     return () => clearTimeout(id);
   }, []);
 
-  useEffect(() => {
-    const id = window.setTimeout(() => {
-      setRunning(false);
-      onDone();
-    }, TOTAL);
-    return () => clearTimeout(id);
-  }, [onDone]);
+  // No auto-exit: reveal holds until the user clicks "Enter Celebration".
 
   const opacityFor = (key: StageKey) => {
     const s = STAGES.find((x) => x.key === key)!;
-    if (t < s.at || t > s.end) return 0;
+    if (t < s.at) return 0;
     if (t < s.at + FADE) return (t - s.at) / FADE;
+    if (key === "reveal") return 1; // hold indefinitely
+    if (t > s.end) return 0;
     if (t > s.end - FADE) return Math.max(0, (s.end - t) / FADE);
     return 1;
   };
@@ -106,9 +105,20 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
   const champPhase: "search" | "match" | "reveal" =
     champP < 0.45 ? "search" : champP < 0.7 ? "match" : "reveal";
 
+  const ctaReady = t >= CTA_READY_AT && !celebrating;
+
   const skip = () => {
     setRunning(false);
     onDone();
+  };
+
+  const enterCelebration = () => {
+    if (celebrating) return;
+    setCelebrating(true);
+    window.setTimeout(() => {
+      setRunning(false);
+      onDone();
+    }, CELEBRATION_MS);
   };
 
   return (
@@ -503,9 +513,114 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
             <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.5em] text-white/60">
               You&apos;re invited to the celebration
             </div>
+
+            {/* Primary CTA — appears once the title has settled */}
+            <div
+              className="mt-10 flex justify-center"
+              style={{
+                opacity: ctaReady ? 1 : 0,
+                transform: ctaReady ? "translateY(0) scale(1)" : "translateY(14px) scale(0.96)",
+                transition: `opacity 900ms ${EASE}, transform 900ms ${EASE}`,
+                pointerEvents: ctaReady ? "auto" : "none",
+              }}
+            >
+              <button
+                onClick={enterCelebration}
+                className="group relative overflow-hidden border-2 border-primary bg-primary px-10 py-5 font-display text-xl uppercase tracking-[0.25em] text-primary-foreground shadow-[0_0_60px_rgba(255,60,40,0.55)] transition-transform hover:scale-[1.04] md:text-2xl"
+                style={{ animation: ctaReady ? `ci-cta-pulse 2.4s ease-in-out infinite` : undefined }}
+              >
+                <span className="relative z-10 flex items-center gap-3">
+                  <span aria-hidden>🏁</span> Enter Celebration
+                </span>
+                <span className="absolute inset-y-0 -left-full w-1/2 skew-x-12 bg-white/25 transition-all duration-700 group-hover:left-full" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* ─────────── 9 · CELEBRATION LAUNCH (triggered by CTA) ─────────── */}
+      {celebrating && (
+        <div className="absolute inset-0 z-40 overflow-hidden">
+          {/* sweeping spotlights */}
+          {[0, 1, 2, 3].map((i) => (
+            <div key={`sl-${i}`} className="absolute left-1/2 top-0 h-[130%] w-56 origin-top -translate-x-1/2"
+              style={{
+                background: "linear-gradient(180deg, rgba(255,220,150,0.55), transparent 70%)",
+                filter: "blur(10px)",
+                animation: `ci-sweep 2.6s ${EASE} ${i * 0.15}s both`,
+                transform: `translateX(-50%) rotate(${(i - 1.5) * 22}deg)`,
+              }} />
+          ))}
+          {/* confetti cannons */}
+          {Array.from({ length: 60 }).map((_, i) => (
+            <div key={`cc-${i}`} className="absolute h-3 w-1.5"
+              style={{
+                left: `${(i * 29) % 100}%`,
+                bottom: "-4%",
+                background: ["#ff3c28", "#ffa040", "#ffffff", "#00ff88", "#ffcc40"][i % 5],
+                animation: `ci-cannon ${1.6 + (i % 5) * 0.15}s ${EASE} ${(i % 8) * 0.05}s both`,
+              }} />
+          ))}
+          {/* fireworks bursts */}
+          {Array.from({ length: 7 }).map((_, i) => (
+            <div key={`fw-${i}`} className="absolute h-3 w-3 rounded-full"
+              style={{
+                left: `${12 + i * 12}%`,
+                top: `${15 + (i % 3) * 18}%`,
+                background: ["#ff3c28", "#ffa040", "#00ff88", "#fff", "#ffcc40", "#ff3c28", "#ffa040"][i],
+                boxShadow: `0 0 80px 24px ${["#ff3c28", "#ffa040", "#00ff88", "#fff", "#ffcc40", "#ff3c28", "#ffa040"][i]}`,
+                animation: `ci-firework 2000ms ${EASE} ${i * 140}ms both`,
+              }} />
+          ))}
+          {/* Championship gate opening */}
+          <div className="absolute inset-y-0 left-0 w-1/2 border-r-4 border-primary bg-gradient-to-r from-black via-[#1a0808] to-[#2a1010]"
+            style={{ animation: `ci-gate-l ${CELEBRATION_MS}ms ${EASE} both` }}>
+            <div className="absolute right-0 top-0 h-full w-2 bg-primary shadow-[0_0_40px_rgba(255,60,40,0.8)]" />
+          </div>
+          <div className="absolute inset-y-0 right-0 w-1/2 border-l-4 border-primary bg-gradient-to-l from-black via-[#1a0808] to-[#2a1010]"
+            style={{ animation: `ci-gate-r ${CELEBRATION_MS}ms ${EASE} both` }}>
+            <div className="absolute left-0 top-0 h-full w-2 bg-primary shadow-[0_0_40px_rgba(255,60,40,0.8)]" />
+          </div>
+          {/* Camera-forward warp: radial speed lines */}
+          <div className="pointer-events-none absolute inset-0"
+            style={{ animation: `ci-warp ${CELEBRATION_MS}ms ${EASE} both` }}>
+            {Array.from({ length: 40 }).map((_, i) => {
+              const angle = (i / 40) * 360;
+              return (
+                <div key={`ln-${i}`} className="absolute left-1/2 top-1/2 h-[3px] w-[60vmax] origin-left"
+                  style={{
+                    transform: `rotate(${angle}deg)`,
+                    background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 60%, rgba(255,60,40,0.9) 100%)`,
+                    animation: `ci-line-warp ${1.4 + (i % 5) * 0.1}s linear ${(i % 8) * 0.05}s infinite`,
+                    opacity: 0.7,
+                    filter: "blur(1px)",
+                  }} />
+              );
+            })}
+          </div>
+          {/* Glowing title lifts and blurs as camera flies through */}
+          <div className="absolute inset-0 flex items-center justify-center"
+            style={{ animation: `ci-title-fly ${CELEBRATION_MS}ms ${EASE} both` }}>
+            <div className="text-center">
+              <div className="font-display text-6xl uppercase leading-[0.9] text-white md:text-8xl"
+                style={{ textShadow: "0 0 60px rgba(255,220,120,0.9), 0 0 120px rgba(255,60,40,0.6)" }}>
+                {racerName.toUpperCase()}&apos;S
+              </div>
+              <div className="mt-2 font-display text-5xl uppercase leading-[0.9] text-fire md:text-7xl"
+                style={{ textShadow: "0 0 80px rgba(255,60,40,0.9)" }}>
+                10<span className="text-white/90">TH</span> BIRTHDAY
+              </div>
+              <div className="mt-3 font-display text-4xl uppercase tracking-[0.15em] text-white md:text-6xl">
+                GRAND PRIX
+              </div>
+            </div>
+          </div>
+          {/* Final white flash into hero */}
+          <div className="absolute inset-0 bg-white"
+            style={{ animation: `ci-flash ${CELEBRATION_MS}ms ${EASE} both` }} />
+        </div>
+      )}
 
       <style>{`
         @keyframes ci-line-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
@@ -559,6 +674,50 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
           50%      { transform: translateY(-14px); }
         }
         @keyframes ci-gate-glow { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes ci-cta-pulse {
+          0%, 100% { box-shadow: 0 0 40px rgba(255,60,40,0.45), 0 0 0 rgba(255,60,40,0); }
+          50%      { box-shadow: 0 0 80px rgba(255,60,40,0.9), 0 0 120px rgba(255,160,60,0.35); }
+        }
+        @keyframes ci-gate-l {
+          0%   { transform: translateX(0); }
+          20%  { transform: translateX(0); }
+          100% { transform: translateX(-100%); }
+        }
+        @keyframes ci-gate-r {
+          0%   { transform: translateX(0); }
+          20%  { transform: translateX(0); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes ci-warp {
+          0%   { opacity: 0; transform: scale(0.4); filter: blur(2px); }
+          25%  { opacity: 1; transform: scale(1); filter: blur(0); }
+          100% { opacity: 0.9; transform: scale(3.6); filter: blur(4px); }
+        }
+        @keyframes ci-line-warp {
+          from { transform-origin: left center; transform: rotate(var(--r, 0deg)) scaleX(0.2); opacity: 0; }
+          20%  { opacity: 1; }
+          to   { transform-origin: left center; transform: rotate(var(--r, 0deg)) scaleX(1.6); opacity: 0; }
+        }
+        @keyframes ci-title-fly {
+          0%   { opacity: 0; transform: scale(1) translateZ(0); filter: blur(0); }
+          20%  { opacity: 1; transform: scale(1.05); filter: blur(0); }
+          70%  { opacity: 0.9; transform: scale(1.8); filter: blur(6px); }
+          100% { opacity: 0; transform: scale(3.6); filter: blur(24px); }
+        }
+        @keyframes ci-cannon {
+          0%   { transform: translateY(0) rotate(0); opacity: 1; }
+          100% { transform: translateY(-120vh) rotate(720deg); opacity: 0; }
+        }
+        @keyframes ci-sweep {
+          0%   { opacity: 0; transform: translateX(-50%) rotate(-45deg); }
+          40%  { opacity: 1; }
+          100% { opacity: 0.4; transform: translateX(-50%) rotate(45deg); }
+        }
+        @keyframes ci-flash {
+          0%, 70% { opacity: 0; }
+          88%     { opacity: 0.9; }
+          100%    { opacity: 1; }
+        }
         @keyframes ci-title {
           0%   { opacity: 0; transform: scale(0.9); filter: blur(20px); }
           100% { opacity: 1; transform: scale(1); filter: blur(0); }
