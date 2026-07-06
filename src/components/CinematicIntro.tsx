@@ -513,9 +513,114 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
             <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.5em] text-white/60">
               You&apos;re invited to the celebration
             </div>
+
+            {/* Primary CTA — appears once the title has settled */}
+            <div
+              className="mt-10 flex justify-center"
+              style={{
+                opacity: ctaReady ? 1 : 0,
+                transform: ctaReady ? "translateY(0) scale(1)" : "translateY(14px) scale(0.96)",
+                transition: `opacity 900ms ${EASE}, transform 900ms ${EASE}`,
+                pointerEvents: ctaReady ? "auto" : "none",
+              }}
+            >
+              <button
+                onClick={enterCelebration}
+                className="group relative overflow-hidden border-2 border-primary bg-primary px-10 py-5 font-display text-xl uppercase tracking-[0.25em] text-primary-foreground shadow-[0_0_60px_rgba(255,60,40,0.55)] transition-transform hover:scale-[1.04] md:text-2xl"
+                style={{ animation: ctaReady ? `ci-cta-pulse 2.4s ease-in-out infinite` : undefined }}
+              >
+                <span className="relative z-10 flex items-center gap-3">
+                  <span aria-hidden>🏁</span> Enter Celebration
+                </span>
+                <span className="absolute inset-y-0 -left-full w-1/2 skew-x-12 bg-white/25 transition-all duration-700 group-hover:left-full" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* ─────────── 9 · CELEBRATION LAUNCH (triggered by CTA) ─────────── */}
+      {celebrating && (
+        <div className="absolute inset-0 z-40 overflow-hidden">
+          {/* sweeping spotlights */}
+          {[0, 1, 2, 3].map((i) => (
+            <div key={`sl-${i}`} className="absolute left-1/2 top-0 h-[130%] w-56 origin-top -translate-x-1/2"
+              style={{
+                background: "linear-gradient(180deg, rgba(255,220,150,0.55), transparent 70%)",
+                filter: "blur(10px)",
+                animation: `ci-sweep 2.6s ${EASE} ${i * 0.15}s both`,
+                transform: `translateX(-50%) rotate(${(i - 1.5) * 22}deg)`,
+              }} />
+          ))}
+          {/* confetti cannons */}
+          {Array.from({ length: 60 }).map((_, i) => (
+            <div key={`cc-${i}`} className="absolute h-3 w-1.5"
+              style={{
+                left: `${(i * 29) % 100}%`,
+                bottom: "-4%",
+                background: ["#ff3c28", "#ffa040", "#ffffff", "#00ff88", "#ffcc40"][i % 5],
+                animation: `ci-cannon ${1.6 + (i % 5) * 0.15}s ${EASE} ${(i % 8) * 0.05}s both`,
+              }} />
+          ))}
+          {/* fireworks bursts */}
+          {Array.from({ length: 7 }).map((_, i) => (
+            <div key={`fw-${i}`} className="absolute h-3 w-3 rounded-full"
+              style={{
+                left: `${12 + i * 12}%`,
+                top: `${15 + (i % 3) * 18}%`,
+                background: ["#ff3c28", "#ffa040", "#00ff88", "#fff", "#ffcc40", "#ff3c28", "#ffa040"][i],
+                boxShadow: `0 0 80px 24px ${["#ff3c28", "#ffa040", "#00ff88", "#fff", "#ffcc40", "#ff3c28", "#ffa040"][i]}`,
+                animation: `ci-firework 2000ms ${EASE} ${i * 140}ms both`,
+              }} />
+          ))}
+          {/* Championship gate opening */}
+          <div className="absolute inset-y-0 left-0 w-1/2 border-r-4 border-primary bg-gradient-to-r from-black via-[#1a0808] to-[#2a1010]"
+            style={{ animation: `ci-gate-l ${CELEBRATION_MS}ms ${EASE} both` }}>
+            <div className="absolute right-0 top-0 h-full w-2 bg-primary shadow-[0_0_40px_rgba(255,60,40,0.8)]" />
+          </div>
+          <div className="absolute inset-y-0 right-0 w-1/2 border-l-4 border-primary bg-gradient-to-l from-black via-[#1a0808] to-[#2a1010]"
+            style={{ animation: `ci-gate-r ${CELEBRATION_MS}ms ${EASE} both` }}>
+            <div className="absolute left-0 top-0 h-full w-2 bg-primary shadow-[0_0_40px_rgba(255,60,40,0.8)]" />
+          </div>
+          {/* Camera-forward warp: radial speed lines */}
+          <div className="pointer-events-none absolute inset-0"
+            style={{ animation: `ci-warp ${CELEBRATION_MS}ms ${EASE} both` }}>
+            {Array.from({ length: 40 }).map((_, i) => {
+              const angle = (i / 40) * 360;
+              return (
+                <div key={`ln-${i}`} className="absolute left-1/2 top-1/2 h-[3px] w-[60vmax] origin-left"
+                  style={{
+                    transform: `rotate(${angle}deg)`,
+                    background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 60%, rgba(255,60,40,0.9) 100%)`,
+                    animation: `ci-line-warp ${1.4 + (i % 5) * 0.1}s linear ${(i % 8) * 0.05}s infinite`,
+                    opacity: 0.7,
+                    filter: "blur(1px)",
+                  }} />
+              );
+            })}
+          </div>
+          {/* Glowing title lifts and blurs as camera flies through */}
+          <div className="absolute inset-0 flex items-center justify-center"
+            style={{ animation: `ci-title-fly ${CELEBRATION_MS}ms ${EASE} both` }}>
+            <div className="text-center">
+              <div className="font-display text-6xl uppercase leading-[0.9] text-white md:text-8xl"
+                style={{ textShadow: "0 0 60px rgba(255,220,120,0.9), 0 0 120px rgba(255,60,40,0.6)" }}>
+                {racerName.toUpperCase()}&apos;S
+              </div>
+              <div className="mt-2 font-display text-5xl uppercase leading-[0.9] text-fire md:text-7xl"
+                style={{ textShadow: "0 0 80px rgba(255,60,40,0.9)" }}>
+                10<span className="text-white/90">TH</span> BIRTHDAY
+              </div>
+              <div className="mt-3 font-display text-4xl uppercase tracking-[0.15em] text-white md:text-6xl">
+                GRAND PRIX
+              </div>
+            </div>
+          </div>
+          {/* Final white flash into hero */}
+          <div className="absolute inset-0 bg-white"
+            style={{ animation: `ci-flash ${CELEBRATION_MS}ms ${EASE} both` }} />
+        </div>
+      )}
 
       <style>{`
         @keyframes ci-line-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
