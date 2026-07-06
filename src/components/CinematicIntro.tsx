@@ -674,6 +674,50 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
           50%      { transform: translateY(-14px); }
         }
         @keyframes ci-gate-glow { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes ci-cta-pulse {
+          0%, 100% { box-shadow: 0 0 40px rgba(255,60,40,0.45), 0 0 0 rgba(255,60,40,0); }
+          50%      { box-shadow: 0 0 80px rgba(255,60,40,0.9), 0 0 120px rgba(255,160,60,0.35); }
+        }
+        @keyframes ci-gate-l {
+          0%   { transform: translateX(0); }
+          20%  { transform: translateX(0); }
+          100% { transform: translateX(-100%); }
+        }
+        @keyframes ci-gate-r {
+          0%   { transform: translateX(0); }
+          20%  { transform: translateX(0); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes ci-warp {
+          0%   { opacity: 0; transform: scale(0.4); filter: blur(2px); }
+          25%  { opacity: 1; transform: scale(1); filter: blur(0); }
+          100% { opacity: 0.9; transform: scale(3.6); filter: blur(4px); }
+        }
+        @keyframes ci-line-warp {
+          from { transform-origin: left center; transform: rotate(var(--r, 0deg)) scaleX(0.2); opacity: 0; }
+          20%  { opacity: 1; }
+          to   { transform-origin: left center; transform: rotate(var(--r, 0deg)) scaleX(1.6); opacity: 0; }
+        }
+        @keyframes ci-title-fly {
+          0%   { opacity: 0; transform: scale(1) translateZ(0); filter: blur(0); }
+          20%  { opacity: 1; transform: scale(1.05); filter: blur(0); }
+          70%  { opacity: 0.9; transform: scale(1.8); filter: blur(6px); }
+          100% { opacity: 0; transform: scale(3.6); filter: blur(24px); }
+        }
+        @keyframes ci-cannon {
+          0%   { transform: translateY(0) rotate(0); opacity: 1; }
+          100% { transform: translateY(-120vh) rotate(720deg); opacity: 0; }
+        }
+        @keyframes ci-sweep {
+          0%   { opacity: 0; transform: translateX(-50%) rotate(-45deg); }
+          40%  { opacity: 1; }
+          100% { opacity: 0.4; transform: translateX(-50%) rotate(45deg); }
+        }
+        @keyframes ci-flash {
+          0%, 70% { opacity: 0; }
+          88%     { opacity: 0.9; }
+          100%    { opacity: 1; }
+        }
         @keyframes ci-title {
           0%   { opacity: 0; transform: scale(0.9); filter: blur(20px); }
           100% { opacity: 1; transform: scale(1); filter: blur(0); }
