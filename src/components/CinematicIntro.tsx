@@ -507,7 +507,7 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
               10<span className="text-white/90">TH</span> BIRTHDAY
             </div>
             <div className="mt-3 font-display text-4xl uppercase tracking-[0.15em] text-white md:text-6xl">
-              GRAND PRIX
+              GRAND CELEBRATION
             </div>
             <div className="mx-auto mt-6 h-2 w-64 checker-flag opacity-80" />
             <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.5em] text-white/60">
@@ -612,7 +612,7 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
                 10<span className="text-white/90">TH</span> BIRTHDAY
               </div>
               <div className="mt-3 font-display text-4xl uppercase tracking-[0.15em] text-white md:text-6xl">
-                GRAND PRIX
+                GRAND CELEBRATION
               </div>
             </div>
           </div>
