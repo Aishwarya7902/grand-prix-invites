@@ -270,7 +270,7 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
         ))}
         {/* rolling car (right → center) */}
         <div className="absolute bottom-[22%] left-1/2 -translate-x-1/2"
-          style={{ animation: `ci-arrive 2200ms ${EASE} both` }}>
+          style={{ animation: `ci-arrive 3200ms ${EASE} both` }}>
           {/* car "silhouette" plate with birthday livery */}
           <div className="relative flex h-24 w-64 items-center justify-center border-2 border-primary bg-gradient-to-r from-primary via-fire to-accent shadow-[0_20px_60px_rgba(255,60,40,0.5)]">
             {/* confetti decals */}
