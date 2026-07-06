@@ -21,17 +21,19 @@ type StageKey =
   | "years"      // "Celebrating 10 Amazing Years"
   | "reveal";    // Welcome to AARAV's 10th Birthday Grand Prix (with paddock banners)
 
+// Reveal stage has no end — it holds until the user clicks the CTA.
 const STAGES: { key: StageKey; at: number; end: number }[] = [
-  { key: "announce", at:     0, end:  2800 },
-  { key: "champion", at:  2500, end:  5800 },
-  { key: "arrival",  at:  5500, end:  7800 },
-  { key: "lights",   at:  7500, end:  9200 },
-  { key: "race",     at:  9000, end: 12600 },
-  { key: "finish",   at: 12300, end: 14800 },
-  { key: "years",    at: 14500, end: 16400 },
-  { key: "reveal",   at: 16100, end: 19200 },
+  { key: "announce", at:     0, end:  2200 },
+  { key: "champion", at:  2000, end:  4600 },
+  { key: "arrival",  at:  4400, end:  6400 },
+  { key: "lights",   at:  6200, end:  7800 },
+  { key: "race",     at:  7600, end: 10600 },
+  { key: "finish",   at: 10400, end: 12200 },
+  { key: "years",    at: 12000, end: 13400 },
+  { key: "reveal",   at: 13200, end: 10_000_000 },
 ];
-const TOTAL = 19200;
+const CTA_READY_AT = 14200; // when the title has fully settled
+const CELEBRATION_MS = 3600;
 const FADE = 550;
 const SKIP_AT = 2500;
 const EASE = "cubic-bezier(0.65, 0, 0.35, 1)";
