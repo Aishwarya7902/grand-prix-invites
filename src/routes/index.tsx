@@ -88,7 +88,7 @@ function Index() {
 
   return (
     <div className="relative min-h-screen bg-background">
-      {intro && <CinematicIntro racerName={RACER_NAME} onDone={() => setIntro(false)} />}
+      {intro && <CinematicIntro racerName={RACER_NAME} onDone={finishIntro} />}
 
       {/* HERO */}
       <section className="relative flex min-h-screen items-center overflow-hidden">
