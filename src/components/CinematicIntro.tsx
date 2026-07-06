@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 /**
- * Story-driven cinematic intro (~18s).
+ * Story-driven cinematic intro (~27s).
  *
  * Narrative arc:
  *   Championship Announcement → Champion Found → Car Arrives →
