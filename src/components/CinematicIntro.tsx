@@ -12,14 +12,14 @@ import { useEffect, useMemo, useState } from "react";
  */
 
 type StageKey =
-  | "announce"   // stadium LED powers on: "Grand Prix Championship — Today's Special Event"
+  | "announce"   // stadium LED powers on: "Grand Celebration Championship — Today's Special Event"
   | "champion"   // "Searching for today's champion…" → "Champion Found · Driver #10 · AARAV"
   | "arrival"    // Car #10 rolls in with birthday livery
   | "lights"     // F1 start lights → GO
   | "race"       // Progression through Training → Mountain → City → Final Straight
   | "finish"     // Finish line, fireworks, "CHAMPION · DRIVER #10 · AARAV"
   | "years"      // "Celebrating 10 Amazing Years"
-  | "reveal";    // Welcome to AARAV's 10th Birthday Grand Prix (with paddock banners)
+  | "reveal";    // Welcome to AARAV's 10th Birthday Grand Celebration (with paddock banners)
 
 // Reveal stage has no end — it holds until the user clicks the CTA.
 const STAGES: { key: StageKey; at: number; end: number }[] = [
