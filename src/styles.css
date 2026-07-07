@@ -163,6 +163,47 @@
   }
 }
 
+@keyframes telemetry-fill {
+  from { width: 0%; }
+  to { width: var(--fill, 100%); }
+}
+@keyframes indicator-blink {
+  0%, 100% { opacity: 1; box-shadow: 0 0 12px currentColor, 0 0 24px currentColor; }
+  50% { opacity: 0.35; box-shadow: 0 0 4px currentColor; }
+}
+@keyframes digit-tick {
+  0% { transform: translateY(-6px); opacity: 0; filter: blur(4px); }
+  100% { transform: translateY(0); opacity: 1; filter: blur(0); }
+}
+@keyframes radar-sweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes holo-shine {
+  0% { transform: translateX(-120%) skewX(-20deg); }
+  60%, 100% { transform: translateX(220%) skewX(-20deg); }
+}
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+@keyframes credential-float {
+  0%, 100% { transform: perspective(1400px) rotateX(2deg) rotateY(-4deg) translateY(0); }
+  50% { transform: perspective(1400px) rotateX(1deg) rotateY(-2deg) translateY(-6px); }
+}
+
+@utility holo-foil {
+  background: linear-gradient(
+    115deg,
+    oklch(0.62 0.26 25 / 0.25) 0%,
+    oklch(0.75 0.19 55 / 0.35) 25%,
+    oklch(0.85 0.15 180 / 0.30) 50%,
+    oklch(0.72 0.19 230 / 0.35) 75%,
+    oklch(0.62 0.26 320 / 0.25) 100%
+  );
+  background-size: 200% 200%;
+}
+
 @layer base {
   * {
     border-color: var(--color-border);

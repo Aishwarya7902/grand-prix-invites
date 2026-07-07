@@ -201,38 +201,228 @@ function Index() {
         </div>
       </section>
 
-      {/* VIP PASS */}
-      <section id="invitation" className="relative py-24 racing-stripe">
-        <div className="mx-auto max-w-6xl px-6">
-          <SectionLabel num="02" title="VIP Race Pass" />
-          <div className="relative overflow-hidden border-2 border-primary bg-card shadow-[var(--shadow-glow)]">
-            <div className="grid md:grid-cols-[1fr_2fr]">
-              <div className="relative flex flex-col justify-between bg-primary p-8 text-primary-foreground">
-                <div>
-                  <div className="font-mono text-[10px] uppercase tracking-[0.3em] opacity-80">Championship Pass</div>
-                  <div className="mt-2 font-display text-3xl">GRAND CELEBRATION</div>
-                  <div className="font-display text-6xl leading-none">10</div>
-                  <div className="mt-1 font-mono text-xs uppercase tracking-widest opacity-80">Round · Season 2026</div>
-                </div>
-                <div className="mt-8">
-                  <div className="font-mono text-[10px] uppercase tracking-widest opacity-80">Driver</div>
-                  <div className="font-display text-2xl">{RACER_NAME}</div>
-                </div>
-                <div className="mt-6 h-16 w-full checker-flag opacity-90" />
-              </div>
-              <div className="grid grid-cols-1 gap-px bg-border sm:grid-cols-2">
-                <DashItem label="Race Day" value={RACE_DATE} icon={Flag} />
-                <DashItem label="Green Flag" value={RACE_TIME} icon={Timer} />
-                <DashItem label="Race Circuit" value={VENUE} icon={MapPin} />
-                <DashItem label="Dress Code" value={DRESS_CODE} icon={Gauge} />
-              </div>
+      {/* VIP PASS — Telemetry Dashboard + Holographic Credential */}
+      <section id="invitation" className="relative overflow-hidden py-28">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              "linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px)",
+            backgroundSize: "48px 48px",
+          }}
+        />
+        <div className="relative mx-auto max-w-6xl px-6">
+          <SectionLabel num="02" title="VIP Race Credential" />
+
+          {/* Telemetry Header Bar */}
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border border-border bg-carbon/70 px-5 py-3 backdrop-blur">
+            <div className="flex items-center gap-4 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+              <span className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" style={{ animation: "indicator-blink 1.6s infinite", color: "rgb(52,211,153)" }} />
+                Telemetry · Online
+              </span>
+              <span className="hidden sm:inline">Ping 12ms</span>
+              <span className="hidden md:inline">Uplink · Race Control</span>
             </div>
-            <div className="border-t border-border bg-carbon px-8 py-4 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-              Pass ID · GP-2026-010 · Non-transferable · Present at gate
+            <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
+              CRED · GC-2026-010 · CLASS-A
+            </div>
+          </div>
+
+          {/* Telemetry rows */}
+          <div className="mb-10 grid gap-px border border-border bg-border">
+            {[
+              { label: "DATE", value: RACE_DATE, status: "SYNCED", pct: 100, hue: "primary" },
+              { label: "TIME", value: RACE_TIME, status: "LOCKED", pct: 100, hue: "accent" },
+              { label: "VENUE", value: VENUE, status: "MAPPED", pct: 96, hue: "primary" },
+              { label: "DRESS CODE", value: DRESS_CODE, status: "APPROVED", pct: 88, hue: "accent" },
+              { label: "RSVP", value: "AWAITING DRIVER CONFIRM", status: "PENDING", pct: 42, hue: "primary" },
+            ].map((row, i) => (
+              <div
+                key={row.label}
+                className="grid grid-cols-[110px_1fr_auto] items-center gap-4 bg-card/80 px-5 py-4 backdrop-blur transition-colors hover:bg-card md:grid-cols-[140px_1fr_1fr_auto]"
+                style={{ animation: `digit-tick 0.5s ${i * 0.12}s both` }}
+              >
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                  {row.label}
+                </div>
+                <div className="font-display text-lg uppercase tracking-wider text-foreground md:text-xl">
+                  {row.value}
+                </div>
+                <div className="hidden h-1.5 w-full max-w-[220px] overflow-hidden bg-background md:block">
+                  <div
+                    className={`h-full ${row.hue === "primary" ? "bg-primary" : "bg-accent"}`}
+                    style={{
+                      ["--fill" as string]: `${row.pct}%`,
+                      animation: `telemetry-fill 1.4s ${0.2 + i * 0.12}s cubic-bezier(.2,.9,.2,1) both`,
+                    }}
+                  />
+                </div>
+                <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em]">
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${row.status === "PENDING" ? "bg-accent" : "bg-emerald-400"}`}
+                    style={{
+                      animation: "indicator-blink 1.6s infinite",
+                      color: row.status === "PENDING" ? "oklch(0.75 0.19 55)" : "rgb(52,211,153)",
+                    }}
+                  />
+                  <span className={row.status === "PENDING" ? "text-accent" : "text-emerald-400"}>
+                    {row.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Holographic Credential */}
+          <div className="relative mx-auto max-w-3xl" style={{ animation: "credential-float 8s ease-in-out infinite" }}>
+            {/* Ambient glow */}
+            <div className="pointer-events-none absolute -inset-6 rounded-[2rem] opacity-70 blur-2xl"
+                 style={{ background: "radial-gradient(60% 60% at 30% 40%, var(--racing-red), transparent 60%), radial-gradient(50% 50% at 80% 70%, var(--mclaren-orange), transparent 60%)" }} />
+
+            <div className="relative overflow-hidden border border-primary/40 bg-carbon/90 shadow-[var(--shadow-glow)] backdrop-blur">
+              {/* Holo foil layer */}
+              <div className="pointer-events-none absolute inset-0 holo-foil mix-blend-overlay" style={{ animation: "holo-shine 6s ease-in-out infinite" }} />
+              {/* Scanline */}
+              <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-30">
+                <div className="absolute inset-x-0 h-16 bg-gradient-to-b from-transparent via-accent/40 to-transparent"
+                     style={{ animation: "scanline 5s linear infinite" }} />
+              </div>
+              {/* Perforation edge */}
+              <div className="pointer-events-none absolute inset-y-0 left-[38%] hidden w-px border-l border-dashed border-border md:block" />
+
+              <div className="relative grid gap-6 p-8 md:grid-cols-[38%_1fr] md:p-10">
+                {/* Left — driver identity */}
+                <div className="relative">
+                  <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
+                    <span>◆ Holographic</span>
+                    <span>No. 010</span>
+                  </div>
+
+                  <div className="mt-6 flex items-center gap-4">
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden border border-accent/60 bg-background">
+                      <img src={helmet} alt="Driver helmet" loading="lazy" className="h-full w-full object-cover" />
+                      <div className="absolute inset-0 holo-foil mix-blend-color-dodge opacity-70" />
+                    </div>
+                    <div>
+                      <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                        Guest of Honour
+                      </div>
+                      <div className="font-display text-3xl uppercase leading-none text-foreground">
+                        {RACER_NAME}
+                      </div>
+                      <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
+                        Turning Ten · Champion Class
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 grid grid-cols-2 gap-3">
+                    <div className="border border-border bg-background/60 p-3">
+                      <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Seat</div>
+                      <div className="font-display text-lg text-foreground">VIP · A10</div>
+                    </div>
+                    <div className="border border-border bg-background/60 p-3">
+                      <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Gate</div>
+                      <div className="font-display text-lg text-foreground">01 · North</div>
+                    </div>
+                  </div>
+
+                  {/* Mini radar */}
+                  <div className="mt-6 flex items-center gap-3">
+                    <div className="relative h-14 w-14 overflow-hidden rounded-full border border-accent/50 bg-background">
+                      <div className="absolute inset-1 rounded-full border border-accent/30" />
+                      <div className="absolute inset-3 rounded-full border border-accent/20" />
+                      <div
+                        className="absolute inset-0 origin-center"
+                        style={{
+                          background:
+                            "conic-gradient(from 0deg, oklch(0.75 0.19 55 / 0.55), transparent 25%)",
+                          animation: "radar-sweep 3.5s linear infinite",
+                        }}
+                      />
+                      <div className="absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent" />
+                    </div>
+                    <div className="font-mono text-[10px] uppercase leading-relaxed tracking-[0.25em] text-muted-foreground">
+                      Locating driver…<br />
+                      <span className="text-accent">Signal acquired</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right — event ticket */}
+                <div className="relative">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                        VIP Driver Pass
+                      </div>
+                      <div className="font-display text-2xl uppercase leading-tight text-foreground md:text-3xl">
+                        Aarav's 10th Birthday
+                      </div>
+                      <div className="font-display text-lg uppercase tracking-wider text-fire">
+                        Grand Celebration
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">Season</div>
+                      <div className="font-display text-3xl leading-none text-foreground">2026</div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 grid grid-cols-2 gap-px bg-border">
+                    <div className="bg-background/70 p-4">
+                      <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Date</div>
+                      <div className="mt-1 font-display text-base text-foreground">{RACE_DATE}</div>
+                    </div>
+                    <div className="bg-background/70 p-4">
+                      <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Green Flag</div>
+                      <div className="mt-1 font-display text-base text-foreground">{RACE_TIME}</div>
+                    </div>
+                    <div className="col-span-2 bg-background/70 p-4">
+                      <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Circuit</div>
+                      <div className="mt-1 font-display text-base text-foreground">{VENUE}</div>
+                    </div>
+                    <div className="col-span-2 bg-background/70 p-4">
+                      <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Dress Code</div>
+                      <div className="mt-1 font-display text-base text-foreground">{DRESS_CODE}</div>
+                    </div>
+                  </div>
+
+                  {/* Barcode strip */}
+                  <div className="mt-6 flex items-end gap-[2px] overflow-hidden">
+                    {Array.from({ length: 64 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="bg-foreground/80"
+                        style={{
+                          width: (i % 5 === 0 ? 3 : i % 3 === 0 ? 2 : 1) + "px",
+                          height: 28 + ((i * 37) % 14) + "px",
+                          opacity: i % 7 === 0 ? 0.35 : 0.9,
+                        }}
+                      />
+                    ))}
+                    <div className="ml-3 font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">
+                      GC · 010 · 2026
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer strip */}
+              <div className="relative flex items-center justify-between border-t border-border bg-background/80 px-6 py-3 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                <span className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" style={{ animation: "indicator-blink 1.6s infinite", color: "rgb(52,211,153)" }} />
+                  Credential Verified
+                </span>
+                <span className="hidden sm:inline">Present at Gate 01 · Non-transferable</span>
+                <span className="text-accent">◇ Holo-secured</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
+
 
       {/* JOURNEY */}
       <section id="journey" className="relative py-24">
