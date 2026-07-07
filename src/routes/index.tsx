@@ -69,11 +69,47 @@ function Index() {
   const finishIntro = () => setIntro(false);
 
   const checkpoints = [
-    { icon: Users, title: "Driver Check-In", time: "4:00 PM", desc: "Sign your racing license and grab your helmet." },
-    { icon: Zap, title: "Warm-Up Games", time: "4:30 PM", desc: "High-speed challenges and pit crew missions." },
-    { icon: Timer, title: "Birthday Pit Stop", time: "5:30 PM", desc: "Refuel with food, drinks and racing tunes." },
-    { icon: Sparkles, title: "Cake Celebration", time: "6:30 PM", desc: "Light the sparklers. Rev the engines." },
-    { icon: Trophy, title: "Podium Ceremony", time: "7:00 PM", desc: "Trophies, gifts and the winner's photo wall." },
+    {
+      emoji: "🏁",
+      flag: "Starting Grid",
+      title: "Welcome, Little Champion",
+      time: "4:00 PM",
+      desc: "The birthday crew welcomes every guest. Collect your golden wristband, sign the champion's book and get ready for an unforgettable celebration.",
+      accent: "from-amber-400/40 via-primary/30 to-transparent",
+    },
+    {
+      emoji: "🎮",
+      flag: "Fun Zone",
+      title: "Games & Giggles",
+      time: "4:45 PM",
+      desc: "Mini races, party challenges, surprise prizes and giant balloon battles. Every guest picks a team colour and joins the fun.",
+      accent: "from-fuchsia-400/40 via-accent/30 to-transparent",
+    },
+    {
+      emoji: "🎂",
+      flag: "Birthday Pit Stop",
+      title: "Cake Cutting Ceremony",
+      time: "6:00 PM",
+      desc: "The birthday car pulls in beside a ten-candle cake. Sparklers glow, everyone sings, and Aarav makes the wish of the season.",
+      accent: "from-rose-400/50 via-amber-300/40 to-transparent",
+      hero: true,
+    },
+    {
+      emoji: "🎁",
+      flag: "Celebration Arena",
+      title: "Music, Dance & Memories",
+      time: "6:45 PM",
+      desc: "Confetti in the air, party lights on the dance floor, a photo booth full of props and gift boxes stacked sky-high.",
+      accent: "from-violet-400/40 via-neon-blue/30 to-transparent",
+    },
+    {
+      emoji: "🏆",
+      flag: "Champion's Celebration",
+      title: "10 Amazing Years",
+      time: "7:30 PM",
+      desc: "Fireworks light the finish line. The trophy isn't for winning a race — it's for a decade of joy. Family cheers, gold confetti falls.",
+      accent: "from-yellow-300/50 via-mclaren-orange/40 to-transparent",
+    },
   ];
 
   const messages = [
