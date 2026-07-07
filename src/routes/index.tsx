@@ -460,41 +460,197 @@ function Index() {
       </section>
 
 
-      {/* JOURNEY */}
-      <section id="journey" className="relative py-24">
-        <div className="mx-auto max-w-7xl px-6">
-          <SectionLabel num="03" title="Race Day Circuit" />
+      {/* JOURNEY — Birthday Grand Celebration Journey */}
+      <section id="journey" className="relative overflow-hidden py-28">
+        {/* Warm ambient birthday glow */}
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -top-32 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,oklch(0.75_0.19_55/0.22),transparent)] blur-2xl" />
+          <div className="absolute bottom-0 left-0 h-[380px] w-[380px] rounded-full bg-[radial-gradient(closest-side,oklch(0.62_0.24_25/0.18),transparent)] blur-3xl" />
+          <div className="absolute right-0 top-1/3 h-[360px] w-[360px] rounded-full bg-[radial-gradient(closest-side,oklch(0.85_0.16_90/0.16),transparent)] blur-3xl" />
+        </div>
+
+        {/* Floating balloons + confetti */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          {Array.from({ length: 14 }).map((_, i) => {
+            const palette = ["#f59e0b", "#ef4444", "#ec4899", "#a78bfa", "#22d3ee", "#facc15"];
+            const c = palette[i % palette.length];
+            return (
+              <span
+                key={`bal-${i}`}
+                className="absolute block"
+                style={{
+                  left: `${(i * 73) % 100}%`,
+                  top: `${((i * 41) % 90) + 5}%`,
+                  animation: `bday-float ${8 + (i % 5)}s ease-in-out ${i * 0.4}s infinite`,
+                  opacity: 0.55,
+                }}
+              >
+                <span
+                  className="block h-6 w-5 rounded-full"
+                  style={{ background: `radial-gradient(circle at 30% 30%, #fff6, ${c})`, boxShadow: `0 0 18px ${c}66` }}
+                />
+                <span className="mx-auto block h-6 w-px" style={{ background: `${c}88` }} />
+              </span>
+            );
+          })}
+          {Array.from({ length: 30 }).map((_, i) => (
+            <span
+              key={`conf-${i}`}
+              className="absolute block h-1.5 w-1.5"
+              style={{
+                left: `${(i * 37) % 100}%`,
+                top: `${(i * 53) % 100}%`,
+                background: ["#facc15", "#f97316", "#ef4444", "#ec4899", "#a78bfa"][i % 5],
+                transform: `rotate(${(i * 47) % 360}deg)`,
+                animation: `bday-confetti ${6 + (i % 4)}s linear ${i * 0.15}s infinite`,
+                opacity: 0.55,
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="relative mx-auto max-w-6xl px-6">
+          {/* Header */}
+          <div className="mb-16 text-center">
+            <div className="mb-4 inline-flex items-center gap-3 rounded-full border border-amber-300/30 bg-amber-300/5 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.35em] text-amber-200/90 backdrop-blur">
+              <span>🎉</span> Section 03 · The Journey <span>🎂</span>
+            </div>
+            <h2 className="font-display text-4xl uppercase leading-none text-foreground md:text-6xl">
+              The Birthday <span className="text-fire">Grand Celebration</span> Journey
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl text-sm text-muted-foreground md:text-base">
+              Five checkpoints. One unforgettable evening. Follow the little birthday racer as it winds through every moment of Aarav's tenth year celebration.
+            </p>
+            <div className="mx-auto mt-6 flex items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+              <span className="h-px w-10 bg-amber-300/60" />
+              <span className="text-amber-200/80">Turning Ten · 2026</span>
+              <span className="h-px w-10 bg-amber-300/60" />
+            </div>
+          </div>
+
+          {/* Circuit */}
           <div className="relative">
-            <div className="absolute left-8 top-0 h-full w-1 bg-gradient-to-b from-primary via-accent to-primary md:left-1/2 md:-translate-x-1/2" />
-            <div className="space-y-8">
-              {checkpoints.map((c, i) => (
-                <div key={c.title} className={`relative flex items-center gap-6 md:gap-12 ${i % 2 ? "md:flex-row-reverse" : "md:flex-row"}`}>
-                  <div className="absolute left-8 z-10 flex h-6 w-6 -translate-x-1/2 items-center justify-center rounded-full bg-primary shadow-[var(--shadow-glow)] md:left-1/2">
-                    <div className="h-2 w-2 rounded-full bg-primary-foreground" />
-                  </div>
-                  <div className="ml-16 flex-1 md:ml-0 md:w-1/2">
-                    <div className="group border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:border-accent">
-                      <div className="mb-3 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center bg-primary/10 text-accent">
-                            <c.icon className="h-5 w-5" />
-                          </div>
-                          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-                            Checkpoint {String(i + 1).padStart(2, "0")}
-                          </div>
+            {/* Winding track spine (desktop) */}
+            <svg
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 top-0 hidden h-full w-[280px] -translate-x-1/2 md:block"
+              viewBox="0 0 280 1200"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <linearGradient id="track-glow" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stopColor="oklch(0.75 0.19 55)" stopOpacity="0.9" />
+                  <stop offset="50%" stopColor="oklch(0.85 0.16 90)" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="oklch(0.62 0.24 25)" stopOpacity="0.9" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M140 0 C 40 150, 240 300, 140 450 S 40 750, 140 900 S 220 1080, 140 1200"
+                fill="none"
+                stroke="oklch(0.75 0.19 55)"
+                strokeWidth="14"
+                strokeLinecap="round"
+                opacity="0.08"
+              />
+              <path
+                d="M140 0 C 40 150, 240 300, 140 450 S 40 750, 140 900 S 220 1080, 140 1200"
+                fill="none"
+                stroke="url(#track-glow)"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeDasharray="1 14"
+                opacity="0.9"
+              />
+            </svg>
+
+            {/* Mobile vertical soft rail */}
+            <div className="absolute left-6 top-0 h-full w-[3px] rounded-full md:hidden" style={{ background: "linear-gradient(to bottom, oklch(0.75 0.19 55), oklch(0.62 0.24 25))", opacity: 0.55 }} />
+
+            <div className="relative space-y-14 md:space-y-24">
+              {checkpoints.map((c, i) => {
+                const left = i % 2 === 0;
+                return (
+                  <div key={c.title} className={`relative flex items-center gap-6 md:gap-10 ${left ? "md:flex-row" : "md:flex-row-reverse"}`}>
+                    {/* Node marker */}
+                    <div className="absolute left-6 z-20 -translate-x-1/2 md:left-1/2">
+                      <div className="relative">
+                        <div className="absolute inset-0 -m-3 rounded-full bg-amber-300/30 blur-md animate-pulse" />
+                        <div className="relative flex h-14 w-14 items-center justify-center rounded-full border-2 border-amber-300/70 bg-gradient-to-br from-background to-carbon text-2xl shadow-[0_0_30px_oklch(0.75_0.19_55/0.55)]">
+                          {c.emoji}
                         </div>
-                        <div className="font-mono text-sm text-accent">{c.time}</div>
+                        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[9px] uppercase tracking-[0.3em] text-amber-200/70">
+                          Stop {String(i + 1).padStart(2, "0")}
+                        </div>
                       </div>
-                      <h3 className="font-display text-2xl uppercase text-foreground">{c.title}</h3>
-                      <p className="mt-2 text-sm text-muted-foreground">{c.desc}</p>
                     </div>
+
+                    {/* Card */}
+                    <div className="ml-20 flex-1 md:ml-0 md:w-[calc(50%-3rem)]">
+                      <div className="group relative overflow-hidden rounded-2xl border border-amber-200/20 bg-white/[0.04] p-6 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-amber-200/50 md:p-8">
+                        <div className={`pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-br ${c.accent} opacity-60`} />
+                        <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ background: "linear-gradient(115deg, transparent 30%, oklch(0.95 0.05 90 / 0.15) 50%, transparent 70%)" }} />
+                        <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/5" />
+
+                        <div className="relative">
+                          <div className="mb-4 flex items-center justify-between gap-4">
+                            <div className="inline-flex items-center gap-2 rounded-full border border-amber-200/30 bg-amber-200/5 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.28em] text-amber-100/90">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#4ade80]" />
+                              {c.flag}
+                            </div>
+                            <div className="font-mono text-xs uppercase tracking-widest text-amber-200/90">{c.time}</div>
+                          </div>
+
+                          <h3 className="font-display text-2xl uppercase leading-tight text-foreground md:text-3xl">{c.title}</h3>
+                          <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-[0.95rem]">{c.desc}</p>
+
+                          <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-white/5 pt-4 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+                            <span className="flex items-center gap-1.5 text-amber-200/80">🎈 <span>Balloons</span></span>
+                            <span className="text-white/20">•</span>
+                            <span className="flex items-center gap-1.5 text-rose-200/80">🎁 <span>Surprises</span></span>
+                            <span className="text-white/20">•</span>
+                            <span className="flex items-center gap-1.5 text-fuchsia-200/80">✨ <span>Memories</span></span>
+                          </div>
+
+                          {c.hero && (
+                            <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-400/20 via-rose-400/20 to-amber-400/20 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.3em] text-amber-100">
+                              ★ Hero Moment · Cake Cutting
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="pointer-events-none absolute -bottom-2 right-4 text-3xl opacity-70 transition-all duration-500 group-hover:-translate-y-1 group-hover:opacity-100 md:right-6">
+                          🏎️
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="hidden md:block md:w-[calc(50%-3rem)]" />
                   </div>
-                  <div className="hidden flex-1 md:block md:w-1/2" />
+                );
+              })}
+
+              {/* Finish line finale */}
+              <div className="relative flex flex-col items-center pt-6">
+                <div className="checker-flag h-3 w-40 rounded-sm opacity-80" />
+                <div className="mt-5 flex items-center gap-3 rounded-full border border-amber-300/40 bg-gradient-to-r from-amber-400/10 via-rose-400/10 to-amber-400/10 px-5 py-2 font-display text-sm uppercase tracking-[0.3em] text-amber-100">
+                  🎆 Finish Line · Celebrating 10 Years 🎆
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         </div>
+
+        <style>{`
+          @keyframes bday-float {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-24px) rotate(3deg); }
+          }
+          @keyframes bday-confetti {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.7; }
+            100% { transform: translateY(140px) rotate(360deg); opacity: 0; }
+          }
+        `}</style>
       </section>
 
       {/* HALL OF FAME */}
