@@ -116,15 +116,7 @@ function CountModule({
 
         {/* Number */}
         <div className="relative z-10 flex flex-col items-center">
-          <div
-            className="font-display text-6xl leading-none text-transparent"
-            style={{
-              backgroundImage: "linear-gradient(180deg, oklch(0.98 0.05 85), oklch(0.78 0.16 65))",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              textShadow: "0 0 24px oklch(0.75 0.19 55 / 0.35)",
-            }}
-          >
+          <div className="font-display text-6xl leading-none">
             <FlipDigit value={str[0]} />
             <FlipDigit value={str[1]} />
           </div>
