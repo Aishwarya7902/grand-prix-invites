@@ -21,7 +21,15 @@ function FlipDigit({ value }: { value: string }) {
     <span
       key={value}
       className="relative inline-block"
-      style={{ animation: "gc-flip 420ms cubic-bezier(.2,.9,.2,1) both" }}
+      style={{
+        animation: "gc-flip 420ms cubic-bezier(.2,.9,.2,1) both",
+        backgroundImage: "linear-gradient(180deg, oklch(0.98 0.05 85), oklch(0.78 0.16 65))",
+        WebkitBackgroundClip: "text",
+        backgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        color: "transparent",
+        textShadow: "0 0 24px oklch(0.75 0.19 55 / 0.35)",
+      }}
     >
       {value}
     </span>
