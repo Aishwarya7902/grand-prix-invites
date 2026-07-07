@@ -303,9 +303,11 @@ function FinaleOverlay() {
 
 export function GrandCountdown({ targetIso }: { targetIso: string }) {
   const target = useMemo(() => new Date(targetIso).getTime(), [targetIso]);
-  const [parts, setParts] = useState<TimeParts>(() => getParts(target));
+  // Start at zeros so SSR and first client render match; hydrate real values in effect.
+  const [parts, setParts] = useState<TimeParts>({ days: 0, hours: 0, minutes: 0, seconds: 0, totalMs: 1 });
 
   useEffect(() => {
+    setParts(getParts(target));
     const id = setInterval(() => setParts(getParts(target)), 1000);
     return () => clearInterval(id);
   }, [target]);
