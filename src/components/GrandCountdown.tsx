@@ -21,7 +21,15 @@ function FlipDigit({ value }: { value: string }) {
     <span
       key={value}
       className="relative inline-block"
-      style={{ animation: "gc-flip 420ms cubic-bezier(.2,.9,.2,1) both" }}
+      style={{
+        animation: "gc-flip 420ms cubic-bezier(.2,.9,.2,1) both",
+        backgroundImage: "linear-gradient(180deg, oklch(0.98 0.05 85), oklch(0.78 0.16 65))",
+        WebkitBackgroundClip: "text",
+        backgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        color: "transparent",
+        textShadow: "0 0 24px oklch(0.75 0.19 55 / 0.35)",
+      }}
     >
       {value}
     </span>
@@ -108,15 +116,7 @@ function CountModule({
 
         {/* Number */}
         <div className="relative z-10 flex flex-col items-center">
-          <div
-            className="font-display text-6xl leading-none text-transparent"
-            style={{
-              backgroundImage: "linear-gradient(180deg, oklch(0.98 0.05 85), oklch(0.78 0.16 65))",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              textShadow: "0 0 24px oklch(0.75 0.19 55 / 0.35)",
-            }}
-          >
+          <div className="font-display text-6xl leading-none">
             <FlipDigit value={str[0]} />
             <FlipDigit value={str[1]} />
           </div>
@@ -303,9 +303,11 @@ function FinaleOverlay() {
 
 export function GrandCountdown({ targetIso }: { targetIso: string }) {
   const target = useMemo(() => new Date(targetIso).getTime(), [targetIso]);
-  const [parts, setParts] = useState<TimeParts>(() => getParts(target));
+  // Start at zeros so SSR and first client render match; hydrate real values in effect.
+  const [parts, setParts] = useState<TimeParts>({ days: 0, hours: 0, minutes: 0, seconds: 0, totalMs: 1 });
 
   useEffect(() => {
+    setParts(getParts(target));
     const id = setInterval(() => setParts(getParts(target)), 1000);
     return () => clearInterval(id);
   }, [target]);
