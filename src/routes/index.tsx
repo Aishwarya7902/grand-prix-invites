@@ -460,6 +460,8 @@ function Index() {
         </div>
       </section>
 
+      {/* COUNTDOWN — Grand Celebration Race Control */}
+      <GrandCountdown targetIso="2026-12-14T16:00:00+05:30" />
 
       {/* JOURNEY — Birthday Grand Celebration Journey */}
       <section id="journey" className="relative overflow-hidden py-28">
