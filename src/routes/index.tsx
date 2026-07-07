@@ -5,6 +5,7 @@ import heroRace from "@/assets/hero-race.jpg";
 import pitLane from "@/assets/pit-lane.jpg";
 import helmet from "@/assets/helmet.jpg";
 import { CinematicIntro } from "@/components/CinematicIntro";
+import { GrandCountdown } from "@/components/GrandCountdown";
 
 export const Route = createFileRoute("/")({
   component: Index,
