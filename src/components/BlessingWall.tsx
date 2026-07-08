@@ -49,12 +49,12 @@ export default function BlessingWall() {
     } catch {}
   }, []);
 
-  // Auto-rotate carousel
+  // Auto-rotate carousel — one card at a time
   useEffect(() => {
     if (phase !== "idle" && phase !== "flying") return;
     const t = setInterval(() => {
       setTrans(TRANSITIONS[Math.floor(Math.random() * TRANSITIONS.length)]);
-      setStart((s) => (s + 1) % Math.max(blessings.length, 1));
+      setCurrent((s) => (s + 1) % Math.max(blessings.length, 1));
     }, ROTATE_MS);
     return () => clearInterval(t);
   }, [blessings.length, phase]);
@@ -67,14 +67,7 @@ export default function BlessingWall() {
     el.style.height = Math.min(el.scrollHeight, 200) + "px";
   }, [message]);
 
-  const visible = useMemo(() => {
-    if (!blessings.length) return [];
-    const out: Blessing[] = [];
-    for (let i = 0; i < Math.min(VISIBLE, blessings.length); i++) {
-      out.push(blessings[(start + i) % blessings.length]);
-    }
-    return out;
-  }, [blessings, start]);
+  const currentBlessing = blessings.length ? blessings[current % blessings.length] : null;
 
   const persist = (list: Blessing[]) => {
     try {
@@ -84,16 +77,14 @@ export default function BlessingWall() {
   };
 
   const handleSubmit = async () => {
-    const n = name.trim();
     const m = message.trim();
-    if (!n || !m || phase !== "idle") return;
+    if (!m || phase !== "idle") return;
 
     setPhase("sending");
     await new Promise((r) => setTimeout(r, 900));
 
     const fresh: Blessing = {
       id: `u_${Date.now()}`,
-      name: n,
       message: m,
       isNew: true,
     };
@@ -102,7 +93,6 @@ export default function BlessingWall() {
     setConfetti(true);
     setFlyingCard(fresh);
 
-    // Compute fly from source to target
     setTimeout(() => {
       const src = flySourceRef.current?.getBoundingClientRect();
       const tgt = flyTargetRef.current?.getBoundingClientRect();
@@ -142,14 +132,12 @@ export default function BlessingWall() {
         persist(next);
         return next;
       });
-      setStart(0);
-      setName("");
+      setCurrent(0);
       setMessage("");
       setFlyingCard(null);
       setFlyStyle(null);
       setPhase("idle");
       setConfetti(false);
-      // Remove new badge after a bit
       setTimeout(() => {
         setBlessings((prev) => prev.map((b) => (b.id === fresh.id ? { ...b, isNew: false } : b)));
       }, 5000);
