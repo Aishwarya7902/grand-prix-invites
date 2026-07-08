@@ -661,32 +661,8 @@ function Index() {
       {/* MEMORY WORLD — immersive scroll journey through Aarav's years */}
       <MemoryWorld />
 
-      {/* PIT BOARD */}
-      <section className="relative py-24">
-        <div className="mx-auto max-w-7xl px-6">
-          <SectionLabel num="05" title="Pit Board Messages" />
-          <div className="relative overflow-hidden border-2 border-accent bg-carbon p-2">
-            <div className="carbon-fiber p-8">
-              <div className="mb-6 flex items-center justify-between font-mono text-xs uppercase tracking-widest text-accent">
-                <span className="flex items-center gap-2"><span className="h-2 w-2 animate-pulse rounded-full bg-accent" /> Live Feed</span>
-                <span>Fans · {messages.length}</span>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                {messages.map((m) => (
-                  <div key={m.name} className="border border-border bg-background/60 p-6">
-                    <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">Transmission</div>
-                    <p className="mt-2 font-display text-xl uppercase leading-snug text-foreground">"{m.text}"</p>
-                    <div className="mt-4 flex items-center justify-between font-mono text-xs text-muted-foreground">
-                      <span>— {m.name}</span>
-                      <span>OVER</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* BLESSING WALL — Champions' Blessing Wall */}
+      <BlessingWall />
 
       {/* RSVP */}
       <section id="rsvp" className="relative overflow-hidden py-24">
