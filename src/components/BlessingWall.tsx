@@ -261,7 +261,7 @@ export default function BlessingWall() {
                   ref={flySourceRef as never}
                   type="button"
                   onClick={handleSubmit}
-                  disabled={phase !== "idle" || !name.trim() || !message.trim()}
+                  disabled={phase !== "idle" || !message.trim()}
                   className="bw-cta group relative mt-4 flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl px-8 py-4 font-display text-lg uppercase tracking-wider text-carbon transition-all disabled:cursor-not-allowed disabled:opacity-50"
                   style={{
                     background: "linear-gradient(135deg, #f4c430, #f97316)",
