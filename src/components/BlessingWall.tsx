@@ -384,7 +384,7 @@ export default function BlessingWall() {
       {flyingCard && flyStyle && (
         <div style={flyStyle}>
           <div className="h-full w-full rounded-2xl border border-yellow-300/70 bg-gradient-to-br from-yellow-200/30 to-mclaren-orange/30 p-4 shadow-[0_0_40px_oklch(0.75_0.19_55/0.8)] backdrop-blur-lg">
-            <div className="font-mono text-[10px] uppercase tracking-widest text-accent">{flyingCard.name}</div>
+            <div className="font-mono text-[10px] uppercase tracking-widest text-accent">Blessing</div>
             <div className="mt-1 line-clamp-3 text-sm text-foreground">{flyingCard.message}</div>
           </div>
         </div>
