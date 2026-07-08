@@ -239,20 +239,6 @@ export default function BlessingWall() {
                   </div>
                 </div>
 
-                {/* Name */}
-                <label className="bw-field mt-8 block">
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value.slice(0, 60))}
-                    placeholder=" "
-                    disabled={phase !== "idle"}
-                    className="peer w-full rounded-xl border border-border bg-background/60 px-4 pt-6 pb-2 font-sans text-base text-foreground outline-none transition-all focus:border-accent focus:shadow-[0_0_25px_oklch(0.75_0.19_55/0.35)]"
-                  />
-                  <span className="bw-label pointer-events-none absolute left-4 top-4 text-sm text-muted-foreground transition-all peer-focus:top-1.5 peer-focus:text-[10px] peer-focus:uppercase peer-focus:tracking-[0.25em] peer-focus:text-accent peer-[:not(:placeholder-shown)]:top-1.5 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:uppercase peer-[:not(:placeholder-shown)]:tracking-[0.25em] peer-[:not(:placeholder-shown)]:text-accent">
-                    Your name
-                  </span>
-                </label>
 
                 {/* Message */}
                 <label className="bw-field mt-5 block">
