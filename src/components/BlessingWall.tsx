@@ -359,16 +359,14 @@ export default function BlessingWall() {
                   </div>
                 </div>
               ) : (
-                <div className="relative min-h-[420px]">
-                  {visible.map((b, idx) => (
+                <div className="relative min-h-[320px]">
+                  {currentBlessing && (
                     <WishCard
-                      key={b.id + "-" + start}
-                      blessing={b}
-                      index={idx}
-                      total={visible.length}
+                      key={currentBlessing.id + "-" + current}
+                      blessing={currentBlessing}
                       transition={trans}
                     />
-                  ))}
+                  )}
                 </div>
               )}
 
