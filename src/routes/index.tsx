@@ -7,6 +7,7 @@ import helmet from "@/assets/helmet.jpg";
 import { CinematicIntro } from "@/components/CinematicIntro";
 import { GrandCountdown } from "@/components/GrandCountdown";
 import { MemoryWorld } from "@/components/MemoryWorld";
+import BlessingWall from "@/components/BlessingWall";
 
 export const Route = createFileRoute("/")({
   component: Index,
