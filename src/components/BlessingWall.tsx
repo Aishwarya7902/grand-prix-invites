@@ -3,35 +3,32 @@ import { Sparkles, Gift, Send, Heart, PartyPopper } from "lucide-react";
 
 type Blessing = {
   id: string;
-  name: string;
   message: string;
   isNew?: boolean;
 };
 
 const SEED: Blessing[] = [
-  { id: "s1", name: "Aishwarya", message: "Happy Birthday Aarav! May your life always be filled with happiness and success." },
-  { id: "s2", name: "Coach Rohan", message: "Ten years of joy and only accelerating from here. Keep chasing every dream, champ!" },
-  { id: "s3", name: "Team Sharma", message: "You bring so much light to everyone around you. Have the most magical birthday ever." },
-  { id: "s4", name: "Pit Crew Priya", message: "Wishing you cake, laughter, and a whole garage full of memories today!" },
-  { id: "s5", name: "Uncle Vikram", message: "Pole position on every birthday. Never slow down, little champion." },
-  { id: "s6", name: "Nani", message: "My darling boy, may every year sparkle brighter than the last. All my love." },
+  { id: "s1", message: "Happy Birthday Aarav! May your life always be filled with happiness and success." },
+  { id: "s2", message: "Ten years of joy and only accelerating from here. Keep chasing every dream, champ!" },
+  { id: "s3", message: "You bring so much light to everyone around you. Have the most magical birthday ever." },
+  { id: "s4", message: "Wishing you cake, laughter, and a whole garage full of memories today!" },
+  { id: "s5", message: "Pole position on every birthday. Never slow down, little champion." },
+  { id: "s6", message: "My darling boy, may every year sparkle brighter than the last. All my love." },
 ];
 
-const STORAGE_KEY = "aarav-blessings-v1";
+const STORAGE_KEY = "aarav-blessings-v2";
 const MAX_LEN = 240;
-const VISIBLE = 3;
-const ROTATE_MS = 4200;
+const ROTATE_MS = 3800;
 
 const TRANSITIONS = ["slide", "fade", "flip", "scale"] as const;
 type Trans = typeof TRANSITIONS[number];
 
 export default function BlessingWall() {
   const [blessings, setBlessings] = useState<Blessing[]>(SEED);
-  const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [phase, setPhase] = useState<"idle" | "sending" | "celebrating" | "flying">("idle");
   const [flyingCard, setFlyingCard] = useState<Blessing | null>(null);
-  const [start, setStart] = useState(0);
+  const [current, setCurrent] = useState(0);
   const [trans, setTrans] = useState<Trans>("slide");
   const [confetti, setConfetti] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -52,12 +49,12 @@ export default function BlessingWall() {
     } catch {}
   }, []);
 
-  // Auto-rotate carousel
+  // Auto-rotate carousel — one card at a time
   useEffect(() => {
     if (phase !== "idle" && phase !== "flying") return;
     const t = setInterval(() => {
       setTrans(TRANSITIONS[Math.floor(Math.random() * TRANSITIONS.length)]);
-      setStart((s) => (s + 1) % Math.max(blessings.length, 1));
+      setCurrent((s) => (s + 1) % Math.max(blessings.length, 1));
     }, ROTATE_MS);
     return () => clearInterval(t);
   }, [blessings.length, phase]);
@@ -70,14 +67,7 @@ export default function BlessingWall() {
     el.style.height = Math.min(el.scrollHeight, 200) + "px";
   }, [message]);
 
-  const visible = useMemo(() => {
-    if (!blessings.length) return [];
-    const out: Blessing[] = [];
-    for (let i = 0; i < Math.min(VISIBLE, blessings.length); i++) {
-      out.push(blessings[(start + i) % blessings.length]);
-    }
-    return out;
-  }, [blessings, start]);
+  const currentBlessing = blessings.length ? blessings[current % blessings.length] : null;
 
   const persist = (list: Blessing[]) => {
     try {
@@ -87,16 +77,14 @@ export default function BlessingWall() {
   };
 
   const handleSubmit = async () => {
-    const n = name.trim();
     const m = message.trim();
-    if (!n || !m || phase !== "idle") return;
+    if (!m || phase !== "idle") return;
 
     setPhase("sending");
     await new Promise((r) => setTimeout(r, 900));
 
     const fresh: Blessing = {
       id: `u_${Date.now()}`,
-      name: n,
       message: m,
       isNew: true,
     };
@@ -105,7 +93,6 @@ export default function BlessingWall() {
     setConfetti(true);
     setFlyingCard(fresh);
 
-    // Compute fly from source to target
     setTimeout(() => {
       const src = flySourceRef.current?.getBoundingClientRect();
       const tgt = flyTargetRef.current?.getBoundingClientRect();
@@ -145,14 +132,12 @@ export default function BlessingWall() {
         persist(next);
         return next;
       });
-      setStart(0);
-      setName("");
+      setCurrent(0);
       setMessage("");
       setFlyingCard(null);
       setFlyStyle(null);
       setPhase("idle");
       setConfetti(false);
-      // Remove new badge after a bit
       setTimeout(() => {
         setBlessings((prev) => prev.map((b) => (b.id === fresh.id ? { ...b, isNew: false } : b)));
       }, 5000);
@@ -254,20 +239,6 @@ export default function BlessingWall() {
                   </div>
                 </div>
 
-                {/* Name */}
-                <label className="bw-field mt-8 block">
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value.slice(0, 60))}
-                    placeholder=" "
-                    disabled={phase !== "idle"}
-                    className="peer w-full rounded-xl border border-border bg-background/60 px-4 pt-6 pb-2 font-sans text-base text-foreground outline-none transition-all focus:border-accent focus:shadow-[0_0_25px_oklch(0.75_0.19_55/0.35)]"
-                  />
-                  <span className="bw-label pointer-events-none absolute left-4 top-4 text-sm text-muted-foreground transition-all peer-focus:top-1.5 peer-focus:text-[10px] peer-focus:uppercase peer-focus:tracking-[0.25em] peer-focus:text-accent peer-[:not(:placeholder-shown)]:top-1.5 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:uppercase peer-[:not(:placeholder-shown)]:tracking-[0.25em] peer-[:not(:placeholder-shown)]:text-accent">
-                    Your name
-                  </span>
-                </label>
 
                 {/* Message */}
                 <label className="bw-field mt-5 block">
@@ -290,7 +261,7 @@ export default function BlessingWall() {
                   ref={flySourceRef as never}
                   type="button"
                   onClick={handleSubmit}
-                  disabled={phase !== "idle" || !name.trim() || !message.trim()}
+                  disabled={phase !== "idle" || !message.trim()}
                   className="bw-cta group relative mt-4 flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl px-8 py-4 font-display text-lg uppercase tracking-wider text-carbon transition-all disabled:cursor-not-allowed disabled:opacity-50"
                   style={{
                     background: "linear-gradient(135deg, #f4c430, #f97316)",
@@ -388,16 +359,14 @@ export default function BlessingWall() {
                   </div>
                 </div>
               ) : (
-                <div className="relative min-h-[420px]">
-                  {visible.map((b, idx) => (
+                <div className="relative min-h-[320px]">
+                  {currentBlessing && (
                     <WishCard
-                      key={b.id + "-" + start}
-                      blessing={b}
-                      index={idx}
-                      total={visible.length}
+                      key={currentBlessing.id + "-" + current}
+                      blessing={currentBlessing}
                       transition={trans}
                     />
-                  ))}
+                  )}
                 </div>
               )}
 
@@ -415,7 +384,7 @@ export default function BlessingWall() {
       {flyingCard && flyStyle && (
         <div style={flyStyle}>
           <div className="h-full w-full rounded-2xl border border-yellow-300/70 bg-gradient-to-br from-yellow-200/30 to-mclaren-orange/30 p-4 shadow-[0_0_40px_oklch(0.75_0.19_55/0.8)] backdrop-blur-lg">
-            <div className="font-mono text-[10px] uppercase tracking-widest text-accent">{flyingCard.name}</div>
+            <div className="font-mono text-[10px] uppercase tracking-widest text-accent">Blessing</div>
             <div className="mt-1 line-clamp-3 text-sm text-foreground">{flyingCard.message}</div>
           </div>
         </div>
@@ -503,25 +472,16 @@ export default function BlessingWall() {
 
 function WishCard({
   blessing,
-  index,
-  total,
   transition,
 }: {
   blessing: Blessing;
-  index: number;
-  total: number;
   transition: Trans;
 }) {
-  // Vertical stagger
-  const top = `${(index / Math.max(total, 1)) * 70 + 4}%`;
-  const left = index % 2 === 0 ? "4%" : "18%";
-  const rotate = index % 2 === 0 ? -2 : 2;
   const cls = `wc-in-${transition}`;
 
   return (
     <div
-      className={`absolute w-[78%] max-w-md ${cls}`}
-      style={{ top, left, transform: `rotate(${rotate}deg)`, animationDelay: `${index * 0.12}s` }}
+      className={`absolute inset-x-4 top-1/2 mx-auto max-w-lg -translate-y-1/2 ${cls}`}
     >
       <div
         className={`relative overflow-hidden rounded-2xl border p-5 backdrop-blur-xl ${blessing.isNew ? "wc-new" : ""}`}
@@ -542,7 +502,7 @@ function WishCard({
           "{blessing.message}"
         </p>
         <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-3">
-          <span className="font-display text-sm uppercase tracking-wider text-accent">— {blessing.name}</span>
+          <span className="font-display text-sm uppercase tracking-wider text-accent">— A well-wisher</span>
           <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Blessing</span>
         </div>
         <span className="absolute -right-2 -bottom-2 text-2xl opacity-40">🎊</span>
