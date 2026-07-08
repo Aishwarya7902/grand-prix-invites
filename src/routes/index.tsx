@@ -115,12 +115,6 @@ function Index() {
     },
   ];
 
-  const messages = [
-    { name: "Coach Rohan", text: "Fastest driver in the paddock. Full throttle, kiddo!" },
-    { name: "Team Sharma", text: "Ten years old and already lapping us. Legend." },
-    { name: "Pit Crew Priya", text: "Championship material. See you on the grid!" },
-    { name: "Uncle Vikram", text: "Pole position on every birthday. Never slow down." },
-  ];
 
   return (
     <div className="relative min-h-screen bg-background">
