@@ -3,35 +3,32 @@ import { Sparkles, Gift, Send, Heart, PartyPopper } from "lucide-react";
 
 type Blessing = {
   id: string;
-  name: string;
   message: string;
   isNew?: boolean;
 };
 
 const SEED: Blessing[] = [
-  { id: "s1", name: "Aishwarya", message: "Happy Birthday Aarav! May your life always be filled with happiness and success." },
-  { id: "s2", name: "Coach Rohan", message: "Ten years of joy and only accelerating from here. Keep chasing every dream, champ!" },
-  { id: "s3", name: "Team Sharma", message: "You bring so much light to everyone around you. Have the most magical birthday ever." },
-  { id: "s4", name: "Pit Crew Priya", message: "Wishing you cake, laughter, and a whole garage full of memories today!" },
-  { id: "s5", name: "Uncle Vikram", message: "Pole position on every birthday. Never slow down, little champion." },
-  { id: "s6", name: "Nani", message: "My darling boy, may every year sparkle brighter than the last. All my love." },
+  { id: "s1", message: "Happy Birthday Aarav! May your life always be filled with happiness and success." },
+  { id: "s2", message: "Ten years of joy and only accelerating from here. Keep chasing every dream, champ!" },
+  { id: "s3", message: "You bring so much light to everyone around you. Have the most magical birthday ever." },
+  { id: "s4", message: "Wishing you cake, laughter, and a whole garage full of memories today!" },
+  { id: "s5", message: "Pole position on every birthday. Never slow down, little champion." },
+  { id: "s6", message: "My darling boy, may every year sparkle brighter than the last. All my love." },
 ];
 
-const STORAGE_KEY = "aarav-blessings-v1";
+const STORAGE_KEY = "aarav-blessings-v2";
 const MAX_LEN = 240;
-const VISIBLE = 3;
-const ROTATE_MS = 4200;
+const ROTATE_MS = 3800;
 
 const TRANSITIONS = ["slide", "fade", "flip", "scale"] as const;
 type Trans = typeof TRANSITIONS[number];
 
 export default function BlessingWall() {
   const [blessings, setBlessings] = useState<Blessing[]>(SEED);
-  const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [phase, setPhase] = useState<"idle" | "sending" | "celebrating" | "flying">("idle");
   const [flyingCard, setFlyingCard] = useState<Blessing | null>(null);
-  const [start, setStart] = useState(0);
+  const [current, setCurrent] = useState(0);
   const [trans, setTrans] = useState<Trans>("slide");
   const [confetti, setConfetti] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
