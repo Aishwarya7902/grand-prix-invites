@@ -1,5 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import helmet from "@/assets/helmet.jpg";
+import memYear1 from "@/assets/memory-year-1.png.asset.json";
+import memYear3 from "@/assets/memory-year-3.png.asset.json";
+import memYear5 from "@/assets/memory-year-5.png.asset.json";
+import memYear8 from "@/assets/memory-year-8.png.asset.json";
+import memYear10 from "@/assets/memory-year-10.png.asset.json";
+
+const MEMORY_IMAGES: Record<string, string> = {
+  "1": memYear1.url,
+  "3": memYear3.url,
+  "5": memYear5.url,
+  "8": memYear8.url,
+  "10": memYear10.url,
+};
 
 type Chapter = {
   age: string;
@@ -322,7 +335,7 @@ function ChapterPanel({ c, index, onActive }: { c: Chapter; index: number; onAct
               borderRadius: 20,
             }}
           >
-            <img src={helmet} alt={c.title} className="h-full w-full object-cover" loading="lazy" />
+            <img src={MEMORY_IMAGES[c.age] ?? helmet} alt={c.title} className="h-full w-full object-cover" loading="lazy" />
             <div
               className="pointer-events-none absolute inset-0"
               style={{ background: "radial-gradient(ellipse at 50% 25%, transparent 45%, rgba(20,10,5,0.75) 100%)" }}
