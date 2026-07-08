@@ -472,25 +472,16 @@ export default function BlessingWall() {
 
 function WishCard({
   blessing,
-  index,
-  total,
   transition,
 }: {
   blessing: Blessing;
-  index: number;
-  total: number;
   transition: Trans;
 }) {
-  // Vertical stagger
-  const top = `${(index / Math.max(total, 1)) * 70 + 4}%`;
-  const left = index % 2 === 0 ? "4%" : "18%";
-  const rotate = index % 2 === 0 ? -2 : 2;
   const cls = `wc-in-${transition}`;
 
   return (
     <div
-      className={`absolute w-[78%] max-w-md ${cls}`}
-      style={{ top, left, transform: `rotate(${rotate}deg)`, animationDelay: `${index * 0.12}s` }}
+      className={`absolute inset-x-4 top-1/2 mx-auto max-w-lg -translate-y-1/2 ${cls}`}
     >
       <div
         className={`relative overflow-hidden rounded-2xl border p-5 backdrop-blur-xl ${blessing.isNew ? "wc-new" : ""}`}
