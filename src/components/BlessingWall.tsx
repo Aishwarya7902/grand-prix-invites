@@ -502,7 +502,7 @@ function WishCard({
           "{blessing.message}"
         </p>
         <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-3">
-          <span className="font-display text-sm uppercase tracking-wider text-accent">— {blessing.name}</span>
+          <span className="font-display text-sm uppercase tracking-wider text-accent">— A well-wisher</span>
           <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Blessing</span>
         </div>
         <span className="absolute -right-2 -bottom-2 text-2xl opacity-40">🎊</span>
