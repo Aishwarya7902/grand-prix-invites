@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Flag, MapPin, Phone, MessageCircle, Trophy, Zap, Timer, Users, Gauge, Sparkles } from "lucide-react";
+import { Flag, MapPin, Phone, MessageCircle, Trophy, Zap, Timer, Users, Gauge, Sparkles, Mail } from "lucide-react";
 import heroRace from "@/assets/hero-race.jpg";
 import pitLane from "@/assets/pit-lane.jpg";
 import helmet from "@/assets/helmet.jpg";
@@ -69,7 +69,14 @@ const ALWAYS_PLAY_INTRO = true;
 
 function Index() {
   const [intro, setIntro] = useState(ALWAYS_PLAY_INTRO);
+  const [rsvpState, setRsvpState] = useState<'idle' | 'animating' | 'confirmed'>('idle');
+  
   const finishIntro = () => setIntro(false);
+  
+  const handleRsvp = () => {
+    setRsvpState('animating');
+    setTimeout(() => setRsvpState('confirmed'), 1500);
+  };
 
   const checkpoints = [
     {
@@ -208,27 +215,27 @@ function Index() {
       <section className="relative overflow-hidden py-24">
         <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-2 lg:items-center">
           <div>
-            <SectionLabel num="01" title="Pit Lane Welcome" />
+            <SectionLabel num="01" title="Welcome to the Party" />
             <div className="relative border border-border bg-card p-8">
               <div className="absolute -top-3 left-8 bg-primary px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-primary-foreground">
-                LED Display · Live
+                Party Central · Live
               </div>
               <div className="carbon-fiber rounded-sm p-8 text-center">
                 <div className="font-mono text-xs uppercase tracking-[0.3em] text-accent">Welcome</div>
                 <div className="mt-3 font-display text-5xl uppercase text-foreground animate-flicker">
-                  Driver, <span className="text-fire">You're In</span>
+                  Racer, <span className="text-fire">It's Party Time!</span>
                 </div>
-                <div className="mt-4 font-mono text-sm text-muted-foreground">Crew standing by · Engine warm · Grid ready</div>
+                <div className="mt-4 font-mono text-sm text-muted-foreground">Cake ready · Balloons up · Fun starts now</div>
               </div>
               <p className="mt-6 text-muted-foreground">
-                Step into the pit lane. Crew members wave you in, tyres are hot, and {RACER_NAME}'s championship car is waiting on the grid.
+                Step into the party zone! Grab your VIP pass, the games are set up, and {RACER_NAME}'s championship celebration is about to begin.
               </p>
             </div>
           </div>
           <div className="relative">
             <img src={pitLane} alt="Luxury pit lane garage" width={1600} height={1024} loading="lazy" className="w-full border border-border" />
             <div className="absolute -bottom-6 -right-6 border-2 border-accent bg-background px-4 py-3 font-mono text-xs uppercase tracking-widest text-accent shadow-[var(--shadow-orange-glow)]">
-              Garage · Bay 10
+              Party Zone · Bay 10
             </div>
           </div>
         </div>
@@ -245,31 +252,31 @@ function Index() {
           }}
         />
         <div className="relative mx-auto max-w-6xl px-6">
-          <SectionLabel num="02" title="VIP Race Credential" />
+          <SectionLabel num="02" title="VIP Party Pass" />
 
           {/* Telemetry Header Bar */}
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border border-border bg-carbon/70 px-5 py-3 backdrop-blur">
             <div className="flex items-center gap-4 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
               <span className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" style={{ animation: "indicator-blink 1.6s infinite", color: "rgb(52,211,153)" }} />
-                Telemetry · Online
+                Party Link · Active
               </span>
-              <span className="hidden sm:inline">Ping 12ms</span>
-              <span className="hidden md:inline">Uplink · Race Control</span>
+              <span className="hidden sm:inline">Vibes 100%</span>
+              <span className="hidden md:inline">Uplink · Party HQ</span>
             </div>
             <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
-              CRED · GC-2026-010 · CLASS-A
+              PASS · AARAV-10 · VVIP
             </div>
           </div>
 
           {/* Telemetry rows */}
           <div className="mb-10 grid gap-px border border-border bg-border">
             {[
-              { label: "DATE", value: RACE_DATE, status: "SYNCED", pct: 100, hue: "primary" },
-              { label: "TIME", value: RACE_TIME, status: "LOCKED", pct: 100, hue: "accent" },
-              { label: "VENUE", value: VENUE, status: "MAPPED", pct: 96, hue: "primary" },
-              { label: "DRESS CODE", value: DRESS_CODE, status: "APPROVED", pct: 88, hue: "accent" },
-              { label: "RSVP", value: "AWAITING DRIVER CONFIRM", status: "PENDING", pct: 42, hue: "primary" },
+              { label: "DATE", value: RACE_DATE, status: "READY", pct: 100, hue: "primary" },
+              { label: "TIME", value: RACE_TIME, status: "SET", pct: 100, hue: "accent" },
+              { label: "VENUE", value: VENUE, status: "SECURED", pct: 96, hue: "primary" },
+              { label: "DRESS CODE", value: DRESS_CODE, status: "LOOKING SHARP", pct: 88, hue: "accent" },
+              { label: "RSVP", value: "AWAITING GUEST CONFIRM", status: "PENDING", pct: 42, hue: "primary" },
             ].map((row, i) => (
               <div
                 key={row.label}
@@ -328,7 +335,7 @@ function Index() {
                 {/* Left — driver identity */}
                 <div className="relative">
                   <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
-                    <span>◆ Holographic</span>
+                    <span>◆ Party Pass</span>
                     <span>No. 010</span>
                   </div>
 
@@ -339,7 +346,7 @@ function Index() {
                     </div>
                     <div>
                       <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-                        Guest of Honour
+                        Birthday Boy
                       </div>
                       <div className="font-display text-3xl uppercase leading-none text-foreground">
                         {RACER_NAME}
@@ -352,12 +359,12 @@ function Index() {
 
                   <div className="mt-6 grid grid-cols-2 gap-3">
                     <div className="border border-border bg-background/60 p-3">
-                      <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Seat</div>
-                      <div className="font-display text-lg text-foreground">VIP · A10</div>
+                      <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Table</div>
+                      <div className="font-display text-lg text-foreground">VVIP</div>
                     </div>
                     <div className="border border-border bg-background/60 p-3">
-                      <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Gate</div>
-                      <div className="font-display text-lg text-foreground">01 · North</div>
+                      <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Entry</div>
+                      <div className="font-display text-lg text-foreground">Red Carpet</div>
                     </div>
                   </div>
 
@@ -377,8 +384,8 @@ function Index() {
                       <div className="absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent" />
                     </div>
                     <div className="font-mono text-[10px] uppercase leading-relaxed tracking-[0.25em] text-muted-foreground">
-                      Locating driver…<br />
-                      <span className="text-accent">Signal acquired</span>
+                      Scanning guest list…<br />
+                      <span className="text-accent">VIP verified</span>
                     </div>
                   </div>
                 </div>
@@ -662,78 +669,165 @@ function Index() {
       <section id="rsvp" className="relative overflow-hidden py-24">
         <div className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(ellipse at center, var(--racing-red), transparent 70%)" }} />
         <div className="relative mx-auto max-w-4xl px-6">
-          <SectionLabel num="06" title="Racing License" />
+          <SectionLabel num="06" title="Birthday RSVP" />
           <div className="border-2 border-primary bg-card p-10 shadow-[var(--shadow-glow)]">
             <div className="grid gap-8 md:grid-cols-[auto_1fr] md:items-center">
-              <div className="relative h-40 w-40 border-4 border-accent bg-carbon">
+              <div className="relative h-40 w-40 shrink-0 border-4 border-accent bg-carbon">
                 <img src={helmet} alt="Driver helmet" loading="lazy" className="h-full w-full object-cover" />
-                <div className="absolute inset-x-0 bottom-0 bg-primary/90 py-1 text-center font-mono text-[10px] uppercase tracking-widest text-primary-foreground">
-                  Verified
+                <div className={`absolute inset-x-0 bottom-0 py-1 text-center font-mono text-[10px] uppercase tracking-widest transition-colors duration-500 ${rsvpState === 'confirmed' ? 'bg-emerald-500 text-black' : 'bg-primary/90 text-primary-foreground'}`}>
+                  {rsvpState === 'confirmed' ? 'Confirmed' : 'VIP Guest'}
                 </div>
               </div>
-              <div>
-                <div className="font-mono text-xs uppercase tracking-[0.3em] text-accent">FIA Certified · Class A</div>
-                <h3 className="mt-2 font-display text-4xl uppercase text-foreground">Confirm your seat on the grid</h3>
-                <p className="mt-3 text-muted-foreground">
-                  Hit the button below to print your personalized racing license. The pit crew will be notified and the gate will open on race day.
-                </p>
-                <form className="mt-6 grid gap-3 sm:grid-cols-2">
-                  <input placeholder="Driver name" className="border border-border bg-background px-4 py-3 font-mono text-sm uppercase tracking-wider text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none" />
-                  <input placeholder="Team / +1" className="border border-border bg-background px-4 py-3 font-mono text-sm uppercase tracking-wider text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none" />
-                  <button
-                    type="button"
-                    className="sm:col-span-2 group relative overflow-hidden bg-primary px-8 py-4 font-display text-xl uppercase tracking-wider text-primary-foreground transition-transform hover:scale-[1.02]"
-                  >
-                    <span className="relative z-10 flex items-center justify-center gap-3">
-                      <Trophy className="h-5 w-5" /> Join the Race
-                    </span>
-                    <span className="absolute inset-y-0 -left-full w-1/2 skew-x-12 bg-white/20 transition-all duration-700 group-hover:left-full" />
-                  </button>
-                </form>
-                <div className="mt-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  See you on race day, driver.
-                </div>
+              <div className="flex-1">
+                {rsvpState === 'idle' ? (
+                  <>
+                    <div className="font-mono text-xs uppercase tracking-[0.3em] text-accent">Turning 10 · Champion Class</div>
+                    <h3 className="mt-2 font-display text-4xl uppercase text-foreground">RSVP to Aarav's 10th Birthday</h3>
+                    <p className="mt-3 text-muted-foreground">
+                      Hit the button below to confirm your attendance at the biggest celebration of the year. The pit crew will be notified and the gates will open for you!
+                    </p>
+                    <form className="mt-6 grid gap-3">
+                      <button
+                        type="button"
+                        onClick={handleRsvp}
+                        className="group relative overflow-hidden bg-primary px-8 py-4 font-display text-xl uppercase tracking-wider text-primary-foreground transition-transform hover:scale-[1.02]"
+                      >
+                        <span className="relative z-10 flex items-center justify-center gap-3">
+                          <Trophy className="h-5 w-5" /> Join the Celebration
+                        </span>
+                        <span className="absolute inset-y-0 -left-full w-1/2 skew-x-12 bg-white/20 transition-all duration-700 group-hover:left-full" />
+                      </button>
+                    </form>
+                    <div className="mt-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                      See you at the party, racer.
+                    </div>
+                  </>
+                ) : rsvpState === 'animating' ? (
+                  <div className="relative mt-8 flex h-24 w-full items-center overflow-hidden border border-primary/40 bg-primary/10">
+                    <div className="absolute left-0 text-5xl animate-drive-fast drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]">🏎️💨</div>
+                    <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(239,68,68,0.1)_50%,transparent_100%)] animate-scanline" />
+                  </div>
+                ) : (
+                  <div className="relative mt-4 overflow-hidden border-2 border-emerald-500/50 bg-emerald-500/10 p-8 text-center shadow-[0_0_30px_rgba(16,185,129,0.2)] animate-in fade-in zoom-in duration-700">
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                      {Array.from({ length: 20 }).map((_, i) => (
+                        <span key={i} className="absolute block h-2 w-2 bg-emerald-400" 
+                              style={{ left: `${(i*27)%100}%`, top: '-10px', animation: `fall ${2+(i%3)}s linear infinite`, animationDelay: `${i*0.15}s`}} />
+                      ))}
+                    </div>
+                    <div className="relative z-10">
+                      <h4 className="font-display text-3xl uppercase text-emerald-400">Birthday Pass Secured!</h4>
+                      <p className="mt-4 font-mono text-sm uppercase leading-relaxed tracking-widest text-emerald-100">
+                        Thank you for RSVPing!<br/>We can't wait to celebrate Aarav's 10th birthday with you! 🎂🎈
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* RACE CONTROL */}
+      {/* PARTY HEADQUARTERS */}
       <section className="relative bg-carbon py-24">
         <div className="mx-auto max-w-7xl px-6">
-          <SectionLabel num="07" title="Race Control" />
-          <div className="grid gap-6 md:grid-cols-3">
-            <a href="tel:+910000000000" className="group border border-border bg-card p-6 transition-all hover:border-primary hover:shadow-[var(--shadow-glow)]">
-              <Phone className="mb-4 h-6 w-6 text-primary" />
-              <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Contact</div>
-              <div className="mt-1 font-display text-xl text-foreground">+91 00000 00000</div>
+          <SectionLabel num="07" title="Party Headquarters" />
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            
+            {/* Card 1 - Venue */}
+            <a href="#" className="group relative overflow-hidden border-2 border-border bg-black p-6 transition-all duration-500 hover:border-accent hover:shadow-[0_0_30px_rgba(255,107,53,0.2)] hover:-translate-y-1 rounded-lg">
+              <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <span key={i} className="absolute block h-1.5 w-1.5 bg-accent rounded-full" 
+                        style={{ left: `${(i*31)%100}%`, top: '-10px', animation: `fall ${1.5+(i%2)}s linear infinite`, animationDelay: `${i*0.2}s`}} />
+                ))}
+              </div>
+              <div className="relative z-10">
+                <MapPin className="mb-4 h-8 w-8 text-accent group-hover:scale-110 transition-transform duration-300" />
+                <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground group-hover:text-accent transition-colors">Party Venue</div>
+                <div className="mt-2 font-display text-xl text-foreground">{VENUE}</div>
+              </div>
             </a>
-            <a href="#" className="group border border-border bg-card p-6 transition-all hover:border-accent hover:shadow-[var(--shadow-orange-glow)]">
-              <MapPin className="mb-4 h-6 w-6 text-accent" />
-              <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Venue / Maps</div>
-              <div className="mt-1 font-display text-xl text-foreground">{VENUE}</div>
+
+            {/* Card 2 - WhatsApp */}
+            <a href="https://wa.me/910000000000" className="group relative overflow-hidden border-2 border-border bg-black p-6 transition-all duration-500 hover:border-[#25D366] hover:shadow-[0_0_30px_rgba(37,211,102,0.2)] hover:-translate-y-1 rounded-lg">
+              <div className="absolute inset-0 bg-[#25D366]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <span key={i} className="absolute block h-1.5 w-1.5 bg-[#25D366] rounded-full" 
+                        style={{ left: `${(i*31)%100}%`, top: '-10px', animation: `fall ${1.5+(i%2)}s linear infinite`, animationDelay: `${i*0.2}s`}} />
+                ))}
+              </div>
+              <div className="relative z-10">
+                <MessageCircle className="mb-4 h-8 w-8 text-[#25D366] group-hover:scale-110 transition-transform duration-300" />
+                <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground group-hover:text-[#25D366] transition-colors">WhatsApp</div>
+                <div className="mt-2 font-display text-xl text-foreground">Message the Hosts</div>
+              </div>
             </a>
-            <a href="https://wa.me/910000000000" className="group border border-border bg-card p-6 transition-all hover:border-primary hover:shadow-[var(--shadow-glow)]">
-              <MessageCircle className="mb-4 h-6 w-6 text-primary" />
-              <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground">WhatsApp</div>
-              <div className="mt-1 font-display text-xl text-foreground">Message the crew</div>
+
+            {/* Card 3 - Call */}
+            <a href="tel:+910000000000" className="group relative overflow-hidden border-2 border-border bg-black p-6 transition-all duration-500 hover:border-primary hover:shadow-[0_0_30px_rgba(239,68,68,0.2)] hover:-translate-y-1 rounded-lg">
+              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <span key={i} className="absolute block h-1.5 w-1.5 bg-primary rounded-full" 
+                        style={{ left: `${(i*31)%100}%`, top: '-10px', animation: `fall ${1.5+(i%2)}s linear infinite`, animationDelay: `${i*0.2}s`}} />
+                ))}
+              </div>
+              <div className="relative z-10">
+                <Phone className="mb-4 h-8 w-8 text-primary group-hover:scale-110 transition-transform duration-300" />
+                <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground group-hover:text-primary transition-colors">Call</div>
+                <div className="mt-2 font-display text-xl text-foreground">+91 00000 00000</div>
+              </div>
             </a>
+
+            {/* Card 4 - Email */}
+            <a href="mailto:party@example.com" className="group relative overflow-hidden border-2 border-border bg-black p-6 transition-all duration-500 hover:border-blue-500 hover:shadow-[0_0_30px_rgba(59,130,246,0.2)] hover:-translate-y-1 rounded-lg">
+              <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <span key={i} className="absolute block h-1.5 w-1.5 bg-blue-500 rounded-full" 
+                        style={{ left: `${(i*31)%100}%`, top: '-10px', animation: `fall ${1.5+(i%2)}s linear infinite`, animationDelay: `${i*0.2}s`}} />
+                ))}
+              </div>
+              <div className="relative z-10">
+                <Mail className="mb-4 h-8 w-8 text-blue-500 group-hover:scale-110 transition-transform duration-300" />
+                <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground group-hover:text-blue-500 transition-colors">Email</div>
+                <div className="mt-2 font-display text-xl text-foreground">party@example.com</div>
+              </div>
+            </a>
+
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-border bg-background py-10">
-        <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-6 md:flex-row md:justify-between">
-          <div className="flex items-center gap-3 font-display text-lg tracking-widest text-foreground">
-            <Flag className="h-4 w-4 text-primary" /> {RACER_NAME}'S GRAND CELEBRATION · 2026
+      <footer className="border-t border-border bg-background py-16">
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-6 px-6 md:flex-row md:justify-between">
+          <div className="flex items-center gap-4 font-display text-3xl tracking-widest text-foreground">
+            <Flag className="h-8 w-8 text-primary" /> {RACER_NAME}'S GRAND CELEBRATION · 2026
           </div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+          <div className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground md:text-sm">
             © Race Crew · All laps reserved
           </div>
         </div>
-        <div className="mt-8 h-4 checker-flag" />
+        <div className="mt-12 h-6 checker-flag" />
       </footer>
+
+      <style>{`
+        @keyframes drive-fast {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(500%); }
+        }
+        .animate-drive-fast {
+          animation: drive-fast 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        @keyframes fall {
+          0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(120px) rotate(360deg); opacity: 0; }
+        }
+      `}</style>
     </div>
   );
 }

@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import helmet from "@/assets/helmet.jpg";
-import memYear1 from "@/assets/memory-year-1.png.asset.json";
-import memYear3 from "@/assets/memory-year-3.png.asset.json";
-import memYear5 from "@/assets/memory-year-5.png.asset.json";
-import memYear8 from "@/assets/memory-year-8.png.asset.json";
-import memYear10 from "@/assets/memory-year-10.png.asset.json";
+import memYear1 from "@/assets/year1.webp";
+import memYear3 from "@/assets/year3.webp";
+import memYear5 from "@/assets/year5.avif";
+import memYear8 from "@/assets/year8.webp";
+import memYear10 from "@/assets/year10.webp";
 
 const MEMORY_IMAGES: Record<string, string> = {
-  "1": memYear1.url,
-  "3": memYear3.url,
-  "5": memYear5.url,
-  "8": memYear8.url,
-  "10": memYear10.url,
+  "1": memYear1,
+  "3": memYear3,
+  "5": memYear5,
+  "8": memYear8,
+  "10": memYear10,
 };
 
 type Chapter = {
