@@ -8,6 +8,7 @@ import { CinematicIntro } from "@/components/CinematicIntro";
 import { GrandCountdown } from "@/components/GrandCountdown";
 import { MemoryWorld } from "@/components/MemoryWorld";
 import BlessingWall from "@/components/BlessingWall";
+import { BirthdayWelcome } from "@/components/BirthdayWelcome";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -70,6 +71,13 @@ const ALWAYS_PLAY_INTRO = true;
 function Index() {
   const [intro, setIntro] = useState(ALWAYS_PLAY_INTRO);
   const [rsvpState, setRsvpState] = useState<'idle' | 'animating' | 'confirmed'>('idle');
+  const [guestName, setGuestName] = useState("Rohan");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const guest = params.get("guest");
+    if (guest) setGuestName(guest);
+  }, []);
   
   const finishIntro = () => setIntro(false);
   
@@ -125,7 +133,7 @@ function Index() {
 
   return (
     <div className="relative min-h-screen bg-background">
-      {intro && <CinematicIntro racerName={RACER_NAME} onDone={finishIntro} />}
+      {intro && <CinematicIntro racerName={RACER_NAME} guestName={guestName} onDone={finishIntro} />}
 
       {/* HERO */}
       <section className="relative flex min-h-screen items-center overflow-hidden">
@@ -211,35 +219,8 @@ function Index() {
 
       <SpeedMarquee text="WELCOME · DRIVER · READY · SET · GO" />
 
-      {/* PIT LANE */}
-      <section className="relative overflow-hidden py-24">
-        <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-2 lg:items-center">
-          <div>
-            <SectionLabel num="01" title="Welcome to the Party" />
-            <div className="relative border border-border bg-card p-8">
-              <div className="absolute -top-3 left-8 bg-primary px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-primary-foreground">
-                Party Central · Live
-              </div>
-              <div className="carbon-fiber rounded-sm p-8 text-center">
-                <div className="font-mono text-xs uppercase tracking-[0.3em] text-accent">Welcome</div>
-                <div className="mt-3 font-display text-5xl uppercase text-foreground animate-flicker">
-                  Racer, <span className="text-fire">It's Party Time!</span>
-                </div>
-                <div className="mt-4 font-mono text-sm text-muted-foreground">Cake ready · Balloons up · Fun starts now</div>
-              </div>
-              <p className="mt-6 text-muted-foreground">
-                Step into the party zone! Grab your VIP pass, the games are set up, and {RACER_NAME}'s championship celebration is about to begin.
-              </p>
-            </div>
-          </div>
-          <div className="relative">
-            <img src={pitLane} alt="Luxury pit lane garage" width={1600} height={1024} loading="lazy" className="w-full border border-border" />
-            <div className="absolute -bottom-6 -right-6 border-2 border-accent bg-background px-4 py-3 font-mono text-xs uppercase tracking-widest text-accent shadow-[var(--shadow-orange-glow)]">
-              Party Zone · Bay 10
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* BIRTHDAY WELCOME SECTION */}
+      <BirthdayWelcome racerName={RACER_NAME} guestName={guestName} />
 
       {/* VIP PASS — Telemetry Dashboard + Holographic Credential */}
       <section id="invitation" className="relative overflow-hidden py-28">
@@ -252,7 +233,7 @@ function Index() {
           }}
         />
         <div className="relative mx-auto max-w-6xl px-6">
-          <SectionLabel num="02" title="VIP Party Pass" />
+          <SectionLabel num="02" title="VIP Birthday Pass" />
 
           {/* Telemetry Header Bar */}
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border border-border bg-carbon/70 px-5 py-3 backdrop-blur">

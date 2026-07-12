@@ -1,49 +1,30 @@
-import { useEffect, useMemo, useState } from "react";
-
-/**
- * Story-driven cinematic intro (~27s).
- *
- * Narrative arc:
- *   Championship Announcement → Champion Found → Car Arrives →
- *   Race Progression → Finish Line & Fireworks → "10 Amazing Years" →
- *   Birthday Invitation Reveal.
- *
- * The race is a storytelling device. The birthday is the destination.
- */
+import { useEffect, useState } from "react";
 
 type StageKey =
-  | "announce"   // stadium LED powers on: "Grand Celebration Championship — Today's Special Event"
-  | "champion"   // "Searching for today's champion…" → "Champion Found · Driver #10 · AARAV"
-  | "arrival"    // Car #10 rolls in with birthday livery
-  | "lights"     // F1 start lights → GO
-  | "race"       // Progression through Training → Mountain → City → Final Straight
-  | "finish"     // Finish line, fireworks, "CHAMPION · DRIVER #10 · AARAV"
-  | "years"      // "Celebrating 10 Amazing Years"
-  | "reveal";    // Welcome to AARAV's 10th Birthday Grand Celebration (with paddock banners)
+  | "headlight"  // Phase 1: Mystery, dark screen, distant rev, two headlights
+  | "delivery"   // Phase 2: Car slowly drives forward, carrying balloons/gifts
+  | "journey"    // Phase 3: Magical birthday world (colorful raceway, stars)
+  | "countdown"  // Phase 4: Giant illuminated gate, 3...2...1
+  | "reveal"     // Phase 5: Gate opens, "HAPPY 10TH BIRTHDAY AARAV"
+  | "welcome"    // Phase 6: Personalized welcome message
+  | "champion"   // Phase 7: Car drifts gently into scene under the message
+  | "celebration"; // Phase 8 & 9: Confetti, balloons, and the CTA button
 
-// Reveal stage has no end — it holds until the user clicks the CTA.
 const STAGES: { key: StageKey; at: number; end: number }[] = [
-  { key: "announce", at:     0, end:  3500 },
-  { key: "champion", at:  3200, end:  7800 },
-  { key: "arrival",  at:  7400, end: 11000 },
-  { key: "lights",   at: 10600, end: 14000 },
-  { key: "race",     at: 13600, end: 19500 },
-  { key: "finish",   at: 19000, end: 22800 },
-  { key: "years",    at: 22400, end: 26000 },
-  { key: "reveal",   at: 25600, end: 10_000_000 },
+  { key: "headlight",   at: 0,     end: 3500 },
+  { key: "delivery",    at: 3000,  end: 7500 },
+  { key: "journey",     at: 7000,  end: 13000 },
+  { key: "countdown",   at: 12500, end: 17500 },
+  { key: "reveal",      at: 17000, end: 23000 },
+  { key: "welcome",     at: 22500, end: 28000 },
+  { key: "champion",    at: 27500, end: 33000 },
+  { key: "celebration", at: 32500, end: 10_000_000 },
 ];
-const CTA_READY_AT = 27500; // when the title has fully settled
-const CELEBRATION_MS = 3600;
-const FADE = 550;
+
+const CTA_READY_AT = 33000;
+const FADE = 600;
 const SKIP_AT = 4000;
 const EASE = "cubic-bezier(0.65, 0, 0.35, 1)";
-
-const CIRCUITS = [
-  { label: "STAGE 01", loc: "TRAINING TRACK" },
-  { label: "STAGE 02", loc: "MOUNTAIN PASS" },
-  { label: "STAGE 03", loc: "CITY CIRCUIT" },
-  { label: "STAGE 04", loc: "FINAL STRAIGHT" },
-];
 
 function useElapsed(active: boolean) {
   const [t, setT] = useState(0);
@@ -61,7 +42,7 @@ function useElapsed(active: boolean) {
   return t;
 }
 
-export function CinematicIntro({ onDone, racerName }: { onDone: () => void; racerName: string }) {
+export function CinematicIntro({ onDone, racerName, guestName }: { onDone: () => void; racerName: string; guestName: string }) {
   const [running, setRunning] = useState(true);
   const t = useElapsed(running);
   const [showSkip, setShowSkip] = useState(false);
@@ -72,13 +53,11 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
     return () => clearTimeout(id);
   }, []);
 
-  // No auto-exit: reveal holds until the user clicks "Enter Celebration".
-
   const opacityFor = (key: StageKey) => {
     const s = STAGES.find((x) => x.key === key)!;
     if (t < s.at) return 0;
     if (t < s.at + FADE) return (t - s.at) / FADE;
-    if (key === "reveal") return 1; // hold indefinitely
+    if (key === "celebration") return 1; 
     if (t > s.end) return 0;
     if (t > s.end - FADE) return Math.max(0, (s.end - t) / FADE);
     return 1;
@@ -88,29 +67,12 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
     return Math.max(0, Math.min(1, (t - s.at) / (s.end - s.at)));
   };
 
-  // F1 lights: 5 reds fill 0–60%, hold, GO at 90%
-  const light = (() => {
-    const p = stageProgress("lights");
-    if (p < 0.6) return Math.min(5, Math.floor((p / 0.6) * 5) + 1);
-    if (p < 0.9) return 5;
-    return 6;
-  })();
-
-  const circuit = Math.min(CIRCUITS.length - 1, Math.floor(stageProgress("race") * CIRCUITS.length));
-  const raceSpeed = 120 + Math.round(stageProgress("race") * 220); // 120 → 340
-  const lapPct = Math.round(stageProgress("race") * 100);
-
-  // champion phase micro-states
-  const champP = stageProgress("champion");
-  const champPhase: "search" | "match" | "reveal" =
-    champP < 0.45 ? "search" : champP < 0.7 ? "match" : "reveal";
-
-  const ctaReady = t >= CTA_READY_AT && !celebrating;
-
   const skip = () => {
     setRunning(false);
     onDone();
   };
+
+  const ctaReady = t >= CTA_READY_AT && !celebrating;
 
   const enterCelebration = () => {
     if (celebrating) return;
@@ -118,8 +80,12 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
     window.setTimeout(() => {
       setRunning(false);
       onDone();
-    }, CELEBRATION_MS);
+    }, 1200); // Quick fade out to main site
   };
+
+  // derived countdown number
+  const cP = stageProgress("countdown");
+  const count = cP < 0.3 ? 3 : cP < 0.6 ? 2 : cP < 0.9 ? 1 : 0;
 
   return (
     <div className="fixed inset-0 z-[100] overflow-hidden bg-black text-foreground">
@@ -130,7 +96,7 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
         style={{
           opacity: showSkip ? 1 : 0,
           transform: showSkip ? "translateY(0)" : "translateY(-6px)",
-          transition: `opacity 600ms ${EASE}, transform 600ms ${EASE}, border-color 200ms, color 200ms`,
+          transition: `opacity 600ms ${EASE}, transform 600ms ${EASE}`,
           pointerEvents: showSkip ? "auto" : "none",
         }}
       >
@@ -139,662 +105,373 @@ export function CinematicIntro({ onDone, racerName }: { onDone: () => void; race
 
       {/* Persistent vignette */}
       <div className="pointer-events-none absolute inset-0"
-        style={{ background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.85) 100%)" }} />
+        style={{ background: "radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.95) 100%)" }} />
 
-      {/* ─────────── 1 · ANNOUNCEMENT (Stadium LED powers on) ─────────── */}
+      {/* ─────────── 1 · HEADLIGHT REVEAL ─────────── */}
       <div className="absolute inset-0 flex items-center justify-center"
-        style={{ opacity: opacityFor("announce"), transition: `opacity ${FADE}ms ${EASE}` }}>
-        <div className="absolute inset-0"
-          style={{ background: "radial-gradient(ellipse at center, rgba(30,10,10,0.55), #000 70%)" }} />
-        {/* stadium LED board */}
-        <div className="relative mx-auto w-[92%] max-w-3xl"
-          style={{ animation: `ci-led-boot 1600ms ${EASE} both` }}>
-          <div className="border-2 border-primary/60 bg-black p-8 shadow-[0_0_80px_rgba(255,60,40,0.35)]"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(0deg, rgba(255,60,40,0.05) 0 2px, transparent 2px 4px)",
-            }}>
-            <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.4em] text-white/50">
-              <span className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" /> LIVE
-              </span>
-              <span>SEASON 2026 · ROUND 10</span>
-            </div>
-            <div className="mt-6 text-center font-display uppercase leading-[0.95]"
-              style={{ textShadow: "0 0 24px rgba(255,60,40,0.7)" }}>
-              <div className="text-3xl text-fire md:text-5xl">GRAND CELEBRATION</div>
-              <div className="mt-1 text-3xl text-white md:text-5xl">CHAMPIONSHIP</div>
-            </div>
-            <div className="mt-6 border-t border-primary/30 pt-4 text-center font-mono text-xs uppercase tracking-[0.5em] text-accent">
-              Today&apos;s Special Event
-            </div>
-            {/* scanlines */}
-            <div className="pointer-events-none absolute inset-0"
-              style={{ background: "repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 3px)" }} />
-          </div>
-          <div className="absolute -bottom-6 left-1/2 h-2 w-40 -translate-x-1/2 checker-flag opacity-70" />
+        style={{ opacity: opacityFor("headlight"), transition: `opacity ${FADE}ms ${EASE}` }}>
+        <div className="relative flex w-64 justify-between">
+           {/* Two bright headlights */}
+           <div className="relative h-12 w-20 rounded-[50%] bg-white blur-md" style={{ boxShadow: "0 0 80px 30px rgba(255,255,255,0.8), 0 0 150px 40px rgba(100,200,255,0.4)", animation: "ci-headlight 2.5s ease-out both" }}>
+              <div className="absolute inset-2 rounded-full bg-white blur-[2px] shadow-[0_0_20px_10px_#fff]" />
+           </div>
+           <div className="relative h-12 w-20 rounded-[50%] bg-white blur-md" style={{ boxShadow: "0 0 80px 30px rgba(255,255,255,0.8), 0 0 150px 40px rgba(100,200,255,0.4)", animation: "ci-headlight 2.5s ease-out both" }}>
+              <div className="absolute inset-2 rounded-full bg-white blur-[2px] shadow-[0_0_20px_10px_#fff]" />
+           </div>
         </div>
       </div>
 
-      {/* ─────────── 2 · CHAMPION FOUND ─────────── */}
+      {/* ─────────── 2 · THE SPECIAL DELIVERY ─────────── */}
       <div className="absolute inset-0 flex items-center justify-center"
-        style={{ opacity: opacityFor("champion"), transition: `opacity ${FADE}ms ${EASE}` }}>
-        <div className="absolute inset-0"
-          style={{ background: "radial-gradient(ellipse at center, rgba(30,10,10,0.75), #000 70%)" }} />
-        <div className="relative w-[92%] max-w-2xl">
-          {/* SEARCH */}
-          {champPhase === "search" && (
-            <div style={{ animation: `ci-line-in 450ms ${EASE} both` }}>
-              <div className="mb-4 font-mono text-[10px] uppercase tracking-[0.5em] text-accent">
-                <span className="mr-2 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
-                Championship Database
-              </div>
-              <div className="font-display text-2xl uppercase text-white md:text-4xl">
-                Searching for today&apos;s champion
-                <span className="text-fire">…</span>
-              </div>
-              <div className="mt-6 h-1.5 w-full overflow-hidden border border-white/15 bg-black">
-                <div className="h-full bg-gradient-to-r from-primary via-accent to-primary"
-                  style={{ width: `${Math.min(100, (champP / 0.45) * 100)}%`, transition: `width 200ms linear` }} />
-              </div>
-              <div className="mt-3 space-y-1 font-mono text-[10px] uppercase tracking-widest text-white/40">
-                <div>▸ Scanning grid · 128 drivers</div>
-                <div>▸ Cross-referencing calendar · birthday flag</div>
-                <div>▸ Match probability rising…</div>
-              </div>
-            </div>
-          )}
-          {/* MATCH */}
-          {champPhase === "match" && (
-            <div style={{ animation: `ci-line-in 350ms ${EASE} both` }}>
-              <div className="mb-4 font-mono text-[10px] uppercase tracking-[0.5em] text-accent">
-                Match Detected
-              </div>
-              <div className="grid grid-cols-[auto_1fr] items-center gap-6">
-                <div className="relative flex h-24 w-24 items-center justify-center border-2 border-primary bg-black md:h-32 md:w-32"
-                  style={{ boxShadow: "0 0 40px rgba(255,60,40,0.5)" }}>
-                  <div className="font-display text-4xl text-fire md:text-6xl">#10</div>
-                  <div className="absolute -top-2 left-2 border border-accent bg-black px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-widest text-accent">
-                    CAR
-                  </div>
-                </div>
-                <div>
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-white/50">Champion Profile</div>
-                  <div className="font-display text-2xl uppercase text-white md:text-3xl">Verifying identity</div>
-                  <div className="mt-3 space-y-0.5 font-mono text-[10px] uppercase tracking-widest text-primary">
-                    <div>▓▓▓▓▓▓▓▓▓░ 92%</div>
-                    <div className="text-white/50">Age · 10 · confirmed</div>
-                    <div className="text-white/50">Class · Birthday Champion</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          {/* REVEAL */}
-          {champPhase === "reveal" && (
-            <div className="text-center" style={{ animation: `ci-title 700ms ${EASE} both` }}>
-              <div className="font-mono text-[10px] uppercase tracking-[0.5em] text-accent md:text-xs">Champion Found</div>
-              <div className="mt-3 font-mono text-xs uppercase tracking-[0.4em] text-white/60">Driver #10</div>
-              <div className="mt-4 font-display text-6xl uppercase leading-[0.9] text-white md:text-8xl"
-                style={{ textShadow: "0 0 40px rgba(255,60,40,0.6)" }}>
-                {racerName.toUpperCase()}
-              </div>
-              <div className="mx-auto mt-6 h-1 w-40 checker-flag opacity-80" />
-            </div>
-          )}
+        style={{ opacity: opacityFor("delivery"), transition: `opacity ${FADE}ms ${EASE}` }}>
+        <div className="absolute bottom-20 text-center font-display text-xl uppercase tracking-widest text-accent sm:text-2xl md:text-3xl" style={{ textShadow: "0 0 20px rgba(255,220,100,0.5)" }}>
+           A Special Delivery Arrives...
         </div>
-      </div>
-
-      {/* ─────────── 3 · CAR ARRIVAL (with birthday livery) ─────────── */}
-      <div className="absolute inset-0 overflow-hidden"
-        style={{ opacity: opacityFor("arrival"), transition: `opacity ${FADE}ms ${EASE}` }}>
-        <div className="absolute inset-0"
-          style={{ background: "linear-gradient(180deg, #0a0505 0%, #1a0a0a 60%, #050505 100%)" }} />
-        {/* pit lane light strips */}
-        {[25, 50, 75].map((y, i) => (
-          <div key={i} className="absolute inset-x-0 h-px"
-            style={{
-              top: `${y}%`,
-              background: "linear-gradient(90deg, transparent, rgba(255,60,40,0.6), transparent)",
-              animation: `ci-strip 1400ms ${EASE} ${i * 120}ms both`,
-            }} />
-        ))}
-        {/* fog / smoke */}
-        {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="absolute h-24 w-24 rounded-full bg-white/8 blur-2xl"
-            style={{
-              left: `${10 + i * 9}%`,
-              bottom: `${(i * 17) % 35}%`,
-              animation: `ci-smoke-drift ${4 + (i % 3)}s ${EASE} ${i * 0.15}s infinite`,
-            }} />
-        ))}
-        {/* rolling car (right → center) */}
-        <div className="absolute bottom-[22%] left-1/2 -translate-x-1/2"
-          style={{ animation: `ci-arrive 3200ms ${EASE} both` }}>
-          {/* car "silhouette" plate with birthday livery */}
-          <div className="relative flex h-24 w-64 items-center justify-center border-2 border-primary bg-gradient-to-r from-primary via-fire to-accent shadow-[0_20px_60px_rgba(255,60,40,0.5)]">
-            {/* confetti decals */}
-            {[15, 40, 65, 82].map((x, i) => (
-              <span key={i} className="absolute h-2 w-2 rotate-45"
-                style={{ left: `${x}%`, top: `${15 + (i * 17) % 60}%`, background: ["#fff", "#00ff88", "#ffa040", "#fff"][i] }} />
-            ))}
-            <div className="absolute inset-y-2 left-2 w-2 checker-flag opacity-90" />
-            <div className="absolute inset-y-2 right-2 w-2 checker-flag opacity-90" />
-            <div className="font-display text-5xl text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">#10</div>
-            <div className="absolute -top-3 right-4 border border-white bg-black px-2 py-0.5 font-mono text-[8px] uppercase tracking-widest text-white">
-              BIRTHDAY CHAMPION
+        <div className="relative flex justify-center" style={{ animation: "ci-drive-forward 5s ease-out both" }}>
+          
+          {/* Formula 1 Car Silhouette */}
+          <div className="relative h-24 w-80">
+            {/* Underglow */}
+            <div className="absolute -bottom-2 left-10 h-3 w-60 rounded-full bg-primary blur-md" />
+            
+            {/* Front Wing */}
+            <div className="absolute bottom-2 left-0 h-2 w-12 rounded-sm bg-primary shadow-[0_0_15px_rgba(255,60,40,0.8)]" />
+            
+            {/* Main Body */}
+            <div className="absolute bottom-2 left-8 h-8 w-64 rounded-full border-t border-white/20 bg-black shadow-[inset_0_-10px_20px_rgba(255,60,40,0.3)]" />
+            
+            {/* Cockpit / Halo */}
+            <div className="absolute bottom-10 left-32 h-10 w-20 rounded-t-3xl border-t-2 border-primary bg-black/90 backdrop-blur-md" />
+            
+            {/* Rear Wing */}
+            <div className="absolute bottom-12 right-0 h-2 w-16 rounded-sm bg-primary shadow-[0_0_15px_rgba(255,60,40,0.8)]" />
+            <div className="absolute bottom-4 right-4 h-10 w-4 rounded-sm bg-black" />
+            
+            {/* Wheels */}
+            {/* Front Wheel */}
+            <div className="absolute -bottom-2 left-12 h-14 w-14 rounded-full border-4 border-zinc-800 bg-black shadow-[0_0_15px_rgba(0,0,0,0.8)]">
+               <div className="absolute inset-2 rounded-full border-2 border-primary/50 bg-zinc-900" />
+            </div>
+            {/* Rear Wheel */}
+            <div className="absolute -bottom-4 right-8 h-16 w-16 rounded-full border-4 border-zinc-800 bg-black shadow-[0_0_15px_rgba(0,0,0,0.8)]">
+               <div className="absolute inset-2 rounded-full border-2 border-primary/50 bg-zinc-900" />
             </div>
           </div>
-          {/* ground shadow */}
-          <div className="mx-auto mt-2 h-3 w-72 rounded-full bg-black/70 blur-md" />
-        </div>
-        {/* label */}
-        <div className="absolute inset-x-0 top-10 text-center"
-          style={{ animation: `ci-line-in 700ms ${EASE} 300ms both` }}>
-          <div className="font-mono text-[10px] uppercase tracking-[0.5em] text-accent">Car #10 Entering the Grid</div>
-          <div className="mt-1 font-display text-2xl uppercase text-white md:text-3xl">{racerName.toUpperCase()} · CHAMPION LIVERY</div>
+
+          {/* Vibrant Gifts stacked on top of the car (behind cockpit) */}
+          <div className="absolute -top-8 right-24 flex h-16 w-20 items-center justify-center rounded-lg border-2 border-primary bg-primary/40 shadow-[0_0_30px_rgba(255,60,40,0.8)] backdrop-blur-md">
+             <div className="h-full w-2 bg-primary" />
+             <div className="absolute h-2 w-full bg-primary" />
+          </div>
+          <div className="absolute -top-20 right-28 flex h-20 w-20 items-center justify-center rounded-lg border-2 border-accent bg-accent/40 shadow-[0_0_30px_rgba(255,220,100,0.8)] backdrop-blur-md">
+             <div className="h-full w-2 bg-accent" />
+             <div className="absolute h-2 w-full bg-accent" />
+          </div>
+          
+          {/* Glowing Balloons tied to gifts */}
+          <div className="absolute -top-40 right-28 flex gap-4">
+             <div className="relative h-16 w-12 rounded-[50%] bg-emerald-400 shadow-[0_0_30px_#34d399]" style={{ animation: "ci-float 3s ease-in-out infinite" }}>
+                <div className="absolute -bottom-16 left-1/2 h-16 w-[2px] bg-white/40 -rotate-12" />
+             </div>
+             <div className="relative h-20 w-14 rounded-[50%] bg-blue-400 shadow-[0_0_30px_#60a5fa]" style={{ animation: "ci-float 4s ease-in-out infinite 1s" }}>
+                <div className="absolute -bottom-20 left-1/2 h-20 w-[2px] bg-white/40" />
+             </div>
+             <div className="relative h-16 w-12 rounded-[50%] bg-purple-400 shadow-[0_0_30px_#c084fc]" style={{ animation: "ci-float 3.5s ease-in-out infinite 0.5s" }}>
+                <div className="absolute -bottom-16 left-1/2 h-16 w-[2px] bg-white/40 rotate-12" />
+             </div>
+          </div>
         </div>
       </div>
 
-      {/* ─────────── 4 · RACE START LIGHTS ─────────── */}
+      {/* ─────────── 3 · BIRTHDAY JOURNEY ─────────── */}
+      <div className="absolute inset-0 overflow-hidden"
+        style={{ opacity: opacityFor("journey"), transition: `opacity ${FADE}ms ${EASE}` }}>
+         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, #1a0826 0%, #050110 100%)" }} />
+         
+         {/* Birthday arches flying by */}
+         {Array.from({ length: 6 }).map((_, i) => (
+           <div key={i} className="absolute inset-0 flex items-center justify-center border-t-8 border-transparent"
+             style={{ 
+               borderTopColor: ["#ff3c28", "#ffa040", "#00ff88", "#00d2ff", "#ff00d2", "#ffcc00"][i],
+               borderRadius: "50% 50% 0 0",
+               transformOrigin: "bottom center",
+               animation: `ci-arch-flyby 4s ease-in infinite ${i * 0.7}s`,
+               opacity: 0
+             }} 
+           />
+         ))}
+         {/* Floating glowing stars */}
+         {Array.from({ length: 30 }).map((_, i) => (
+           <div key={i} className="absolute h-2 w-2 rounded-full bg-white shadow-[0_0_10px_#fff]"
+             style={{
+               left: `${(i * 17) % 100}%`,
+               top: `${(i * 23) % 100}%`,
+               animation: `ci-star-twinkle ${2 + (i % 3)}s ease-in-out infinite ${i * 0.1}s`,
+             }} />
+         ))}
+         {/* Ground line */}
+         <div className="absolute inset-x-0 bottom-1/4 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+         
+         <div className="absolute inset-x-0 top-1/4 px-4 text-center font-display text-2xl uppercase text-white/80 md:text-4xl" style={{ animation: "ci-pulse 3s infinite" }}>
+            The Celebration Begins
+         </div>
+      </div>
+
+      {/* ─────────── 4 · COUNTDOWN MOMENT ─────────── */}
       <div className="absolute inset-0 flex flex-col items-center justify-center"
-        style={{ opacity: opacityFor("lights"), transition: `opacity ${FADE}ms ${EASE}` }}>
+        style={{ opacity: opacityFor("countdown"), transition: `opacity ${FADE}ms ${EASE}` }}>
         <div className="absolute inset-0"
-          style={{
-            background: `radial-gradient(circle at center, ${light === 6 ? "rgba(0,210,106,0.35)" : "rgba(255,60,40,0.22)"}, transparent 60%)`,
-            transition: `background 400ms ${EASE}`,
-          }} />
-        <div className="font-mono text-[10px] uppercase tracking-[0.5em] text-white/40">Formation Complete</div>
-        <div className="mt-6 flex gap-3 md:gap-5">
-          {[0, 1, 2, 3, 4].map((i) => {
-            const on = light !== 6 && i < light;
-            const green = light === 6;
-            return (
-              <div key={i} className="flex h-16 w-12 items-center justify-center rounded-md border border-white/10 bg-black md:h-20 md:w-16">
-                <div
-                  className="h-10 w-10 rounded-full md:h-12 md:w-12"
-                  style={{
-                    background: green ? "#00ff88" : on ? "#ff2020" : "#1a0505",
-                    boxShadow: green
-                      ? "0 0 34px #00ff88, 0 0 70px #00ff88"
-                      : on
-                      ? "0 0 28px #ff2020, 0 0 55px #ff2020"
-                      : "inset 0 0 8px rgba(255,255,255,0.05)",
-                    transition: `background 260ms ${EASE}, box-shadow 260ms ${EASE}`,
-                  }}
-                />
-              </div>
-            );
-          })}
-        </div>
-        <div className="mt-10 h-20">
-          {light === 6 && (
-            <div className="font-display text-6xl uppercase md:text-8xl"
-              style={{ color: "#00ff88", textShadow: "0 0 50px #00ff88", animation: `ci-go 700ms ${EASE} both` }}>
-              GO
-            </div>
+          style={{ background: "radial-gradient(circle at center, rgba(255,220,100,0.1), transparent 60%)" }} />
+        <div className="font-mono text-sm uppercase tracking-[0.5em] text-white/50">Approaching Party Gates</div>
+        <div className="mt-10 flex h-40 w-40 items-center justify-center rounded-full border-4 border-white/20"
+             style={{ boxShadow: "inset 0 0 40px rgba(255,255,255,0.1), 0 0 60px rgba(255,255,255,0.1)" }}>
+          {count > 0 && (
+             <div className="font-display text-8xl text-white drop-shadow-[0_0_20px_#fff]" key={count} style={{ animation: "ci-pop 1s ease-out both" }}>
+               {count}
+             </div>
           )}
         </div>
       </div>
 
-      {/* ─────────── 5 · RACE PROGRESSION ─────────── */}
-      <div className="absolute inset-0 overflow-hidden"
-        style={{ opacity: opacityFor("race"), transition: `opacity ${FADE}ms ${EASE}` }}>
-        <CircuitScene index={circuit} />
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-6 top-6 border border-primary/40 bg-black/50 px-3 py-2 backdrop-blur">
-            <div className="font-mono text-[9px] uppercase tracking-widest text-white/50">Speed KM/H</div>
-            <div className="font-display text-3xl text-fire tabular-nums">{raceSpeed}</div>
-          </div>
-          <div className="absolute right-6 top-6 border border-accent/40 bg-black/50 px-3 py-2 text-right backdrop-blur">
-            <div className="font-mono text-[9px] uppercase tracking-widest text-white/50">Progress</div>
-            <div className="font-display text-2xl text-accent tabular-nums">{lapPct}%</div>
-          </div>
-          <div className="absolute bottom-6 left-6">
-            <div className="font-mono text-[9px] uppercase tracking-widest text-white/50">Journey</div>
-            <div className="mt-1 flex items-center gap-1.5">
-              {CIRCUITS.map((_, i) => (
-                <div key={i} className="h-1 w-8 border border-white/20"
-                  style={{ background: i <= circuit ? "#ff3c28" : "transparent" }} />
-              ))}
-            </div>
-          </div>
-          <div className="absolute left-1/2 top-6 -translate-x-1/2 font-mono text-[10px] uppercase tracking-[0.4em] text-white/60">
-            ◉ CAR #10 · {CIRCUITS[circuit].label}
-          </div>
-        </div>
-      </div>
-
-      {/* ─────────── 6 · FINISH LINE + FIREWORKS ─────────── */}
-      <div className="absolute inset-0 overflow-hidden"
-        style={{ opacity: opacityFor("finish"), transition: `opacity ${FADE}ms ${EASE}` }}>
-        <div className="absolute inset-0"
-          style={{ background: "radial-gradient(ellipse at 50% 60%, rgba(255,60,40,0.4), #000 70%)" }} />
-        {/* checker banner sweeps down */}
-        <div className="absolute inset-x-0 top-0 h-20 checker-flag"
-          style={{ animation: `ci-banner 900ms ${EASE} both` }} />
-        <div className="absolute inset-x-0 bottom-0 h-20 checker-flag"
-          style={{ animation: `ci-banner 900ms ${EASE} both` }} />
-        {/* fireworks */}
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="absolute h-4 w-4 rounded-full"
-            style={{
-              left: `${15 + i * 18}%`,
-              top: `${20 + (i % 3) * 15}%`,
-              background: ["#ff3c28", "#ffa040", "#00ff88", "#fff", "#ffcc40"][i],
-              boxShadow: `0 0 60px 20px ${["#ff3c28", "#ffa040", "#00ff88", "#fff", "#ffcc40"][i]}`,
-              animation: `ci-firework 1600ms ${EASE} ${i * 180}ms both`,
-            }} />
-        ))}
-        {/* confetti */}
-        {Array.from({ length: 40 }).map((_, i) => (
-          <div key={i} className="absolute h-2 w-1"
-            style={{
-              left: `${(i * 37) % 100}%`,
-              top: "-5%",
-              background: ["#ff3c28", "#ffa040", "#ffffff", "#00ff88"][i % 4],
-              animation: `ci-confetti ${2.4 + (i % 3) * 0.4}s linear ${i * 0.04}s infinite`,
-            }} />
-        ))}
-        {/* Champion LED */}
-        <div className="absolute inset-0 flex items-center justify-center"
-          style={{ animation: `ci-title 900ms ${EASE} 400ms both` }}>
-          <div className="border-4 border-primary bg-black px-10 py-8 text-center shadow-[0_0_120px_rgba(255,60,40,0.6)]"
-            style={{ backgroundImage: "repeating-linear-gradient(0deg, rgba(255,60,40,0.05) 0 2px, transparent 2px 4px)" }}>
-            <div className="font-display text-6xl md:text-7xl">🏆</div>
-            <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.5em] text-accent">Race Complete</div>
-            <div className="mt-3 font-display text-4xl uppercase text-white md:text-6xl"
-              style={{ textShadow: "0 0 30px rgba(255,60,40,0.7)" }}>
-              CHAMPION
-            </div>
-            <div className="mt-1 font-mono text-xs uppercase tracking-[0.4em] text-white/70">Driver #10</div>
-            <div className="mt-2 font-display text-5xl uppercase text-fire md:text-7xl"
-              style={{ textShadow: "0 0 40px rgba(255,60,40,0.8)" }}>
-              {racerName.toUpperCase()}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ─────────── 7 · CELEBRATING 10 AMAZING YEARS ─────────── */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center"
-        style={{ opacity: opacityFor("years"), transition: `opacity ${FADE}ms ${EASE}` }}>
-        <div className="absolute inset-0"
-          style={{ background: "radial-gradient(ellipse at center, rgba(60,20,20,0.7), #000 70%)" }} />
-        {/* soft confetti drift */}
-        {Array.from({ length: 18 }).map((_, i) => (
-          <div key={i} className="absolute h-2 w-1"
-            style={{
-              left: `${(i * 53) % 100}%`,
-              top: "-5%",
-              background: ["#ff3c28", "#ffa040", "#ffffff", "#00ff88"][i % 4],
-              animation: `ci-confetti ${4 + (i % 3)}s linear ${i * 0.1}s infinite`,
-              opacity: 0.7,
-            }} />
-        ))}
-        <div className="relative text-center" style={{ animation: `ci-title 900ms ${EASE} both` }}>
-          <div className="font-mono text-xs uppercase tracking-[0.5em] text-accent">Celebrating</div>
-          <div className="mt-4 font-display uppercase leading-[0.9] text-white">
-            <span className="block text-8xl text-fire drop-shadow-[0_0_40px_rgba(255,60,40,0.7)] md:text-[10rem]">10</span>
-            <span className="mt-2 block text-3xl text-white md:text-5xl">Amazing Years</span>
-          </div>
-          <div className="mx-auto mt-6 h-1 w-40 checker-flag opacity-80" />
-        </div>
-      </div>
-
-      {/* ─────────── 8 · INVITATION REVEAL (paddock + banners) ─────────── */}
-      <div className="absolute inset-0 overflow-hidden"
+      {/* ─────────── 5 · THE GRAND REVEAL ─────────── */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden"
         style={{ opacity: opacityFor("reveal"), transition: `opacity ${FADE}ms ${EASE}` }}>
-        {/* searchlights */}
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="absolute left-1/2 top-0 h-[120%] w-40 origin-top -translate-x-1/2"
+        
+        {/* Flash */}
+        <div className="absolute inset-0 bg-white" style={{ animation: "ci-flash-fade 2s ease-out both" }} />
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, rgba(255,60,40,0.3), #000 80%)" }} />
+        
+        {/* Fireworks */}
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={`fw1-${i}`} className="absolute h-6 w-6 rounded-full"
             style={{
-              background: "linear-gradient(180deg, rgba(255,220,150,0.35), transparent 70%)",
-              animation: `ci-search 5s ${EASE} ${i * 0.5}s infinite`,
-              transform: `translateX(-50%) rotate(${(i - 1) * 20}deg)`,
-              filter: "blur(6px)",
+              left: `${15 + i * 10}%`,
+              top: `${20 + (i % 4) * 15}%`,
+              background: ["#ff3c28", "#ffa040", "#00ff88", "#00d2ff", "#ff00d2", "#fff", "#ffcc40", "#ff3c28"][i],
+              boxShadow: `0 0 100px 30px ${["#ff3c28", "#ffa040", "#00ff88", "#00d2ff", "#ff00d2", "#fff", "#ffcc40", "#ff3c28"][i]}`,
+              animation: `ci-firework 2.5s ${EASE} ${i * 0.2}s both`,
             }} />
         ))}
-        {/* stadium floor / crowd bar */}
-        <div className="absolute inset-x-0 bottom-0 h-28"
-          style={{
-            background: "repeating-linear-gradient(90deg, #0a0505 0 6px, #1a0a0a 6px 12px)",
-            boxShadow: "inset 0 20px 40px rgba(0,0,0,0.7)",
-          }} />
-        {/* Happy Birthday banner */}
-        <div className="absolute inset-x-0 top-6 z-10 flex justify-center"
-          style={{ animation: `ci-line-in 800ms ${EASE} 300ms both` }}>
-          <div className="border border-accent/60 bg-black/70 px-6 py-2 font-mono text-xs uppercase tracking-[0.5em] text-accent backdrop-blur">
-            🎉 HAPPY BIRTHDAY {racerName.toUpperCase()} 🎉
+
+        <div className="relative px-4 text-center" style={{ animation: "ci-title-up 1.5s ease-out both 0.5s" }}>
+          <div className="font-mono text-xs uppercase tracking-[0.6em] text-accent">Gate Open</div>
+          <div className="mt-4 font-display text-4xl uppercase leading-[0.9] text-white sm:text-6xl md:text-8xl"
+            style={{ textShadow: "0 0 40px rgba(255,60,40,0.6)" }}>
+            HAPPY 10<span className="text-white/80">TH</span> BIRTHDAY
+          </div>
+          <div className="mt-4 font-display text-6xl uppercase text-fire sm:text-7xl md:text-9xl"
+            style={{ textShadow: "0 0 60px rgba(255,60,40,0.8)" }}>
+            {racerName}
           </div>
         </div>
-        {/* balloons integrated w/ racing colors */}
-        {[10, 22, 78, 90].map((x, i) => (
-          <div key={i} className="absolute h-8 w-6 rounded-full"
+      </div>
+
+      {/* ─────────── 6 · PERSONALIZED WELCOME ─────────── */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden"
+        style={{ opacity: opacityFor("welcome"), transition: `opacity ${FADE}ms ${EASE}` }}>
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, rgba(10,30,50,0.5), #000 70%)" }} />
+        
+        {/* Dynamic background element */}
+        <div className="absolute inset-x-0 top-[40%] h-40 -skew-y-3 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+        <div className="absolute inset-x-0 top-[48%] h-2 border-y border-white/10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjZmZmIi8+PHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIGZpbGw9IiNmZmYiLz48L3N2Zz4=')] opacity-20" />
+
+        <div className="relative z-10 px-4 text-center" style={{ animation: "ci-fade-up 1.5s ease-out both" }}>
+           <div className="mb-4 flex justify-center gap-4 text-4xl sm:text-5xl">
+             <span className="animate-bounce" style={{ animationDelay: "0s", animationDuration: "2s" }}>🏁</span>
+             <span className="animate-bounce" style={{ animationDelay: "0.2s", animationDuration: "2s" }}>🏆</span>
+             <span className="animate-bounce" style={{ animationDelay: "0.4s", animationDuration: "2s" }}>🎈</span>
+           </div>
+           
+           <div className="font-display text-3xl uppercase italic text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] sm:text-5xl md:text-7xl">
+              Welcome to <span className="text-fire">{racerName}'s</span>
+              <br />
+              <span className="bg-gradient-to-r from-accent via-yellow-300 to-accent bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(255,200,0,0.5)]">
+                Birthday Grand Prix
+              </span>
+           </div>
+           
+           <div className="mx-auto mt-8 max-w-lg rounded-xl border border-white/10 bg-black/40 p-4 font-mono text-xs uppercase tracking-widest text-white/80 backdrop-blur-sm sm:text-sm md:text-base">
+              Your presence makes this celebration
+              <br />
+              <span className="text-accent">even more special.</span>
+           </div>
+        </div>
+      </div>
+
+      {/* ─────────── 7, 8 & 9 · CHAMPION ARRIVAL, CELEBRATION MOMENT & CTA ─────────── */}
+      <div className="absolute inset-0 overflow-hidden"
+        style={{ 
+          opacity: opacityFor("champion") || opacityFor("celebration") ? 1 : 0, 
+          transition: `opacity ${FADE}ms ${EASE}` 
+        }}>
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at bottom, rgba(255,60,40,0.15), #000 80%)" }} />
+
+        {/* Confetti & Balloons background */}
+        {Array.from({ length: 40 }).map((_, i) => (
+          <div key={`c2-${i}`} className="absolute h-3 w-1.5"
+            style={{
+              left: `${(i * 31) % 100}%`,
+              top: "-5%",
+              background: ["#ff3c28", "#ffa040", "#ffffff", "#00ff88", "#00d2ff"][i % 5],
+              animation: `ci-confetti-fall ${4 + (i % 4)}s linear ${i * 0.1}s infinite`,
+            }} />
+        ))}
+        {[15, 30, 70, 85].map((x, i) => (
+          <div key={`b-${i}`} className="absolute h-10 w-8 rounded-full"
             style={{
               left: `${x}%`,
-              bottom: `${20 + (i * 9) % 22}%`,
-              background: ["#ff3c28", "#ffa040", "#00ff88", "#fff"][i],
-              boxShadow: "0 0 16px rgba(255,60,40,0.4)",
-              animation: `ci-float ${3 + i * 0.4}s ${EASE} ${i * 0.2}s infinite`,
+              bottom: "-10%",
+              background: ["#ff3c28", "#ffa040", "#00ff88", "#00d2ff"][i],
+              boxShadow: `0 0 20px ${["#ff3c28", "#ffa040", "#00ff88", "#00d2ff"][i]}`,
+              animation: `ci-balloon-rise ${6 + i}s ease-in-out infinite ${i * 1.5}s`,
             }} />
         ))}
-        {/* confetti */}
-        {Array.from({ length: 26 }).map((_, i) => (
-          <div key={i} className="absolute h-2 w-1"
-            style={{
-              left: `${(i * 41) % 100}%`,
-              top: "-5%",
-              background: ["#ff3c28", "#ffa040", "#ffffff", "#00ff88"][i % 4],
-              animation: `ci-confetti ${3 + (i % 3)}s linear ${i * 0.08}s infinite`,
-            }} />
-        ))}
-        {/* gate glow */}
-        <div className="absolute inset-0"
-          style={{
-            background: "radial-gradient(circle at center, rgba(255,220,120,0.7), rgba(255,80,40,0.25) 30%, transparent 60%)",
-            animation: `ci-gate-glow 2600ms ${EASE} 200ms both`,
-          }} />
-        {/* Title */}
-        <div className="absolute inset-0 flex items-center justify-center"
-          style={{ animation: `ci-title 1400ms ${EASE} 600ms both` }}>
-          <div className="text-center">
-            <div className="font-mono text-xs uppercase tracking-[0.5em] text-accent md:text-sm">Welcome To</div>
-            <div className="mt-4 font-display text-6xl uppercase leading-[0.9] text-white md:text-8xl">
-              {racerName.toUpperCase()}&apos;S
-            </div>
-            <div className="mt-2 font-display text-5xl uppercase leading-[0.9] text-fire drop-shadow-[0_0_40px_rgba(255,60,40,0.6)] md:text-7xl">
-              10<span className="text-white/90">TH</span> BIRTHDAY
-            </div>
-            <div className="mt-3 font-display text-4xl uppercase tracking-[0.15em] text-white md:text-6xl">
-              GRAND CELEBRATION
-            </div>
-            <div className="mx-auto mt-6 h-2 w-64 checker-flag opacity-80" />
-            <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.5em] text-white/60">
-              You&apos;re invited to the celebration
-            </div>
 
-            {/* Primary CTA — appears once the title has settled */}
-            <div
-              className="mt-10 flex justify-center"
-              style={{
-                opacity: ctaReady ? 1 : 0,
-                transform: ctaReady ? "translateY(0) scale(1)" : "translateY(14px) scale(0.96)",
-                transition: `opacity 900ms ${EASE}, transform 900ms ${EASE}`,
-                pointerEvents: ctaReady ? "auto" : "none",
-              }}
-            >
-              <button
-                onClick={enterCelebration}
-                className="group relative overflow-hidden border-2 border-primary bg-primary px-10 py-5 font-display text-xl uppercase tracking-[0.25em] text-primary-foreground shadow-[0_0_60px_rgba(255,60,40,0.55)] transition-transform hover:scale-[1.04] md:text-2xl"
-                style={{ animation: ctaReady ? `ci-cta-pulse 2.4s ease-in-out infinite` : undefined }}
-              >
-                <span className="relative z-10 flex items-center gap-3">
-                  <span aria-hidden>🏁</span> Enter Celebration
-                </span>
-                <span className="absolute inset-y-0 -left-full w-1/2 skew-x-12 bg-white/25 transition-all duration-700 group-hover:left-full" />
-              </button>
+        {/* Unified Typography Block */}
+        <div className="absolute inset-x-0 top-[38%] flex -translate-y-1/2 flex-col items-center gap-10 px-4 text-center sm:gap-14">
+          {/* Guest Welcome */}
+          <div style={{ animation: "ci-fade-down 1.5s ease-out both" }}>
+            <div className="font-mono text-xs uppercase tracking-widest text-white/70 sm:text-sm">
+              Welcome to the Celebration,
+            </div>
+            <div className="mt-4 font-display text-3xl uppercase text-accent sm:text-5xl" style={{ textShadow: "0 0 20px rgba(255,220,100,0.4)" }}>
+              {guestName}
             </div>
           </div>
+
+          {/* Happy Birthday Wish */}
+          <div style={{ animation: "ci-title-up 1.5s ease-out both 0.5s" }}>
+            <div className="font-display text-4xl uppercase text-white sm:text-6xl md:text-8xl" style={{ textShadow: "0 0 30px rgba(255,255,255,0.3)" }}>
+               HAPPY 10TH BIRTHDAY
+               <br />
+               <span className="text-fire">{racerName}</span>
+            </div>
+          </div>
+
+          {/* CTA Button placed right below Happy Birthday */}
+          <div
+            className="mt-8 sm:mt-12"
+            style={{
+              opacity: ctaReady ? 1 : 0,
+              transform: ctaReady ? "translateY(0)" : "translateY(20px)",
+              transition: `opacity 1.5s ${EASE}, transform 1.5s ${EASE}`,
+              pointerEvents: ctaReady ? "auto" : "none",
+            }}
+          >
+            <button
+              onClick={enterCelebration}
+              className="group relative flex overflow-hidden rounded-full bg-gradient-to-r from-fire via-primary to-fire bg-[length:200%_auto] px-6 py-4 font-display text-xs uppercase tracking-widest text-white shadow-[0_0_40px_rgba(255,60,40,0.6)] transition-all hover:scale-105 hover:shadow-[0_0_60px_rgba(255,60,40,0.8)] sm:px-10 sm:text-lg md:px-12 md:py-5 md:text-2xl"
+              style={{ animation: "ci-gradient-shift 3s linear infinite" }}
+            >
+              {/* Glowing border ring */}
+              <div className="absolute inset-0 rounded-full border-2 border-white/20" />
+              <div className="absolute inset-0 rounded-full opacity-0 outline outline-4 outline-white/40 transition-opacity group-hover:opacity-100" style={{ animation: "ci-pulse 2s infinite" }} />
+              
+              <span className="relative z-10 flex items-center justify-center gap-2 text-center drop-shadow-md sm:gap-4">
+                 <span aria-hidden className="text-lg sm:text-2xl">🏁</span> 
+                 <span>Enter The Birthday Celebration</span>
+                 <span aria-hidden className="text-lg sm:text-2xl">🎉</span>
+              </span>
+              
+              {/* Shimmer sweep */}
+              <span className="absolute inset-y-0 -left-[100%] w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/40 to-transparent transition-all duration-700 group-hover:left-[200%]" />
+            </button>
+          </div>
+        </div>
+
+        {/* The Car Drifting gently into the scene */}
+        <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2" style={{ animation: "ci-gentle-park 4s cubic-bezier(0.2, 0.8, 0.2, 1) both" }}>
+           <div className="relative flex h-20 w-64 items-center justify-center rounded-xl border border-primary bg-black/80 shadow-[0_20px_60px_rgba(255,60,40,0.3)] backdrop-blur">
+              <div className="font-display text-4xl text-white">#10</div>
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 border border-white/30 bg-black px-3 py-1 font-mono text-[8px] uppercase tracking-widest text-accent whitespace-nowrap">
+                 PARTY VEHICLE
+              </div>
+           </div>
+           {/* Soft glow underneath */}
+           <div className="mx-auto mt-4 h-4 w-56 rounded-full bg-primary/40 blur-xl" />
         </div>
       </div>
 
-      {/* ─────────── 9 · CELEBRATION LAUNCH (triggered by CTA) ─────────── */}
+      {/* FINAL EXIT FADE */}
       {celebrating && (
-        <div className="absolute inset-0 z-40 overflow-hidden">
-          {/* sweeping spotlights */}
-          {[0, 1, 2, 3].map((i) => (
-            <div key={`sl-${i}`} className="absolute left-1/2 top-0 h-[130%] w-56 origin-top -translate-x-1/2"
-              style={{
-                background: "linear-gradient(180deg, rgba(255,220,150,0.55), transparent 70%)",
-                filter: "blur(10px)",
-                animation: `ci-sweep 2.6s ${EASE} ${i * 0.15}s both`,
-                transform: `translateX(-50%) rotate(${(i - 1.5) * 22}deg)`,
-              }} />
-          ))}
-          {/* confetti cannons */}
-          {Array.from({ length: 60 }).map((_, i) => (
-            <div key={`cc-${i}`} className="absolute h-3 w-1.5"
-              style={{
-                left: `${(i * 29) % 100}%`,
-                bottom: "-4%",
-                background: ["#ff3c28", "#ffa040", "#ffffff", "#00ff88", "#ffcc40"][i % 5],
-                animation: `ci-cannon ${1.6 + (i % 5) * 0.15}s ${EASE} ${(i % 8) * 0.05}s both`,
-              }} />
-          ))}
-          {/* fireworks bursts */}
-          {Array.from({ length: 7 }).map((_, i) => (
-            <div key={`fw-${i}`} className="absolute h-3 w-3 rounded-full"
-              style={{
-                left: `${12 + i * 12}%`,
-                top: `${15 + (i % 3) * 18}%`,
-                background: ["#ff3c28", "#ffa040", "#00ff88", "#fff", "#ffcc40", "#ff3c28", "#ffa040"][i],
-                boxShadow: `0 0 80px 24px ${["#ff3c28", "#ffa040", "#00ff88", "#fff", "#ffcc40", "#ff3c28", "#ffa040"][i]}`,
-                animation: `ci-firework 2000ms ${EASE} ${i * 140}ms both`,
-              }} />
-          ))}
-          {/* Championship gate opening */}
-          <div className="absolute inset-y-0 left-0 w-1/2 border-r-4 border-primary bg-gradient-to-r from-black via-[#1a0808] to-[#2a1010]"
-            style={{ animation: `ci-gate-l ${CELEBRATION_MS}ms ${EASE} both` }}>
-            <div className="absolute right-0 top-0 h-full w-2 bg-primary shadow-[0_0_40px_rgba(255,60,40,0.8)]" />
-          </div>
-          <div className="absolute inset-y-0 right-0 w-1/2 border-l-4 border-primary bg-gradient-to-l from-black via-[#1a0808] to-[#2a1010]"
-            style={{ animation: `ci-gate-r ${CELEBRATION_MS}ms ${EASE} both` }}>
-            <div className="absolute left-0 top-0 h-full w-2 bg-primary shadow-[0_0_40px_rgba(255,60,40,0.8)]" />
-          </div>
-          {/* Camera-forward warp: radial speed lines */}
-          <div className="pointer-events-none absolute inset-0"
-            style={{ animation: `ci-warp ${CELEBRATION_MS}ms ${EASE} both` }}>
-            {Array.from({ length: 40 }).map((_, i) => {
-              const angle = (i / 40) * 360;
-              return (
-                <div key={`ln-${i}`} className="absolute left-1/2 top-1/2 h-[3px] w-[60vmax] origin-left"
-                  style={{
-                    transform: `rotate(${angle}deg)`,
-                    background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 60%, rgba(255,60,40,0.9) 100%)`,
-                    animation: `ci-line-warp ${1.4 + (i % 5) * 0.1}s linear ${(i % 8) * 0.05}s infinite`,
-                    opacity: 0.7,
-                    filter: "blur(1px)",
-                  }} />
-              );
-            })}
-          </div>
-          {/* Glowing title lifts and blurs as camera flies through */}
-          <div className="absolute inset-0 flex items-center justify-center"
-            style={{ animation: `ci-title-fly ${CELEBRATION_MS}ms ${EASE} both` }}>
-            <div className="text-center">
-              <div className="font-display text-6xl uppercase leading-[0.9] text-white md:text-8xl"
-                style={{ textShadow: "0 0 60px rgba(255,220,120,0.9), 0 0 120px rgba(255,60,40,0.6)" }}>
-                {racerName.toUpperCase()}&apos;S
-              </div>
-              <div className="mt-2 font-display text-5xl uppercase leading-[0.9] text-fire md:text-7xl"
-                style={{ textShadow: "0 0 80px rgba(255,60,40,0.9)" }}>
-                10<span className="text-white/90">TH</span> BIRTHDAY
-              </div>
-              <div className="mt-3 font-display text-4xl uppercase tracking-[0.15em] text-white md:text-6xl">
-                GRAND CELEBRATION
-              </div>
-            </div>
-          </div>
-          {/* Final white flash into hero */}
-          <div className="absolute inset-0 bg-white"
-            style={{ animation: `ci-flash ${CELEBRATION_MS}ms ${EASE} both` }} />
-        </div>
+        <div className="absolute inset-0 z-50 bg-black" style={{ animation: "ci-fade-to-black 1s ease-in forwards" }} />
       )}
 
       <style>{`
-        @keyframes ci-line-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes ci-go {
-          0% { transform: scale(2.2); opacity: 0; filter: blur(20px); }
-          45% { transform: scale(1); opacity: 1; filter: blur(0); }
+        @keyframes ci-headlight {
+          0% { opacity: 0; transform: scale(0.2) translateY(20px); filter: brightness(0.5); }
+          50% { opacity: 1; transform: scale(1.1) translateY(-5px); filter: brightness(1.5); }
+          100% { opacity: 1; transform: scale(1) translateY(0); filter: brightness(1); }
+        }
+        @keyframes ci-drive-forward {
+          0% { transform: scale(0.8) translateY(20px); opacity: 0; filter: blur(10px); }
+          100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
+        }
+        @keyframes ci-arch-flyby {
+          0% { transform: scale(0.1) translateY(100px); opacity: 0; border-width: 2px; }
+          20% { opacity: 1; }
+          100% { transform: scale(15) translateY(-50px); opacity: 0; border-width: 20px; }
+        }
+        @keyframes ci-star-twinkle {
+          0%, 100% { opacity: 0.2; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
+        @keyframes ci-pop {
+          0% { transform: scale(0.5); opacity: 0; }
+          20% { transform: scale(1.1); opacity: 1; }
           100% { transform: scale(1); opacity: 1; }
         }
-        @keyframes ci-led-boot {
-          0% { opacity: 0; transform: scale(0.94); filter: blur(14px) brightness(0.4); }
-          40% { opacity: 1; filter: blur(0) brightness(1.2); }
-          60% { filter: brightness(0.7); }
-          100% { opacity: 1; transform: scale(1); filter: blur(0) brightness(1); }
-        }
-        @keyframes ci-smoke-drift {
-          0%, 100% { transform: translate(0,0) scale(1); opacity: 0.3; }
-          50% { transform: translate(24px,-34px) scale(1.4); opacity: 0.6; }
-        }
-        @keyframes ci-arrive {
-          0% { transform: translate(120%, 0) scale(0.7); opacity: 0; filter: blur(6px); }
-          60% { transform: translate(-50%, 0) scale(1); opacity: 1; filter: blur(0); }
-          100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
-        }
-        @keyframes ci-strip {
-          from { opacity: 0; transform: scaleX(0.3); }
-          to   { opacity: 1; transform: scaleX(1); }
-        }
-        @keyframes ci-streak {
-          from { transform: translateX(0) scaleX(1); }
-          to   { transform: translateX(700%) scaleX(2); }
-        }
-        @keyframes ci-search {
-          0%, 100% { transform: translateX(-50%) rotate(-25deg); }
-          50%      { transform: translateX(-50%) rotate(25deg); }
-        }
-        @keyframes ci-confetti {
-          0%   { transform: translateY(0) rotate(0); opacity: 1; }
-          100% { transform: translateY(110vh) rotate(720deg); opacity: 0.6; }
+        @keyframes ci-flash-fade {
+          0% { opacity: 1; }
+          100% { opacity: 0; }
         }
         @keyframes ci-firework {
-          0%   { transform: scale(0.2); opacity: 0; }
-          40%  { transform: scale(1.4); opacity: 1; }
-          100% { transform: scale(2.6); opacity: 0; }
+          0% { transform: scale(0); opacity: 1; }
+          100% { transform: scale(3); opacity: 0; }
         }
-        @keyframes ci-banner {
-          from { transform: translateY(-100%); }
-          to   { transform: translateY(0); }
+        @keyframes ci-title-up {
+          0% { transform: translateY(40px); opacity: 0; filter: blur(10px); }
+          100% { transform: translateY(0); opacity: 1; filter: blur(0); }
+        }
+        @keyframes ci-fade-up {
+          0% { transform: translateY(20px); opacity: 0; }
+          100% { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes ci-fade-down {
+          0% { transform: translateY(-20px); opacity: 0; }
+          100% { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes ci-confetti-fall {
+          0% { transform: translateY(0) rotate(0); opacity: 1; }
+          100% { transform: translateY(110vh) rotate(720deg); opacity: 0.6; }
+        }
+        @keyframes ci-balloon-rise {
+          0% { transform: translateY(0) rotate(-5deg); opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { transform: translateY(-120vh) rotate(5deg); opacity: 0; }
+        }
+        @keyframes ci-gentle-park {
+          0% { transform: translate(-150%, 0) scale(0.9); opacity: 0; }
+          100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+        }
+        @keyframes ci-fade-to-black {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
         }
         @keyframes ci-float {
           0%, 100% { transform: translateY(0); }
-          50%      { transform: translateY(-14px); }
+          50% { transform: translateY(-10px); }
         }
-        @keyframes ci-gate-glow { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes ci-cta-pulse {
-          0%, 100% { box-shadow: 0 0 40px rgba(255,60,40,0.45), 0 0 0 rgba(255,60,40,0); }
-          50%      { box-shadow: 0 0 80px rgba(255,60,40,0.9), 0 0 120px rgba(255,160,60,0.35); }
+        @keyframes ci-pulse {
+          0%, 100% { opacity: 0.6; transform: scale(0.98); }
+          50% { opacity: 1; transform: scale(1.02); }
         }
-        @keyframes ci-gate-l {
-          0%   { transform: translateX(0); }
-          20%  { transform: translateX(0); }
-          100% { transform: translateX(-100%); }
-        }
-        @keyframes ci-gate-r {
-          0%   { transform: translateX(0); }
-          20%  { transform: translateX(0); }
-          100% { transform: translateX(100%); }
-        }
-        @keyframes ci-warp {
-          0%   { opacity: 0; transform: scale(0.4); filter: blur(2px); }
-          25%  { opacity: 1; transform: scale(1); filter: blur(0); }
-          100% { opacity: 0.9; transform: scale(3.6); filter: blur(4px); }
-        }
-        @keyframes ci-line-warp {
-          from { transform-origin: left center; transform: rotate(var(--r, 0deg)) scaleX(0.2); opacity: 0; }
-          20%  { opacity: 1; }
-          to   { transform-origin: left center; transform: rotate(var(--r, 0deg)) scaleX(1.6); opacity: 0; }
-        }
-        @keyframes ci-title-fly {
-          0%   { opacity: 0; transform: scale(1) translateZ(0); filter: blur(0); }
-          20%  { opacity: 1; transform: scale(1.05); filter: blur(0); }
-          70%  { opacity: 0.9; transform: scale(1.8); filter: blur(6px); }
-          100% { opacity: 0; transform: scale(3.6); filter: blur(24px); }
-        }
-        @keyframes ci-cannon {
-          0%   { transform: translateY(0) rotate(0); opacity: 1; }
-          100% { transform: translateY(-120vh) rotate(720deg); opacity: 0; }
-        }
-        @keyframes ci-sweep {
-          0%   { opacity: 0; transform: translateX(-50%) rotate(-45deg); }
-          40%  { opacity: 1; }
-          100% { opacity: 0.4; transform: translateX(-50%) rotate(45deg); }
-        }
-        @keyframes ci-flash {
-          0%, 70% { opacity: 0; }
-          88%     { opacity: 0.9; }
-          100%    { opacity: 1; }
-        }
-        @keyframes ci-title {
-          0%   { opacity: 0; transform: scale(0.9); filter: blur(20px); }
-          100% { opacity: 1; transform: scale(1); filter: blur(0); }
-        }
-        @keyframes ci-car-travel {
-          0%   { transform: translate(-55%, 0); opacity: 0.7; }
-          50%  { transform: translate(-50%, -4%); opacity: 1; }
-          100% { transform: translate(-45%, 0); opacity: 0.9; }
+        @keyframes ci-gradient-shift {
+          0% { background-position: 0% 50%; }
+          100% { background-position: 200% 50%; }
         }
       `}</style>
-    </div>
-  );
-}
-
-function CircuitScene({ index }: { index: number }) {
-  const stop = CIRCUITS[index];
-  const streaks = useMemo(() => Array.from({ length: 26 }), []);
-  const bg = (() => {
-    switch (stop.loc) {
-      case "TRAINING TRACK":
-        return "radial-gradient(ellipse at center, rgba(0,210,140,0.18), transparent 55%), linear-gradient(180deg, #05100a 0%, #050505 100%)";
-      case "MOUNTAIN PASS":
-        return "linear-gradient(180deg, #0a0f1a 0%, #1a1010 60%, #050505 100%)";
-      case "CITY CIRCUIT":
-        return "radial-gradient(ellipse at 50% 40%, rgba(255,60,40,0.28), transparent 55%), linear-gradient(180deg, #0a0510 0%, #000 100%)";
-      case "FINAL STRAIGHT":
-        return "radial-gradient(ellipse at 50% 60%, rgba(255,220,120,0.35), transparent 55%), linear-gradient(180deg, #150808 0%, #000 100%)";
-      default:
-        return "#000";
-    }
-  })();
-  return (
-    <div key={index} className="absolute inset-0" style={{ animation: `ci-title 600ms ${EASE} both` }}>
-      <div className="absolute inset-0" style={{ background: bg, transition: `background 500ms ${EASE}` }} />
-      <div className="absolute inset-x-0 top-1/2 h-24 -translate-y-1/2"
-        style={{ background: "radial-gradient(ellipse at center, rgba(255,60,40,0.35), transparent 70%)" }} />
-      {streaks.map((_, i) => {
-        const top = (i * 137) % 100;
-        const dur = 0.35 + ((i * 13) % 40) / 80;
-        const delay = ((i * 71) % 100) / 100;
-        const hue = i % 5 === 0 ? "#ff3c28" : i % 4 === 0 ? "#ffa040" : "#ffffff";
-        return (
-          <div
-            key={i}
-            className="absolute h-[2px] rounded-full"
-            style={{
-              top: `${top}%`,
-              left: "-20%",
-              width: `${20 + (i % 5) * 10}%`,
-              background: `linear-gradient(90deg, transparent, ${hue}, transparent)`,
-              opacity: 0.7,
-              animation: `ci-streak ${dur}s linear ${delay}s infinite`,
-              filter: "blur(0.5px)",
-            }}
-          />
-        );
-      })}
-      <div className="pointer-events-none absolute inset-0"
-        style={{ background: "radial-gradient(ellipse at center, transparent 32%, rgba(0,0,0,0.78) 92%)" }} />
-      {/* Car #10 travelling naturally across the frame with birthday livery hint */}
-      <div className="absolute bottom-[16%] left-1/2"
-        style={{ animation: `ci-car-travel 3s ${EASE} both`, transform: "translate(-50%, 0)" }}>
-        <div className="relative flex h-14 w-40 items-center justify-center border-2 border-primary bg-gradient-to-r from-primary via-fire to-accent shadow-[0_10px_40px_rgba(255,60,40,0.6)]">
-          <div className="font-display text-2xl text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">#10</div>
-          <div className="absolute inset-y-1 left-1 w-1.5 checker-flag opacity-90" />
-          <div className="absolute inset-y-1 right-1 w-1.5 checker-flag opacity-90" />
-        </div>
-        <div className="mx-auto mt-1 h-2 w-44 rounded-full bg-black/70 blur-md" />
-      </div>
-      <div className="absolute inset-x-0 bottom-24 text-center"
-        style={{ animation: `ci-line-in 700ms ${EASE} 150ms both` }}>
-        <div className="font-mono text-[10px] uppercase tracking-[0.6em] text-white/50">Now Racing</div>
-        <div className="mt-2 font-display text-4xl uppercase text-white md:text-6xl"
-          style={{ textShadow: "0 0 30px rgba(255,60,40,0.8)" }}>
-          {stop.loc}
-        </div>
-      </div>
     </div>
   );
 }
