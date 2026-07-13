@@ -296,7 +296,7 @@ function FinaleOverlay() {
         }}>
         Welcome to Aarav's<br />10th Birthday Grand Celebration
       </h3>
-      <div className="mt-4 text-sm text-amber-100/80">🎉 The champion has arrived 🎉</div>
+      <div className="mt-4 flex items-center justify-center gap-2 text-sm text-amber-100/80"><PartyPopper className="h-4 w-4 text-amber-300" /> The champion has arrived <PartyPopper className="h-4 w-4 text-amber-300" /></div>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { MapPin, Trophy, Camera, Award, Star, Sparkles, CarFront, Car, Flag } from "lucide-react";
 import helmet from "@/assets/helmet.jpg";
 import memYear1 from "@/assets/year1.webp";
 import memYear3 from "@/assets/year3.webp";
@@ -95,8 +96,8 @@ function NurseryScene() {
         />
       ))}
       {/* butterflies */}
-      <span className="mw-butterfly absolute left-[12%] top-[40%]">✿</span>
-      <span className="mw-butterfly absolute right-[18%] top-[65%]" style={{ animationDelay: "1.2s" }}>❋</span>
+      <span className="mw-butterfly absolute left-[12%] top-[40%] text-amber-200"><Sparkles className="h-3 w-3" /></span>
+      <span className="mw-butterfly absolute right-[18%] top-[65%] text-amber-300" style={{ animationDelay: "1.2s" }}><Sparkles className="h-4 w-4" /></span>
     </div>
   );
 }
@@ -125,8 +126,8 @@ function PlayroomScene() {
         />
       ))}
       {/* mini toy car */}
-      <span className="mw-toycar absolute bottom-8 left-0 text-3xl">🏎️</span>
-      <span className="mw-toycar absolute bottom-14 left-0 text-2xl" style={{ animationDelay: "3s", animationDuration: "14s" }}>🚗</span>
+      <span className="mw-toycar absolute bottom-8 left-0 text-primary"><CarFront className="h-8 w-8" /></span>
+      <span className="mw-toycar absolute bottom-14 left-0 text-accent" style={{ animationDelay: "3s", animationDuration: "14s" }}><Car className="h-6 w-6" /></span>
     </div>
   );
 }
@@ -381,7 +382,7 @@ function ChapterPanel({ c, index, onActive }: { c: Chapter; index: number; onAct
                 Reserve Your Seat →
               </a>
               <span className="rounded-full border border-amber-300/40 bg-amber-300/10 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.3em] text-amber-100">
-                🏁 The Biggest Celebration Begins
+                <Flag className="inline h-4 w-4" /> The Biggest Celebration Begins
               </span>
             </div>
           ) : (
@@ -493,7 +494,7 @@ export function MemoryWorld() {
                   transition: "top 0.15s linear",
                 }}
               >
-                🏎️
+                <CarFront className="inline h-5 w-5 text-primary" />
               </span>
             </div>
             <div className="flex flex-col items-center gap-3">

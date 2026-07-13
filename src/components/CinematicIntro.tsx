@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Flag, Trophy, Gift, PartyPopper } from "lucide-react";
 
 type StageKey =
   | "headlight"  // Phase 1: Mystery, dark screen, distant rev, two headlights
@@ -276,10 +277,10 @@ export function CinematicIntro({ onDone, racerName, guestName }: { onDone: () =>
         <div className="absolute inset-x-0 top-[48%] h-2 border-y border-white/10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjZmZmIi8+PHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIGZpbGw9IiNmZmYiLz48L3N2Zz4=')] opacity-20" />
 
         <div className="relative z-10 px-4 text-center" style={{ animation: "ci-fade-up 1.5s ease-out both" }}>
-           <div className="mb-4 flex justify-center gap-4 text-4xl sm:text-5xl">
-             <span className="animate-bounce" style={{ animationDelay: "0s", animationDuration: "2s" }}>🏁</span>
-             <span className="animate-bounce" style={{ animationDelay: "0.2s", animationDuration: "2s" }}>🏆</span>
-             <span className="animate-bounce" style={{ animationDelay: "0.4s", animationDuration: "2s" }}>🎈</span>
+           <div className="mb-4 flex justify-center gap-4 text-4xl sm:text-5xl items-center">
+             <Flag className="animate-bounce h-10 w-10 sm:h-12 sm:w-12 text-white" style={{ animationDelay: "0s", animationDuration: "2s" }} />
+             <Trophy className="animate-bounce h-10 w-10 sm:h-12 sm:w-12 text-yellow-400" style={{ animationDelay: "0.2s", animationDuration: "2s" }} />
+             <Gift className="animate-bounce h-10 w-10 sm:h-12 sm:w-12 text-primary" style={{ animationDelay: "0.4s", animationDuration: "2s" }} />
            </div>
            
            <div className="font-display text-3xl uppercase italic text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] sm:text-5xl md:text-7xl">
@@ -368,9 +369,9 @@ export function CinematicIntro({ onDone, racerName, guestName }: { onDone: () =>
               <div className="absolute inset-0 rounded-full opacity-0 outline outline-4 outline-white/40 transition-opacity group-hover:opacity-100" style={{ animation: "ci-pulse 2s infinite" }} />
               
               <span className="relative z-10 flex items-center justify-center gap-2 text-center drop-shadow-md sm:gap-4">
-                 <span aria-hidden className="text-lg sm:text-2xl">🏁</span> 
+                 <Flag aria-hidden className="h-5 w-5 sm:h-7 sm:w-7" /> 
                  <span>Enter The Birthday Celebration</span>
-                 <span aria-hidden className="text-lg sm:text-2xl">🎉</span>
+                 <PartyPopper aria-hidden className="h-5 w-5 sm:h-7 sm:w-7" />
               </span>
               
               {/* Shimmer sweep */}

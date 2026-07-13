@@ -42,28 +42,31 @@ export function BirthdayWelcome({ racerName, guestName }: { racerName: string; g
             </div>
           </div>
 
-          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-red-900/40 to-black p-8 shadow-2xl backdrop-blur-md">
+          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/80 p-8 shadow-[0_0_40px_rgba(255,60,40,0.2)] backdrop-blur-md">
+            {/* Ambient inner glow */}
+            <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+            
             {/* SVG Decorations */}
             <div className="absolute -top-4 -right-4 text-accent/10"><Star size={100} /></div>
             <div className="absolute -bottom-4 -left-4 text-primary/10"><Gift size={100} /></div>
             
-            <div className="absolute -top-3 left-8 bg-gradient-to-r from-accent to-yellow-500 px-4 py-1 rounded-full font-mono text-[10px] uppercase tracking-widest text-black font-bold shadow-[0_0_10px_rgba(255,200,0,0.5)]">
+            <div className="absolute -top-3 left-8 bg-primary px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-primary-foreground shadow-[0_0_15px_rgba(255,60,40,0.6)]">
               Birthday Headquarters
             </div>
             
             <div className="relative z-10 text-center pt-4">
-              <div className="font-mono text-sm uppercase tracking-[0.2em] text-blue-300">Welcome, {guestName}!</div>
-              <div className="mt-4 font-display text-4xl uppercase text-white drop-shadow-md leading-tight">
-                Turning 10 and ready for the <span className="text-accent">biggest adventure</span> of the year!
+              <div className="font-mono text-sm uppercase tracking-[0.3em] text-accent">Welcome, {guestName}!</div>
+              <div className="mt-4 font-display text-4xl uppercase text-foreground drop-shadow-md leading-tight">
+                Turning 10 and ready for the <br/><span className="text-fire animate-flicker">biggest adventure</span> of the year!
               </div>
               
-              <div className="mt-6 flex justify-center gap-4 text-accent">
-                <PartyPopper className="animate-pulse" />
-                <Trophy className="animate-pulse" style={{ animationDelay: "0.2s" }} />
-                <Gift className="animate-pulse" style={{ animationDelay: "0.4s" }} />
+              <div className="mt-8 flex justify-center gap-6 text-accent">
+                <PartyPopper className="h-8 w-8 animate-pulse shadow-accent drop-shadow-[0_0_10px_rgba(255,220,100,0.8)]" />
+                <Trophy className="h-8 w-8 animate-pulse drop-shadow-[0_0_10px_rgba(255,220,100,0.8)]" style={{ animationDelay: "0.2s" }} />
+                <Gift className="h-8 w-8 animate-pulse drop-shadow-[0_0_10px_rgba(255,220,100,0.8)]" style={{ animationDelay: "0.4s" }} />
               </div>
               
-              <p className="mt-6 font-mono text-sm leading-relaxed text-gray-300">
+              <p className="mt-8 font-mono text-sm leading-relaxed text-muted-foreground">
                 Join us for games, laughter, surprises, cake, and an epic championship celebration. {racerName} is excited to celebrate with you. Your VIP Birthday Pass is ready.
               </p>
             </div>
@@ -87,51 +90,51 @@ export function BirthdayWelcome({ racerName, guestName }: { racerName: string; g
                </div>
             </div>
 
-            {/* Banners */}
-            <div className="absolute top-0 inset-x-0 flex justify-around p-2">
-               {[1,2,3,4,5,6].map(i => (
-                 <div key={i} className={`w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[30px] ${i%2===0 ? 'border-t-primary' : 'border-t-blue-500'} drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]`} style={{ transformOrigin: 'top center', animation: `bw-swing ${2 + i*0.1}s ease-in-out infinite alternate` }} />
-               ))}
-            </div>
+            {/* Sleek Laser Guidelines instead of cartoon banners */}
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+            <div className="absolute top-12 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-            {/* The Birthday Car */}
-            <div className="absolute bottom-12 left-1/2 -translate-x-1/2">
-              <div className="relative h-28 w-80">
-                {/* Underglow */}
-                <div className="absolute -bottom-4 left-4 right-4 h-8 rounded-[100%] bg-blue-500/60 blur-xl animate-pulse" />
-                <div className="absolute -bottom-2 left-10 right-10 h-6 rounded-[100%] bg-primary/80 blur-lg animate-pulse" style={{ animationDelay: "0.5s" }} />
+            {/* The Premium Birthday Car */}
+            <div className="absolute bottom-16 left-1/2 -translate-x-1/2">
+              <div className="relative h-32 w-80">
+                {/* Sleek Underglow */}
+                <div className="absolute -bottom-4 left-4 right-4 h-8 rounded-[100%] bg-primary/60 blur-xl animate-pulse" />
+                <div className="absolute -bottom-2 left-10 right-10 h-6 rounded-[100%] bg-accent/80 blur-lg animate-pulse" style={{ animationDelay: "0.5s" }} />
                 
-                {/* Car Body */}
-                <div className="absolute bottom-4 left-16 h-12 w-48 rounded-t-full bg-gradient-to-t from-red-800 to-primary shadow-[inset_0_2px_10px_rgba(255,255,255,0.5)]">
+                {/* Premium Car Body */}
+                <div className="absolute bottom-4 left-12 h-14 w-56 rounded-r-[100px] rounded-tl-[40px] bg-gradient-to-r from-red-800 to-primary shadow-[inset_0_2px_15px_rgba(255,255,255,0.4),0_0_20px_rgba(255,60,40,0.5)]">
                   {/* Cockpit */}
-                  <div className="absolute -top-4 left-1/2 h-8 w-16 -translate-x-1/2 rounded-t-3xl bg-black border border-white/20" />
+                  <div className="absolute top-2 left-12 h-6 w-16 rounded-t-3xl bg-black border border-white/20" />
                   {/* #10 Decal */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-display text-2xl text-accent drop-shadow-md">10</div>
+                  <div className="absolute top-1/2 left-24 -translate-y-1/2 font-display text-3xl italic text-accent drop-shadow-[0_0_10px_rgba(255,220,100,0.8)]">10</div>
                 </div>
                 
                 {/* Front Wing */}
-                <div className="absolute bottom-2 left-0 h-4 w-24 rounded-l-full bg-primary" />
-                <div className="absolute bottom-6 left-4 h-2 w-12 -rotate-12 bg-red-700" />
+                <div className="absolute bottom-4 left-0 h-3 w-16 rounded-l-full bg-primary" />
+                <div className="absolute bottom-6 left-4 h-2 w-8 -rotate-12 bg-red-700" />
                 
                 {/* Rear Wing */}
-                <div className="absolute bottom-8 right-8 h-10 w-4 bg-primary" />
-                <div className="absolute bottom-16 right-0 h-4 w-24 rounded-sm bg-gradient-to-b from-primary to-red-900" />
+                <div className="absolute bottom-10 right-10 h-12 w-4 bg-primary" />
+                <div className="absolute bottom-20 right-2 h-4 w-28 rounded-sm bg-gradient-to-b from-primary to-red-900 shadow-[0_5px_10px_rgba(0,0,0,0.5)]" />
                 
-                {/* Wheels */}
-                <div className="absolute -bottom-2 left-8 h-14 w-14 rounded-full border-4 border-gray-800 bg-black shadow-[0_5px_15px_rgba(0,0,0,0.8)]">
-                  <div className="absolute inset-2 rounded-full border-2 border-red-500/50" />
-                  <div className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent" />
+                {/* Sleek Wheels */}
+                <div className="absolute -bottom-2 left-8 h-16 w-16 rounded-full border-4 border-zinc-800 bg-black shadow-[0_0_20px_rgba(0,0,0,0.9)] z-10">
+                  <div className="absolute inset-2 rounded-full border-2 border-primary/50 bg-zinc-900" />
                 </div>
-                <div className="absolute -bottom-2 right-12 h-16 w-16 rounded-full border-4 border-gray-800 bg-black shadow-[0_5px_15px_rgba(0,0,0,0.8)]">
-                  <div className="absolute inset-2 rounded-full border-2 border-red-500/50" />
-                  <div className="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent" />
+                <div className="absolute -bottom-4 right-10 h-20 w-20 rounded-full border-4 border-zinc-800 bg-black shadow-[0_0_20px_rgba(0,0,0,0.9)] z-10">
+                  <div className="absolute inset-2 rounded-full border-2 border-primary/50 bg-zinc-900" />
                 </div>
 
-                {/* Smoke (using CSS blurs) */}
+                {/* Celebration Gifts Tied to the Car */}
+                <div className="absolute -top-10 right-24 flex h-14 w-16 items-center justify-center rounded-lg border-2 border-primary bg-primary/40 shadow-[0_0_20px_rgba(255,60,40,0.8)] backdrop-blur-md">
+                   <div className="h-full w-2 bg-primary" />
+                   <div className="absolute h-2 w-full bg-primary" />
+                </div>
+                
+                {/* Smoke Exhaust */}
                 {isVisible && (
                   <>
-                    <div className="absolute -bottom-2 -left-4 h-8 w-16 bg-white/20 blur-xl rounded-full animate-[bw-smoke_3s_ease-out_infinite]" />
-                    <div className="absolute -bottom-2 -right-4 h-8 w-16 bg-white/20 blur-xl rounded-full animate-[bw-smoke_3s_ease-out_infinite_1s]" />
+                    <div className="absolute -bottom-2 -left-8 h-10 w-20 bg-white/20 blur-xl rounded-full animate-[bw-smoke_2s_ease-out_infinite]" />
                   </>
                 )}
               </div>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles, Gift, Send, Heart, PartyPopper } from "lucide-react";
+import confetti from "canvas-confetti";
 
 type Blessing = {
   id: string;
@@ -28,13 +29,54 @@ export default function BlessingWall() {
   const [message, setMessage] = useState("");
   const [phase, setPhase] = useState<"idle" | "sending" | "celebrating" | "flying">("idle");
   const [flyingCard, setFlyingCard] = useState<Blessing | null>(null);
-  const [current, setCurrent] = useState(0);
-  const [trans, setTrans] = useState<Trans>("slide");
-  const [confetti, setConfetti] = useState(false);
+  const [isSubmitConfetti, setIsSubmitConfetti] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const flyTargetRef = useRef<HTMLDivElement>(null);
   const flySourceRef = useRef<HTMLDivElement>(null);
   const [flyStyle, setFlyStyle] = useState<React.CSSProperties | null>(null);
+
+  // Scroll Celebration
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !hasScrolled) {
+          setHasScrolled(true);
+          
+          const duration = 2.5 * 1000;
+          const end = Date.now() + duration;
+
+          (function frame() {
+            confetti({
+              particleCount: 5,
+              angle: 60,
+              spread: 55,
+              origin: { x: 0 },
+              colors: ['#ef4444', '#facc15', '#3b82f6', '#ec4899', '#8b5cf6']
+            });
+            confetti({
+              particleCount: 5,
+              angle: 120,
+              spread: 55,
+              origin: { x: 1 },
+              colors: ['#ef4444', '#facc15', '#3b82f6', '#ec4899', '#8b5cf6']
+            });
+
+            if (Date.now() < end) {
+              requestAnimationFrame(frame);
+            }
+          }());
+        }
+      },
+      { threshold: 0.4 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+    return () => observer.disconnect();
+  }, [hasScrolled]);
 
   // Load persisted
   useEffect(() => {
@@ -43,21 +85,15 @@ export default function BlessingWall() {
       if (raw) {
         const stored = JSON.parse(raw) as Blessing[];
         if (Array.isArray(stored) && stored.length) {
-          setBlessings((prev) => [...stored, ...prev]);
+          setBlessings((prev) => {
+            const existingIds = new Set(prev.map(b => b.id));
+            const newStored = stored.filter(b => !existingIds.has(b.id));
+            return [...newStored, ...prev];
+          });
         }
       }
     } catch {}
   }, []);
-
-  // Auto-rotate carousel — one card at a time
-  useEffect(() => {
-    if (phase !== "idle" && phase !== "flying") return;
-    const t = setInterval(() => {
-      setTrans(TRANSITIONS[Math.floor(Math.random() * TRANSITIONS.length)]);
-      setCurrent((s) => (s + 1) % Math.max(blessings.length, 1));
-    }, ROTATE_MS);
-    return () => clearInterval(t);
-  }, [blessings.length, phase]);
 
   // Auto-expand textarea
   useEffect(() => {
@@ -66,8 +102,6 @@ export default function BlessingWall() {
     el.style.height = "auto";
     el.style.height = Math.min(el.scrollHeight, 200) + "px";
   }, [message]);
-
-  const currentBlessing = blessings.length ? blessings[current % blessings.length] : null;
 
   const persist = (list: Blessing[]) => {
     try {
@@ -90,7 +124,7 @@ export default function BlessingWall() {
     };
 
     setPhase("celebrating");
-    setConfetti(true);
+    setIsSubmitConfetti(true);
     setFlyingCard(fresh);
 
     setTimeout(() => {
@@ -132,12 +166,11 @@ export default function BlessingWall() {
         persist(next);
         return next;
       });
-      setCurrent(0);
       setMessage("");
       setFlyingCard(null);
       setFlyStyle(null);
       setPhase("idle");
-      setConfetti(false);
+      setIsSubmitConfetti(false);
       setTimeout(() => {
         setBlessings((prev) => prev.map((b) => (b.id === fresh.id ? { ...b, isNew: false } : b)));
       }, 5000);
@@ -148,7 +181,7 @@ export default function BlessingWall() {
   const empty = blessings.length === 0;
 
   return (
-    <section id="blessings" className="relative overflow-hidden py-24">
+    <section ref={sectionRef as any} id="blessings" className="relative overflow-hidden py-24">
       {/* Ambient warm background */}
       <div
         className="pointer-events-none absolute inset-0"
@@ -184,9 +217,9 @@ export default function BlessingWall() {
             <span>Section · 05</span>
             <span className="h-px w-16 bg-gradient-to-l from-transparent to-accent" />
           </div>
-          <h2 className="font-display text-4xl uppercase leading-tight text-foreground sm:text-6xl">
-            <span className="mr-3 inline-block animate-pulse">💛</span>
-            <span className="bw-gold-text">Blessings for our Champion</span>
+          <h2 className="font-display text-4xl uppercase leading-tight text-foreground sm:text-6xl flex items-center justify-center gap-4">
+            <Heart className="h-10 w-10 text-fire animate-pulse drop-shadow-[0_0_20px_rgba(255,60,40,0.8)]" fill="currentColor" />
+            <span className="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">Blessings for our Champion</span>
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg">
             Leave a heartfelt message for Aarav and become a part of his unforgettable celebration.
@@ -199,18 +232,12 @@ export default function BlessingWall() {
         <div className="grid gap-10 lg:grid-cols-2">
           {/* LEFT — Blessing Station */}
           <div className="relative">
-            {/* Balloon corners */}
-            <div className="bw-balloon absolute -left-4 -top-6 text-3xl" style={{ animationDelay: "0s" }}>🎈</div>
-            <div className="bw-balloon absolute -right-4 -top-8 text-3xl" style={{ animationDelay: "1.2s" }}>🎈</div>
-            <div className="bw-balloon absolute -left-6 bottom-6 text-2xl" style={{ animationDelay: "2s" }}>🎈</div>
+            {/* Neon SVG corners */}
+            <div className="absolute -left-6 -top-6 text-accent drop-shadow-[0_0_20px_rgba(255,220,100,0.8)] animate-[bw-float_4s_ease-in-out_infinite]" style={{ animationDelay: "0s" }}><PartyPopper size={48} /></div>
+            <div className="absolute -right-6 -top-8 text-primary drop-shadow-[0_0_20px_rgba(255,60,40,0.8)] animate-[bw-float_4s_ease-in-out_infinite]" style={{ animationDelay: "1.2s" }}><Gift size={48} /></div>
 
             <div
-              className="relative overflow-hidden rounded-3xl border p-8 backdrop-blur-xl"
-              style={{
-                borderColor: "oklch(0.85 0.15 90 / 0.4)",
-                background: "linear-gradient(160deg, oklch(0.22 0.03 60 / 0.55), oklch(0.14 0.02 20 / 0.7))",
-                boxShadow: "0 30px 80px -30px oklch(0.75 0.19 55 / 0.5), inset 0 0 60px oklch(0.85 0.15 90 / 0.08)",
-              }}
+              className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/80 p-8 shadow-[0_0_40px_rgba(255,60,40,0.15)] backdrop-blur-xl"
             >
               {/* Inner confetti bits */}
               <div className="pointer-events-none absolute inset-0">
@@ -235,7 +262,7 @@ export default function BlessingWall() {
                   </div>
                   <div>
                     <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">Blessing Station</div>
-                    <div className="font-display text-2xl uppercase text-foreground">Write your wish</div>
+                    <div className="font-display text-xl md:text-2xl uppercase text-foreground">Write your wish</div>
                   </div>
                 </div>
 
@@ -262,11 +289,7 @@ export default function BlessingWall() {
                   type="button"
                   onClick={handleSubmit}
                   disabled={phase !== "idle" || !message.trim()}
-                  className="bw-cta group relative mt-4 flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl px-8 py-4 font-display text-lg uppercase tracking-wider text-carbon transition-all disabled:cursor-not-allowed disabled:opacity-50"
-                  style={{
-                    background: "linear-gradient(135deg, #f4c430, #f97316)",
-                    boxShadow: "0 15px 40px -10px oklch(0.75 0.19 55 / 0.6), inset 0 1px 0 rgba(255,255,255,0.4)",
-                  }}
+                  className="group relative mt-4 flex w-full items-center justify-center gap-3 overflow-hidden rounded-full bg-gradient-to-r from-fire via-primary to-fire bg-[length:200%_auto] px-8 py-4 font-display text-lg uppercase tracking-wider text-white shadow-[0_0_20px_rgba(255,60,40,0.5)] transition-all hover:bg-[position:100%_center] hover:shadow-[0_0_40px_rgba(255,60,40,0.8)] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <span className="relative z-10 flex items-center gap-2">
                     {phase === "sending" ? (
@@ -294,7 +317,7 @@ export default function BlessingWall() {
                 {phase === "celebrating" && (
                   <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-3xl bg-carbon/70 backdrop-blur-md">
                     <div className="bw-confirm text-center">
-                      <div className="mx-auto mb-3 text-6xl">💛</div>
+                      <Heart className="mx-auto mb-3 h-16 w-16 text-yellow-400 drop-shadow-[0_0_20px_rgba(250,204,21,0.6)]" fill="currentColor" />
                       <div className="font-display text-3xl uppercase text-foreground">Thank you!</div>
                       <p className="mt-2 max-w-xs text-sm text-muted-foreground">
                         Your blessing has become a part of Aarav's celebration.
@@ -309,13 +332,7 @@ export default function BlessingWall() {
           {/* RIGHT — Wishing Wall */}
           <div ref={flyTargetRef} className="relative">
             <div
-              className="relative min-h-[520px] overflow-hidden rounded-3xl border p-6 backdrop-blur-xl"
-              style={{
-                borderColor: "oklch(0.85 0.15 90 / 0.35)",
-                background:
-                  "linear-gradient(180deg, oklch(0.18 0.02 20 / 0.7), oklch(0.10 0.02 260 / 0.85))",
-                boxShadow: "0 30px 90px -30px oklch(0.62 0.26 25 / 0.5), inset 0 0 80px oklch(0.75 0.19 55 / 0.1)",
-              }}
+              className="relative min-h-[400px] md:min-h-[520px] overflow-hidden rounded-3xl border border-white/10 bg-black/80 p-6 shadow-[0_0_40px_rgba(255,220,100,0.1)] backdrop-blur-xl"
             >
               {/* Fairy lights top */}
               <div className="pointer-events-none absolute inset-x-0 top-0 h-10 overflow-hidden">
@@ -347,26 +364,26 @@ export default function BlessingWall() {
               </div>
 
               {empty ? (
-                <div className="flex min-h-[380px] flex-col items-center justify-center gap-4 text-center">
-                  <div className="text-6xl">💛</div>
+                <div className="flex min-h-[300px] md:min-h-[380px] flex-col items-center justify-center gap-4 text-center">
+                  <Heart className="mx-auto h-20 w-20 text-yellow-400 drop-shadow-[0_0_30px_rgba(250,204,21,0.5)] animate-pulse" fill="currentColor" />
                   <p className="max-w-xs text-muted-foreground">
                     Be the first to bless Aarav and make his celebration even more special.
                   </p>
-                  <div className="flex gap-3 text-3xl">
-                    <span className="bw-balloon" style={{ animationDelay: "0s" }}>🎈</span>
-                    <span className="bw-balloon" style={{ animationDelay: "1s" }}>🎈</span>
-                    <span className="bw-balloon" style={{ animationDelay: "2s" }}>🎈</span>
+                  <div className="flex gap-4 items-center justify-center">
+                    <span className="bw-balloon" style={{ animationDelay: "0s" }}><Gift className="h-8 w-8 text-primary" /></span>
+                    <span className="bw-balloon" style={{ animationDelay: "1s" }}><PartyPopper className="h-8 w-8 text-accent" /></span>
+                    <span className="bw-balloon" style={{ animationDelay: "2s" }}><Sparkles className="h-8 w-8 text-yellow-400" /></span>
                   </div>
                 </div>
               ) : (
-                <div className="relative min-h-[320px]">
-                  {currentBlessing && (
+                <div className="relative flex flex-col gap-4 max-h-[420px] overflow-y-auto pr-2 pb-10 custom-scrollbar">
+                  {blessings.map((b) => (
                     <WishCard
-                      key={currentBlessing.id + "-" + current}
-                      blessing={currentBlessing}
-                      transition={trans}
+                      key={b.id}
+                      blessing={b}
+                      transition="fade"
                     />
-                  )}
+                  ))}
                 </div>
               )}
 
@@ -391,7 +408,7 @@ export default function BlessingWall() {
       )}
 
       {/* Celebration confetti burst */}
-      {confetti && (
+      {isSubmitConfetti && (
         <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
           {Array.from({ length: 60 }).map((_, i) => (
             <span
@@ -410,18 +427,18 @@ export default function BlessingWall() {
               }}
             />
           ))}
-          {/* Floating balloons */}
+          {/* Floating elements */}
           {Array.from({ length: 8 }).map((_, i) => (
             <span
               key={"b" + i}
-              className="bw-rise absolute text-4xl"
+              className="bw-rise absolute text-primary"
               style={{
                 left: `${10 + i * 10}%`,
                 bottom: "-60px",
                 animationDelay: `${i * 0.15}s`,
               }}
             >
-              {i % 2 ? "🎈" : "🎊"}
+              {i % 2 ? <Gift className="h-10 w-10" /> : <PartyPopper className="h-10 w-10 text-accent" />}
             </span>
           ))}
         </div>
@@ -465,6 +482,22 @@ export default function BlessingWall() {
         .wc-in-scale { animation: wc-scale .7s cubic-bezier(.16,1,.3,1) both, wc-drift 6s ease-in-out infinite 1s; }
         @keyframes wc-newglow { 0%,100%{box-shadow: 0 0 30px oklch(0.85 0.18 90 / .5)} 50%{box-shadow: 0 0 60px oklch(0.85 0.18 90 / .9)} }
         .wc-new { animation: wc-newglow 1.8s ease-in-out infinite; }
+        
+        /* Custom scrollbar for the wishes list */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(255,255,255,0.05);
+          border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: oklch(0.75 0.19 55 / 0.5);
+          border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: oklch(0.75 0.19 55 / 0.8);
+        }
       `}</style>
     </section>
   );
@@ -481,7 +514,7 @@ function WishCard({
 
   return (
     <div
-      className={`absolute inset-x-4 top-1/2 mx-auto max-w-lg -translate-y-1/2 ${cls}`}
+      className={`relative w-full ${cls}`}
     >
       <div
         className={`relative overflow-hidden rounded-2xl border p-5 backdrop-blur-xl ${blessing.isNew ? "wc-new" : ""}`}
@@ -493,8 +526,8 @@ function WishCard({
         }}
       >
         {blessing.isNew && (
-          <span className="absolute right-3 top-3 rounded-full bg-gradient-to-r from-yellow-300 to-mclaren-orange px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-carbon shadow-lg">
-            ✨ New
+          <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-gradient-to-r from-yellow-300 to-mclaren-orange px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-carbon shadow-lg">
+            <Sparkles className="h-3 w-3" /> New
           </span>
         )}
         <Heart className="mb-2 h-4 w-4 text-accent" fill="currentColor" />
@@ -505,7 +538,7 @@ function WishCard({
           <span className="font-display text-sm uppercase tracking-wider text-accent">— A well-wisher</span>
           <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Blessing</span>
         </div>
-        <span className="absolute -right-2 -bottom-2 text-2xl opacity-40">🎊</span>
+        <PartyPopper className="absolute -right-4 -bottom-4 h-16 w-16 text-primary opacity-20" />
       </div>
     </div>
   );
