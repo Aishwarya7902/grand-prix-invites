@@ -33,7 +33,7 @@ export function VictoryLapFooter() {
   const [playerVisualLane, setPlayerVisualLane] = useState(1);
 
   // Engine Refs
-  const requestRef = useRef<number>();
+  const requestRef = useRef<number | undefined>(undefined);
   const lastTimeRef = useRef<number>(0);
   
   // Game Logic State
