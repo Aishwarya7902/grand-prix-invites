@@ -43,6 +43,126 @@ function useElapsed(active: boolean) {
   return t;
 }
 
+function F1Car({ mirror = false }: { mirror?: boolean }) {
+  return (
+    <svg width="360" height="140" viewBox="0 0 360 140" style={{ overflow: "visible", filter: mirror ? "none" : "drop-shadow(0 8px 18px rgba(255,60,40,0.35))" }}>
+      <defs>
+        <linearGradient id="f1body" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#ff6a3d" />
+          <stop offset="0.35" stopColor="#e0261a" />
+          <stop offset="1" stopColor="#3a0606" />
+        </linearGradient>
+        <linearGradient id="f1nose" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#1a1a1a" />
+          <stop offset="0.5" stopColor="#e0261a" />
+          <stop offset="1" stopColor="#ff8a5a" />
+        </linearGradient>
+        <radialGradient id="f1tire" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stopColor="#2a2a2a" />
+          <stop offset="0.7" stopColor="#0a0a0a" />
+          <stop offset="1" stopColor="#000" />
+        </radialGradient>
+        <linearGradient id="f1glass" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#0a2540" />
+          <stop offset="1" stopColor="#000" />
+        </linearGradient>
+      </defs>
+
+      {/* Underglow */}
+      <ellipse cx="180" cy="118" rx="140" ry="6" fill="#ff3c28" opacity="0.55" filter="blur(6px)" />
+      <ellipse cx="180" cy="120" rx="110" ry="3" fill="#ffcc40" opacity="0.6" filter="blur(3px)" />
+
+      {/* Front wing (low, wide) */}
+      <path d="M8 108 L60 108 L70 96 L58 96 L52 100 L14 100 Z" fill="#111" stroke="#e0261a" strokeWidth="1.2" />
+      <rect x="6" y="106" width="60" height="3" fill="#e0261a" />
+      <rect x="10" y="98" width="12" height="2" fill="#ffcc40" />
+
+      {/* Nose cone (long, pointed) */}
+      <path d="M40 96 Q95 84, 150 82 L150 96 L60 96 Z" fill="url(#f1nose)" />
+      <path d="M40 96 Q95 84, 150 82" stroke="#ffb090" strokeWidth="0.6" fill="none" opacity="0.6" />
+
+      {/* Sidepods */}
+      <path d="M150 96 Q180 78, 230 78 L280 82 L285 100 L150 100 Z" fill="url(#f1body)" stroke="#000" strokeWidth="0.6" />
+      {/* Sidepod intake */}
+      <path d="M158 92 Q175 84, 210 84 L210 92 Z" fill="#000" />
+      <path d="M162 90 Q178 86, 206 86" stroke="#ff8a5a" strokeWidth="0.8" fill="none" />
+
+      {/* Engine cover ridge */}
+      <path d="M195 78 Q235 66, 275 78 L275 84 Q235 74, 195 84 Z" fill="#1a1a1a" stroke="#e0261a" strokeWidth="0.6" />
+      {/* Airbox above cockpit */}
+      <path d="M195 78 Q205 60, 225 60 L235 62 L235 76 Z" fill="#0a0a0a" stroke="#e0261a" strokeWidth="0.6" />
+
+      {/* Cockpit + Halo */}
+      <path d="M160 82 Q180 68, 200 70 L200 84 L160 84 Z" fill="url(#f1glass)" stroke="#e0261a" strokeWidth="0.8" />
+      {/* Halo bar */}
+      <path d="M150 78 Q180 56, 210 78" stroke="#000" strokeWidth="4" fill="none" strokeLinecap="round" />
+      <path d="M150 78 Q180 56, 210 78" stroke="#ff8a5a" strokeWidth="0.8" fill="none" opacity="0.6" />
+      {/* Halo center strut */}
+      <line x1="180" y1="60" x2="180" y2="72" stroke="#000" strokeWidth="2.5" />
+
+      {/* Racing #10 on sidepod */}
+      <text x="205" y="97" fontFamily="Impact, 'Racing Sans One', sans-serif" fontSize="18" fill="#ffcc40" stroke="#000" strokeWidth="0.6" fontStyle="italic" fontWeight="900">10</text>
+      {/* Aarav GP decal */}
+      <text x="230" y="97" fontFamily="ui-monospace, monospace" fontSize="6" fill="#fff" opacity="0.9" letterSpacing="1.5">AARAV GP</text>
+
+      {/* Rear wing (large, dramatic) */}
+      <rect x="295" y="52" width="8" height="52" fill="#111" stroke="#e0261a" strokeWidth="0.5" />
+      <rect x="278" y="50" width="44" height="10" rx="1" fill="url(#f1body)" stroke="#000" strokeWidth="0.5" />
+      <rect x="282" y="62" width="36" height="4" rx="1" fill="#e0261a" opacity="0.85" />
+      <rect x="286" y="70" width="28" height="3" rx="1" fill="#3a0606" />
+      {/* DRS gap highlight */}
+      <line x1="280" y1="56" x2="320" y2="56" stroke="#ffcc40" strokeWidth="0.4" opacity="0.7" />
+
+      {/* Rear diffuser + brake light */}
+      <rect x="286" y="100" width="30" height="6" fill="#0a0a0a" stroke="#333" strokeWidth="0.4" />
+      <circle cx="301" cy="80" r="3" fill="#ff2020">
+        <animate attributeName="opacity" values="0.5;1;0.5" dur="1.2s" repeatCount="indefinite" />
+      </circle>
+
+      {/* Headlight signature (LED strip on nose) */}
+      <path d="M52 92 L64 92" stroke="#e6f4ff" strokeWidth="1.8" strokeLinecap="round" opacity="0.95" />
+      <circle cx="58" cy="92" r="2.4" fill="#fff" opacity="0.95">
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="1.6s" repeatCount="indefinite" />
+      </circle>
+      <path d="M42 92 L54 92" stroke="#7ecbff" strokeWidth="0.6" opacity="0.7" />
+
+      {/* Front wheel */}
+      <g>
+        <circle cx="90" cy="110" r="20" fill="url(#f1tire)" />
+        <circle cx="90" cy="110" r="20" fill="none" stroke="#000" strokeWidth="1" />
+        <circle cx="90" cy="110" r="10" fill="#181818" stroke="#e0261a" strokeWidth="1.2" />
+        <g style={{ transformOrigin: "90px 110px", animation: "ci-wheel-spin 0.35s linear infinite" }}>
+          <line x1="80" y1="110" x2="100" y2="110" stroke="#ff8a5a" strokeWidth="1.2" />
+          <line x1="90" y1="100" x2="90" y2="120" stroke="#ff8a5a" strokeWidth="1.2" />
+          <line x1="83" y1="103" x2="97" y2="117" stroke="#ff8a5a" strokeWidth="0.8" />
+          <line x1="97" y1="103" x2="83" y2="117" stroke="#ff8a5a" strokeWidth="0.8" />
+        </g>
+        <circle cx="90" cy="110" r="2.5" fill="#ffcc40" />
+      </g>
+
+      {/* Rear wheel */}
+      <g>
+        <circle cx="280" cy="112" r="24" fill="url(#f1tire)" />
+        <circle cx="280" cy="112" r="24" fill="none" stroke="#000" strokeWidth="1" />
+        <circle cx="280" cy="112" r="12" fill="#181818" stroke="#e0261a" strokeWidth="1.4" />
+        <g style={{ transformOrigin: "280px 112px", animation: "ci-wheel-spin 0.35s linear infinite" }}>
+          <line x1="268" y1="112" x2="292" y2="112" stroke="#ff8a5a" strokeWidth="1.4" />
+          <line x1="280" y1="100" x2="280" y2="124" stroke="#ff8a5a" strokeWidth="1.4" />
+          <line x1="271" y1="103" x2="289" y2="121" stroke="#ff8a5a" strokeWidth="0.9" />
+          <line x1="289" y1="103" x2="271" y2="121" stroke="#ff8a5a" strokeWidth="0.9" />
+        </g>
+        <circle cx="280" cy="112" r="3" fill="#ffcc40" />
+      </g>
+
+      {/* Suspension arms */}
+      <line x1="90" y1="110" x2="120" y2="98" stroke="#222" strokeWidth="2" />
+      <line x1="90" y1="110" x2="120" y2="104" stroke="#222" strokeWidth="2" />
+      <line x1="280" y1="112" x2="260" y2="96" stroke="#222" strokeWidth="2" />
+      <line x1="280" y1="112" x2="260" y2="104" stroke="#222" strokeWidth="2" />
+    </svg>
+  );
+}
+
 export function CinematicIntro({ onDone, racerName, guestName }: { onDone: () => void; racerName: string; guestName: string }) {
   const [running, setRunning] = useState(true);
   const t = useElapsed(running);
@@ -125,61 +245,86 @@ export function CinematicIntro({ onDone, racerName, guestName }: { onDone: () =>
       {/* ─────────── 2 · THE SPECIAL DELIVERY ─────────── */}
       <div className="absolute inset-0 flex items-center justify-center"
         style={{ opacity: opacityFor("delivery"), transition: `opacity ${FADE}ms ${EASE}` }}>
-        <div className="absolute bottom-20 text-center font-display text-xl uppercase tracking-widest text-accent sm:text-2xl md:text-3xl" style={{ textShadow: "0 0 20px rgba(255,220,100,0.5)" }}>
+        {/* Racing tunnel environment */}
+        <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 40% at 50% 65%, rgba(255,60,40,0.18), transparent 70%)" }} />
+        {/* Tunnel light strips converging to vanishing point */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-60">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={`ts-${i}`} className="absolute left-1/2 top-1/2 h-[2px] w-[120vw] -translate-x-1/2 origin-center"
+              style={{
+                background: "linear-gradient(90deg, transparent, rgba(0,210,255,0.5), transparent)",
+                transform: `translate(-50%, -50%) rotate(${(i - 3.5) * 6}deg)`,
+                animation: `ci-tunnel-streak 1.4s linear ${i * 0.12}s infinite`,
+              }} />
+          ))}
+        </div>
+        {/* Ground plane with reflection gradient */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[42%]"
+          style={{ background: "linear-gradient(180deg, transparent 0%, rgba(255,60,40,0.05) 40%, rgba(0,0,0,0.9) 100%)" }} />
+        <div className="pointer-events-none absolute inset-x-0 bottom-[38%] h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+
+        <div className="absolute bottom-16 text-center font-display text-xl uppercase tracking-widest text-accent sm:text-2xl md:text-3xl" style={{ textShadow: "0 0 20px rgba(255,220,100,0.5)" }}>
            A Special Delivery Arrives...
         </div>
-        <div className="relative flex justify-center" style={{ animation: "ci-drive-forward 5s ease-out both" }}>
-          
-          {/* Formula 1 Car Silhouette */}
-          <div className="relative h-24 w-80">
-            {/* Underglow */}
-            <div className="absolute -bottom-2 left-10 h-3 w-60 rounded-full bg-primary blur-md" />
-            
-            {/* Front Wing */}
-            <div className="absolute bottom-2 left-0 h-2 w-12 rounded-sm bg-primary shadow-[0_0_15px_rgba(255,60,40,0.8)]" />
-            
-            {/* Main Body */}
-            <div className="absolute bottom-2 left-8 h-8 w-64 rounded-full border-t border-white/20 bg-black shadow-[inset_0_-10px_20px_rgba(255,60,40,0.3)]" />
-            
-            {/* Cockpit / Halo */}
-            <div className="absolute bottom-10 left-32 h-10 w-20 rounded-t-3xl border-t-2 border-primary bg-black/90 backdrop-blur-md" />
-            
-            {/* Rear Wing */}
-            <div className="absolute bottom-12 right-0 h-2 w-16 rounded-sm bg-primary shadow-[0_0_15px_rgba(255,60,40,0.8)]" />
-            <div className="absolute bottom-4 right-4 h-10 w-4 rounded-sm bg-black" />
-            
-            {/* Wheels */}
-            {/* Front Wheel */}
-            <div className="absolute -bottom-2 left-12 h-14 w-14 rounded-full border-4 border-zinc-800 bg-black shadow-[0_0_15px_rgba(0,0,0,0.8)]">
-               <div className="absolute inset-2 rounded-full border-2 border-primary/50 bg-zinc-900" />
-            </div>
-            {/* Rear Wheel */}
-            <div className="absolute -bottom-4 right-8 h-16 w-16 rounded-full border-4 border-zinc-800 bg-black shadow-[0_0_15px_rgba(0,0,0,0.8)]">
-               <div className="absolute inset-2 rounded-full border-2 border-primary/50 bg-zinc-900" />
-            </div>
-          </div>
 
-          {/* Vibrant Gifts stacked on top of the car (behind cockpit) */}
-          <div className="absolute -top-8 right-24 flex h-16 w-20 items-center justify-center rounded-lg border-2 border-primary bg-primary/40 shadow-[0_0_30px_rgba(255,60,40,0.8)] backdrop-blur-md">
-             <div className="h-full w-2 bg-primary" />
-             <div className="absolute h-2 w-full bg-primary" />
-          </div>
-          <div className="absolute -top-20 right-28 flex h-20 w-20 items-center justify-center rounded-lg border-2 border-accent bg-accent/40 shadow-[0_0_30px_rgba(255,220,100,0.8)] backdrop-blur-md">
-             <div className="h-full w-2 bg-accent" />
-             <div className="absolute h-2 w-full bg-accent" />
-          </div>
-          
-          {/* Glowing Balloons tied to gifts */}
-          <div className="absolute -top-40 right-28 flex gap-4">
-             <div className="relative h-16 w-12 rounded-[50%] bg-emerald-400 shadow-[0_0_30px_#34d399]" style={{ animation: "ci-float 3s ease-in-out infinite" }}>
-                <div className="absolute -bottom-16 left-1/2 h-16 w-[2px] bg-white/40 -rotate-12" />
-             </div>
-             <div className="relative h-20 w-14 rounded-[50%] bg-blue-400 shadow-[0_0_30px_#60a5fa]" style={{ animation: "ci-float 4s ease-in-out infinite 1s" }}>
-                <div className="absolute -bottom-20 left-1/2 h-20 w-[2px] bg-white/40" />
-             </div>
-             <div className="relative h-16 w-12 rounded-[50%] bg-purple-400 shadow-[0_0_30px_#c084fc]" style={{ animation: "ci-float 3.5s ease-in-out infinite 0.5s" }}>
-                <div className="absolute -bottom-16 left-1/2 h-16 w-[2px] bg-white/40 rotate-12" />
-             </div>
+        <div className="relative" style={{ animation: "ci-drive-forward 5s ease-out both" }}>
+          {/* Subtle vibration wrapper */}
+          <div style={{ animation: "ci-vibrate 0.12s ease-in-out infinite" }}>
+
+            {/* Ground reflection of the car (mirrored, blurred, faded) */}
+            <div className="absolute left-1/2 top-full -translate-x-1/2 opacity-30 blur-[3px]"
+              style={{ transform: "translateX(-50%) scaleY(-0.6)", maskImage: "linear-gradient(180deg, black, transparent 80%)" }}>
+              <F1Car mirror />
+            </div>
+
+            {/* Main F1 car */}
+            <F1Car />
+
+            {/* Headlight beams sweeping ground */}
+            <div className="pointer-events-none absolute left-[-40px] top-[54%] h-24 w-40 origin-left"
+              style={{ background: "conic-gradient(from 200deg at 0% 50%, transparent 0deg, rgba(200,230,255,0.35) 8deg, transparent 20deg)", filter: "blur(6px)" }} />
+
+            {/* Cargo platform on rear — celebration crate with gifts */}
+            <div className="absolute" style={{ left: "58%", top: "-6px" }}>
+              {/* Crate */}
+              <div className="relative h-10 w-24 rounded-md border border-accent/60 bg-gradient-to-b from-zinc-800 to-black shadow-[0_0_25px_rgba(255,60,40,0.4),inset_0_1px_0_rgba(255,255,255,0.15)]">
+                <div className="absolute inset-x-2 top-1 h-px bg-white/20" />
+                <div className="absolute inset-x-2 bottom-1 h-px bg-white/10" />
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-mono text-[8px] uppercase tracking-[0.25em] text-accent">Team Aarav</div>
+              </div>
+              {/* Stacked glowing gifts */}
+              <div className="absolute -top-6 left-3 h-8 w-10 rounded-sm border border-primary/80 bg-primary/30 shadow-[0_0_18px_rgba(255,60,40,0.7)] backdrop-blur-sm">
+                <div className="absolute left-1/2 top-0 h-full w-[3px] -translate-x-1/2 bg-accent" />
+                <div className="absolute left-0 top-1/2 h-[3px] w-full -translate-y-1/2 bg-accent" />
+              </div>
+              <div className="absolute -top-10 left-12 h-10 w-8 rounded-sm border border-accent/80 bg-accent/30 shadow-[0_0_18px_rgba(255,220,100,0.7)] backdrop-blur-sm">
+                <div className="absolute left-1/2 top-0 h-full w-[3px] -translate-x-1/2 bg-primary" />
+                <div className="absolute left-0 top-1/2 h-[3px] w-full -translate-y-1/2 bg-primary" />
+              </div>
+            </div>
+
+            {/* Balloons tied to the cargo with visible strings, swaying from speed */}
+            <div className="absolute" style={{ left: "62%", top: "-140px" }}>
+              <div className="relative flex items-end gap-3" style={{ transformOrigin: "bottom center", animation: "ci-balloon-sway 2.4s ease-in-out infinite" }}>
+                {[
+                  { c: "#34d399", h: 44, d: 0 },
+                  { c: "#60a5fa", h: 56, d: 0.4 },
+                  { c: "#c084fc", h: 44, d: 0.2 },
+                ].map((b, i) => (
+                  <div key={`bl-${i}`} className="relative" style={{ animation: `ci-float 3s ease-in-out ${b.d}s infinite` }}>
+                    <div className="rounded-[50%]"
+                      style={{ width: b.h * 0.75, height: b.h, background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.6), ${b.c} 55%, rgba(0,0,0,0.3) 100%)`, boxShadow: `0 0 24px ${b.c}` }}>
+                      <div className="mx-auto mt-[100%] h-1 w-2 -translate-y-2 rounded-b-sm" style={{ background: b.c, filter: "brightness(0.7)" }} />
+                    </div>
+                    {/* String */}
+                    <svg className="absolute left-1/2 top-full -translate-x-1/2" width="20" height="80" viewBox="0 0 20 80">
+                      <path d={`M10 0 Q ${10 + (i - 1) * 4} 40, ${10 + (i - 1) * 6} 80`} stroke="rgba(255,255,255,0.35)" strokeWidth="1" fill="none" />
+                    </svg>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -471,6 +616,23 @@ export function CinematicIntro({ onDone, racerName, guestName }: { onDone: () =>
         @keyframes ci-gradient-shift {
           0% { background-position: 0% 50%; }
           100% { background-position: 200% 50%; }
+        }
+        @keyframes ci-wheel-spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes ci-vibrate {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-0.6px); }
+        }
+        @keyframes ci-tunnel-streak {
+          0% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--r, 0deg)) scaleX(0.2); }
+          40% { opacity: 0.8; }
+          100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--r, 0deg)) scaleX(1.4); }
+        }
+        @keyframes ci-balloon-sway {
+          0%, 100% { transform: rotate(-3deg); }
+          50% { transform: rotate(3deg); }
         }
       `}</style>
     </div>
