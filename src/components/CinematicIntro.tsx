@@ -617,6 +617,23 @@ export function CinematicIntro({ onDone, racerName, guestName }: { onDone: () =>
           0% { background-position: 0% 50%; }
           100% { background-position: 200% 50%; }
         }
+        @keyframes ci-wheel-spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes ci-vibrate {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-0.6px); }
+        }
+        @keyframes ci-tunnel-streak {
+          0% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--r, 0deg)) scaleX(0.2); }
+          40% { opacity: 0.8; }
+          100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--r, 0deg)) scaleX(1.4); }
+        }
+        @keyframes ci-balloon-sway {
+          0%, 100% { transform: rotate(-3deg); }
+          50% { transform: rotate(3deg); }
+        }
       `}</style>
     </div>
   );
