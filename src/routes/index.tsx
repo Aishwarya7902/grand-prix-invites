@@ -179,6 +179,7 @@ function Index() {
       <SpeedMarquee text="WELCOME · DRIVER · READY · SET · GO" />
 
       {/* BIRTHDAY WELCOME SECTION */}
+      <div id="invitation" className="scroll-mt-10" />
       <BirthdayWelcome racerName={RACER_NAME} guestName={guestName} />
 
       {/* VIP PASS — Magical Ticket Assembly */}
@@ -195,9 +196,11 @@ function Index() {
       <GrandCountdown targetIso="2026-12-14T16:00:00+05:30" />
 
       {/* JOURNEY — Birthday Grand Celebration Journey */}
+      <div id="journey" className="scroll-mt-10" />
       <EventJourney />
 
       {/* MEMORY WORLD — immersive scroll journey through Aarav's years */}
+      <div id="memories" className="scroll-mt-10" />
       <MemoryWorld />
 
       {/* BLESSING WALL — Champions' Blessing Wall */}
