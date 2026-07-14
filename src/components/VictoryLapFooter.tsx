@@ -24,7 +24,7 @@ type Entity = {
 };
 
 export function VictoryLapFooter() {
-  const [gameState, setGameState] = useState<"idle" | "playing" | "finished">("idle");
+  const [gameState, setGameState] = useState<"idle" | "playing" | "finished" | "gameover">("idle");
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
 
@@ -158,7 +158,7 @@ export function VictoryLapFooter() {
         spawnEntity();
         lastSpawnDistanceRef.current = distanceTraveledRef.current;
       }
-    } else if (gameState === "finished") {
+    } else if (gameState === "finished" || gameState === "gameover") {
       // Slow down to a stop
       gameSpeedRef.current = Math.max(0, gameSpeedRef.current - dt * 500);
     }
@@ -200,7 +200,7 @@ export function VictoryLapFooter() {
               }
             } else if (entity.type === "ai") {
               // Game Over!
-              setGameState("finished");
+              setGameState("gameover");
               setTimeLeft(0);
               
               // Screen shake effect on track
@@ -434,6 +434,33 @@ export function VictoryLapFooter() {
                 className="w-full rounded-full border border-white/20 bg-white/10 px-6 py-3 font-display text-lg uppercase tracking-wider text-white transition-all hover:bg-white/20"
               >
                 Race Again
+              </button>
+              <button
+                onClick={() => setGameState("idle")}
+                className="mt-3 w-full rounded-full border border-white/10 bg-transparent px-6 py-3 font-display text-sm uppercase tracking-wider text-muted-foreground transition-all hover:bg-white/5 hover:text-white"
+              >
+                Close Game
+              </button>
+            </div>
+          )}
+
+          {gameState === "gameover" && (
+            <div className="pointer-events-auto w-[90%] max-w-md rounded-3xl border border-red-500/30 bg-black/80 p-8 text-center shadow-[0_0_50px_rgba(239,68,68,0.2)] backdrop-blur-xl animate-in zoom-in duration-500">
+              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-red-500/20">
+                <span className="text-5xl">💥</span>
+              </div>
+              <h3 className="mb-1 font-display text-4xl uppercase text-red-500">Game Over!</h3>
+              <div className="mb-6 font-mono text-xl uppercase text-primary">
+                Final Score: <span className="text-3xl text-yellow-400">{score}</span>
+              </div>
+              <p className="mb-8 font-sans text-sm italic text-muted-foreground">
+                "Ouch! You hit the traffic. Better luck next lap!"
+              </p>
+              <button
+                onClick={startGame}
+                className="w-full rounded-full border border-white/20 bg-white/10 px-6 py-3 font-display text-lg uppercase tracking-wider text-white transition-all hover:bg-white/20 hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-100"
+              >
+                Try Again
               </button>
               <button
                 onClick={() => setGameState("idle")}
