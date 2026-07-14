@@ -125,61 +125,86 @@ export function CinematicIntro({ onDone, racerName, guestName }: { onDone: () =>
       {/* ─────────── 2 · THE SPECIAL DELIVERY ─────────── */}
       <div className="absolute inset-0 flex items-center justify-center"
         style={{ opacity: opacityFor("delivery"), transition: `opacity ${FADE}ms ${EASE}` }}>
-        <div className="absolute bottom-20 text-center font-display text-xl uppercase tracking-widest text-accent sm:text-2xl md:text-3xl" style={{ textShadow: "0 0 20px rgba(255,220,100,0.5)" }}>
+        {/* Racing tunnel environment */}
+        <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 40% at 50% 65%, rgba(255,60,40,0.18), transparent 70%)" }} />
+        {/* Tunnel light strips converging to vanishing point */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-60">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={`ts-${i}`} className="absolute left-1/2 top-1/2 h-[2px] w-[120vw] -translate-x-1/2 origin-center"
+              style={{
+                background: "linear-gradient(90deg, transparent, rgba(0,210,255,0.5), transparent)",
+                transform: `translate(-50%, -50%) rotate(${(i - 3.5) * 6}deg)`,
+                animation: `ci-tunnel-streak 1.4s linear ${i * 0.12}s infinite`,
+              }} />
+          ))}
+        </div>
+        {/* Ground plane with reflection gradient */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[42%]"
+          style={{ background: "linear-gradient(180deg, transparent 0%, rgba(255,60,40,0.05) 40%, rgba(0,0,0,0.9) 100%)" }} />
+        <div className="pointer-events-none absolute inset-x-0 bottom-[38%] h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+
+        <div className="absolute bottom-16 text-center font-display text-xl uppercase tracking-widest text-accent sm:text-2xl md:text-3xl" style={{ textShadow: "0 0 20px rgba(255,220,100,0.5)" }}>
            A Special Delivery Arrives...
         </div>
-        <div className="relative flex justify-center" style={{ animation: "ci-drive-forward 5s ease-out both" }}>
-          
-          {/* Formula 1 Car Silhouette */}
-          <div className="relative h-24 w-80">
-            {/* Underglow */}
-            <div className="absolute -bottom-2 left-10 h-3 w-60 rounded-full bg-primary blur-md" />
-            
-            {/* Front Wing */}
-            <div className="absolute bottom-2 left-0 h-2 w-12 rounded-sm bg-primary shadow-[0_0_15px_rgba(255,60,40,0.8)]" />
-            
-            {/* Main Body */}
-            <div className="absolute bottom-2 left-8 h-8 w-64 rounded-full border-t border-white/20 bg-black shadow-[inset_0_-10px_20px_rgba(255,60,40,0.3)]" />
-            
-            {/* Cockpit / Halo */}
-            <div className="absolute bottom-10 left-32 h-10 w-20 rounded-t-3xl border-t-2 border-primary bg-black/90 backdrop-blur-md" />
-            
-            {/* Rear Wing */}
-            <div className="absolute bottom-12 right-0 h-2 w-16 rounded-sm bg-primary shadow-[0_0_15px_rgba(255,60,40,0.8)]" />
-            <div className="absolute bottom-4 right-4 h-10 w-4 rounded-sm bg-black" />
-            
-            {/* Wheels */}
-            {/* Front Wheel */}
-            <div className="absolute -bottom-2 left-12 h-14 w-14 rounded-full border-4 border-zinc-800 bg-black shadow-[0_0_15px_rgba(0,0,0,0.8)]">
-               <div className="absolute inset-2 rounded-full border-2 border-primary/50 bg-zinc-900" />
-            </div>
-            {/* Rear Wheel */}
-            <div className="absolute -bottom-4 right-8 h-16 w-16 rounded-full border-4 border-zinc-800 bg-black shadow-[0_0_15px_rgba(0,0,0,0.8)]">
-               <div className="absolute inset-2 rounded-full border-2 border-primary/50 bg-zinc-900" />
-            </div>
-          </div>
 
-          {/* Vibrant Gifts stacked on top of the car (behind cockpit) */}
-          <div className="absolute -top-8 right-24 flex h-16 w-20 items-center justify-center rounded-lg border-2 border-primary bg-primary/40 shadow-[0_0_30px_rgba(255,60,40,0.8)] backdrop-blur-md">
-             <div className="h-full w-2 bg-primary" />
-             <div className="absolute h-2 w-full bg-primary" />
-          </div>
-          <div className="absolute -top-20 right-28 flex h-20 w-20 items-center justify-center rounded-lg border-2 border-accent bg-accent/40 shadow-[0_0_30px_rgba(255,220,100,0.8)] backdrop-blur-md">
-             <div className="h-full w-2 bg-accent" />
-             <div className="absolute h-2 w-full bg-accent" />
-          </div>
-          
-          {/* Glowing Balloons tied to gifts */}
-          <div className="absolute -top-40 right-28 flex gap-4">
-             <div className="relative h-16 w-12 rounded-[50%] bg-emerald-400 shadow-[0_0_30px_#34d399]" style={{ animation: "ci-float 3s ease-in-out infinite" }}>
-                <div className="absolute -bottom-16 left-1/2 h-16 w-[2px] bg-white/40 -rotate-12" />
-             </div>
-             <div className="relative h-20 w-14 rounded-[50%] bg-blue-400 shadow-[0_0_30px_#60a5fa]" style={{ animation: "ci-float 4s ease-in-out infinite 1s" }}>
-                <div className="absolute -bottom-20 left-1/2 h-20 w-[2px] bg-white/40" />
-             </div>
-             <div className="relative h-16 w-12 rounded-[50%] bg-purple-400 shadow-[0_0_30px_#c084fc]" style={{ animation: "ci-float 3.5s ease-in-out infinite 0.5s" }}>
-                <div className="absolute -bottom-16 left-1/2 h-16 w-[2px] bg-white/40 rotate-12" />
-             </div>
+        <div className="relative" style={{ animation: "ci-drive-forward 5s ease-out both" }}>
+          {/* Subtle vibration wrapper */}
+          <div style={{ animation: "ci-vibrate 0.12s ease-in-out infinite" }}>
+
+            {/* Ground reflection of the car (mirrored, blurred, faded) */}
+            <div className="absolute left-1/2 top-full -translate-x-1/2 opacity-30 blur-[3px]"
+              style={{ transform: "translateX(-50%) scaleY(-0.6)", maskImage: "linear-gradient(180deg, black, transparent 80%)" }}>
+              <F1Car mirror />
+            </div>
+
+            {/* Main F1 car */}
+            <F1Car />
+
+            {/* Headlight beams sweeping ground */}
+            <div className="pointer-events-none absolute left-[-40px] top-[54%] h-24 w-40 origin-left"
+              style={{ background: "conic-gradient(from 200deg at 0% 50%, transparent 0deg, rgba(200,230,255,0.35) 8deg, transparent 20deg)", filter: "blur(6px)" }} />
+
+            {/* Cargo platform on rear — celebration crate with gifts */}
+            <div className="absolute" style={{ left: "58%", top: "-6px" }}>
+              {/* Crate */}
+              <div className="relative h-10 w-24 rounded-md border border-accent/60 bg-gradient-to-b from-zinc-800 to-black shadow-[0_0_25px_rgba(255,60,40,0.4),inset_0_1px_0_rgba(255,255,255,0.15)]">
+                <div className="absolute inset-x-2 top-1 h-px bg-white/20" />
+                <div className="absolute inset-x-2 bottom-1 h-px bg-white/10" />
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-mono text-[8px] uppercase tracking-[0.25em] text-accent">Team Aarav</div>
+              </div>
+              {/* Stacked glowing gifts */}
+              <div className="absolute -top-6 left-3 h-8 w-10 rounded-sm border border-primary/80 bg-primary/30 shadow-[0_0_18px_rgba(255,60,40,0.7)] backdrop-blur-sm">
+                <div className="absolute left-1/2 top-0 h-full w-[3px] -translate-x-1/2 bg-accent" />
+                <div className="absolute left-0 top-1/2 h-[3px] w-full -translate-y-1/2 bg-accent" />
+              </div>
+              <div className="absolute -top-10 left-12 h-10 w-8 rounded-sm border border-accent/80 bg-accent/30 shadow-[0_0_18px_rgba(255,220,100,0.7)] backdrop-blur-sm">
+                <div className="absolute left-1/2 top-0 h-full w-[3px] -translate-x-1/2 bg-primary" />
+                <div className="absolute left-0 top-1/2 h-[3px] w-full -translate-y-1/2 bg-primary" />
+              </div>
+            </div>
+
+            {/* Balloons tied to the cargo with visible strings, swaying from speed */}
+            <div className="absolute" style={{ left: "62%", top: "-140px" }}>
+              <div className="relative flex items-end gap-3" style={{ transformOrigin: "bottom center", animation: "ci-balloon-sway 2.4s ease-in-out infinite" }}>
+                {[
+                  { c: "#34d399", h: 44, d: 0 },
+                  { c: "#60a5fa", h: 56, d: 0.4 },
+                  { c: "#c084fc", h: 44, d: 0.2 },
+                ].map((b, i) => (
+                  <div key={`bl-${i}`} className="relative" style={{ animation: `ci-float 3s ease-in-out ${b.d}s infinite` }}>
+                    <div className="rounded-[50%]"
+                      style={{ width: b.h * 0.75, height: b.h, background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.6), ${b.c} 55%, rgba(0,0,0,0.3) 100%)`, boxShadow: `0 0 24px ${b.c}` }}>
+                      <div className="mx-auto mt-[100%] h-1 w-2 -translate-y-2 rounded-b-sm" style={{ background: b.c, filter: "brightness(0.7)" }} />
+                    </div>
+                    {/* String */}
+                    <svg className="absolute left-1/2 top-full -translate-x-1/2" width="20" height="80" viewBox="0 0 20 80">
+                      <path d={`M10 0 Q ${10 + (i - 1) * 4} 40, ${10 + (i - 1) * 6} 80`} stroke="rgba(255,255,255,0.35)" strokeWidth="1" fill="none" />
+                    </svg>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
