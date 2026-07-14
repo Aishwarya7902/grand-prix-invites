@@ -78,17 +78,27 @@ export function VictoryLapFooter() {
     setRenderTick(t => t + 1); // Trigger render to mount the new DOM node
   }, []);
 
-  const handleMoveLeft = useCallback(() => {
+  const lastMoveTimeRef = useRef(0);
+
+  const handleMoveLeft = useCallback((e?: React.MouseEvent | React.TouchEvent) => {
+    if (e && 'preventDefault' in e) e.preventDefault();
+    const now = Date.now();
+    if (now - lastMoveTimeRef.current < 150) return;
     if (gameState !== "finished" && playerLaneRef.current > 0) {
       playerLaneRef.current -= 1;
       setPlayerVisualLane(playerLaneRef.current);
+      lastMoveTimeRef.current = now;
     }
   }, [gameState]);
 
-  const handleMoveRight = useCallback(() => {
+  const handleMoveRight = useCallback((e?: React.MouseEvent | React.TouchEvent) => {
+    if (e && 'preventDefault' in e) e.preventDefault();
+    const now = Date.now();
+    if (now - lastMoveTimeRef.current < 150) return;
     if (gameState !== "finished" && playerLaneRef.current < 2) {
       playerLaneRef.current += 1;
       setPlayerVisualLane(playerLaneRef.current);
+      lastMoveTimeRef.current = now;
     }
   }, [gameState]);
 
@@ -189,13 +199,15 @@ export function VictoryLapFooter() {
                 }, 150);
               }
             } else if (entity.type === "ai") {
-              // Hit a car! Penalty bump.
-              gameSpeedRef.current = Math.max(200, gameSpeedRef.current - 150);
+              // Game Over!
+              setGameState("finished");
+              setTimeLeft(0);
+              
               // Screen shake effect on track
               if (trackBgRef.current) {
-                trackBgRef.current.style.transform = "translateX(10px)";
+                trackBgRef.current.style.transform = "translateX(20px)";
                 setTimeout(() => {
-                  if (trackBgRef.current) trackBgRef.current.style.transform = "translateX(-10px)";
+                  if (trackBgRef.current) trackBgRef.current.style.transform = "translateX(-20px)";
                   setTimeout(() => {
                     if (trackBgRef.current) trackBgRef.current.style.transform = "translateX(0)";
                   }, 50);
@@ -423,6 +435,12 @@ export function VictoryLapFooter() {
               >
                 Race Again
               </button>
+              <button
+                onClick={() => setGameState("idle")}
+                className="mt-3 w-full rounded-full border border-white/10 bg-transparent px-6 py-3 font-display text-sm uppercase tracking-wider text-muted-foreground transition-all hover:bg-white/5 hover:text-white"
+              >
+                Close Game
+              </button>
             </div>
           )}
         </div>
@@ -430,13 +448,13 @@ export function VictoryLapFooter() {
         {/* Mobile Touch Zones */}
         {gameState === "playing" && (
           <div className="absolute inset-0 z-10 flex pointer-events-auto md:hidden">
-            <div className="flex-1 h-full flex items-end justify-start p-4 pb-20" onTouchStart={handleMoveLeft} onClick={handleMoveLeft}>
-              <div className="w-16 h-16 rounded-full bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur active:bg-white/30 transition-colors shadow-lg">
+            <div className="flex-1 h-full flex items-end justify-start p-4 pb-20" onTouchStart={handleMoveLeft}>
+              <div className="w-16 h-16 rounded-full bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur active:bg-white/30 transition-colors shadow-lg pointer-events-none">
                 <ChevronLeft className="w-10 h-10 text-white/70" />
               </div>
             </div>
-            <div className="flex-1 h-full flex items-end justify-end p-4 pb-20" onTouchStart={handleMoveRight} onClick={handleMoveRight}>
-              <div className="w-16 h-16 rounded-full bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur active:bg-white/30 transition-colors shadow-lg">
+            <div className="flex-1 h-full flex items-end justify-end p-4 pb-20" onTouchStart={handleMoveRight}>
+              <div className="w-16 h-16 rounded-full bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur active:bg-white/30 transition-colors shadow-lg pointer-events-none">
                 <ChevronRight className="w-10 h-10 text-white/70" />
               </div>
             </div>
