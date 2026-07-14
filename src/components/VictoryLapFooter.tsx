@@ -309,7 +309,7 @@ export function VictoryLapFooter() {
         {entitiesRef.current.map((entity) => (
           <div
             key={entity.id}
-            ref={(el) => entityNodesRef.current[entity.id] = el}
+            ref={(el) => { entityNodesRef.current[entity.id] = el; }}
             className={`absolute top-0 transform -translate-x-1/2 will-change-transform ${entity.active ? 'opacity-100' : 'opacity-0'}`}
             style={{ left: `${LANES[entity.lane]}%`, transform: `translate(-50%, ${entity.y}px)` }}
           >
