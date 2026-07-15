@@ -1,665 +1,309 @@
 import { useEffect, useRef, useState } from "react";
-import { MapPin, Trophy, Camera, Award, Star, Sparkles, CarFront, Car, Flag } from "lucide-react";
-import helmet from "@/assets/helmet.jpg";
+import { Trophy, Sparkles, Flag, Medal } from "lucide-react";
+import confetti from "canvas-confetti";
+
 import memYear1 from "@/assets/year1.webp";
 import memYear3 from "@/assets/year3.webp";
 import memYear5 from "@/assets/year5.avif";
 import memYear8 from "@/assets/year8.webp";
 import memYear10 from "@/assets/year10.webp";
 
-const MEMORY_IMAGES: Record<string, string> = {
-  "1": memYear1,
-  "3": memYear3,
-  "5": memYear5,
-  "8": memYear8,
-  "10": memYear10,
-};
-
-type Chapter = {
-  age: string;
-  chapter: string;
-  title: string;
-  caption: string;
-  scene: "nursery" | "playroom" | "outdoors" | "dreams" | "grand";
-};
-
-const CHAPTERS: Chapter[] = [
+const MEMORIES = [
   {
     age: "1",
-    chapter: "Chapter One",
     title: "First Steps",
-    caption: "Every great journey begins with one tiny step.",
-    scene: "nursery",
+    caption: "Every great champion begins with one tiny step.",
+    img: memYear1,
+    progress: 0.15,
   },
   {
     age: "3",
-    chapter: "Chapter Two",
-    title: "Curious Explorer",
-    caption: "Every day became a new adventure filled with curiosity and laughter.",
-    scene: "playroom",
+    title: "Little Explorer",
+    caption: "The adventure had only just begun. Always curious.",
+    img: memYear3,
+    progress: 0.35,
   },
   {
     age: "5",
-    chapter: "Chapter Three",
-    title: "Adventure Begins",
-    caption: "From little adventures to unforgettable memories — every moment shaped the champion he is today.",
-    scene: "outdoors",
+    title: "Halfway Champion",
+    caption: "A milestone reached with boundless energy and the brightest smiles.",
+    img: memYear5,
+    progress: 0.55,
   },
   {
     age: "8",
-    chapter: "Chapter Four",
     title: "Dreams Take Flight",
-    caption: "Bigger dreams, brighter smiles, and a heart full of celebration.",
-    scene: "dreams",
+    caption: "Growing fast, dreaming big, and conquering every turn.",
+    img: memYear8,
+    progress: 0.75,
   },
   {
     age: "10",
-    chapter: "The Grand Celebration",
-    title: "Today · Aarav Turns 10",
-    caption: "The biggest celebration begins. The grid is lit. The champion has arrived.",
-    scene: "grand",
+    title: "The Grand Champion",
+    caption: "A decade of incredible memories. The ultimate birthday champion!",
+    img: memYear10,
+    progress: 0.90,
   },
 ];
 
-/* --------------------------- SCENES --------------------------- */
+const TRACK_PATH = "M 50 -5 C 90 15, 90 25, 50 40 C 10 55, 10 65, 50 80 C 90 95, 50 105, 50 105";
 
-function NurseryScene() {
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse at 70% 20%, rgba(255,214,153,0.55), transparent 55%), radial-gradient(ellipse at 20% 90%, rgba(255,183,120,0.25), transparent 60%), linear-gradient(180deg, #2a1a12 0%, #1a0f0a 100%)",
-        }}
-      />
-      {/* window light */}
-      <div
-        className="absolute right-8 top-10 h-56 w-40 rotate-6 rounded-md"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(255,220,160,0.35), rgba(255,220,160,0.05))",
-          boxShadow: "0 0 80px 20px rgba(255,220,160,0.25)",
-          filter: "blur(2px)",
-        }}
-      />
-      {/* stars */}
-      {Array.from({ length: 22 }).map((_, i) => (
-        <span
-          key={i}
-          className="mw-star absolute"
-          style={{
-            left: `${(i * 37) % 100}%`,
-            top: `${(i * 19) % 90}%`,
-            animationDelay: `${(i % 6) * 0.4}s`,
-          }}
-        />
-      ))}
-      {/* butterflies */}
-      <span className="mw-butterfly absolute left-[12%] top-[40%] text-amber-200"><Sparkles className="h-3 w-3" /></span>
-      <span className="mw-butterfly absolute right-[18%] top-[65%] text-amber-300" style={{ animationDelay: "1.2s" }}><Sparkles className="h-4 w-4" /></span>
-    </div>
-  );
-}
-
-function PlayroomScene() {
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse at 30% 20%, rgba(255,180,200,0.35), transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(180,220,255,0.30), transparent 55%), linear-gradient(180deg, #1d1526 0%, #120b1a 100%)",
-        }}
-      />
-      {/* balloons */}
-      {["#f472b6", "#fbbf24", "#60a5fa", "#a78bfa", "#f87171"].map((c, i) => (
-        <span
-          key={i}
-          className="mw-balloon absolute"
-          style={{
-            left: `${8 + i * 18}%`,
-            top: `${20 + (i % 3) * 10}%`,
-            background: `radial-gradient(circle at 35% 30%, #ffffff88, ${c})`,
-            animationDelay: `${i * 0.4}s`,
-          }}
-        />
-      ))}
-      {/* mini toy car */}
-      <span className="mw-toycar absolute bottom-8 left-0 text-primary"><CarFront className="h-8 w-8" /></span>
-      <span className="mw-toycar absolute bottom-14 left-0 text-accent" style={{ animationDelay: "3s", animationDuration: "14s" }}><Car className="h-6 w-6" /></span>
-    </div>
-  );
-}
-
-function OutdoorsScene() {
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, #3a2410 0%, #2a1a08 50%, #1a1206 100%), radial-gradient(ellipse at 70% 30%, rgba(255,190,110,0.5), transparent 60%)",
-        }}
-      />
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse at 75% 25%, rgba(255,180,90,0.55), transparent 55%)",
-        }}
-      />
-      {/* sun */}
-      <div
-        className="absolute right-16 top-16 h-28 w-28 rounded-full"
-        style={{
-          background: "radial-gradient(circle, #ffd97a, #f59e0b 60%, transparent 75%)",
-          boxShadow: "0 0 120px 30px rgba(251,191,36,0.5)",
-        }}
-      />
-      {/* fireflies */}
-      {Array.from({ length: 24 }).map((_, i) => (
-        <span
-          key={i}
-          className="mw-firefly absolute"
-          style={{
-            left: `${(i * 43) % 100}%`,
-            top: `${30 + ((i * 17) % 60)}%`,
-            animationDelay: `${(i % 8) * 0.5}s`,
-          }}
-        />
-      ))}
-      {/* grass silhouette */}
-      <div
-        className="absolute inset-x-0 bottom-0 h-24"
-        style={{
-          background: "linear-gradient(180deg, transparent, #0a0704 90%)",
-        }}
-      />
-    </div>
-  );
-}
-
-function DreamsScene() {
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse at 50% 20%, rgba(251,191,36,0.35), transparent 60%), linear-gradient(180deg, #1a1024 0%, #0d0714 100%)",
-        }}
-      />
-      {/* floating frames */}
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div
-          key={i}
-          className="mw-floatframe absolute rounded-md border border-amber-200/40 bg-black/40 backdrop-blur"
-          style={{
-            width: 90 + (i % 3) * 20,
-            height: 70 + (i % 3) * 15,
-            left: `${8 + i * 17}%`,
-            top: `${15 + (i * 11) % 55}%`,
-            animationDelay: `${i * 0.6}s`,
-            boxShadow: "0 0 30px rgba(251,191,36,0.25)",
-          }}
-        />
-      ))}
-      {/* confetti */}
-      {Array.from({ length: 30 }).map((_, i) => (
-        <span
-          key={i}
-          className="mw-confetti absolute"
-          style={{
-            left: `${(i * 29) % 100}%`,
-            top: `-10px`,
-            background: ["#fbbf24", "#f472b6", "#60a5fa", "#a78bfa", "#f87171"][i % 5],
-            animationDelay: `${(i % 10) * 0.5}s`,
-            animationDuration: `${8 + (i % 5)}s`,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function GrandScene() {
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse at 50% 20%, rgba(255,220,140,0.45), transparent 55%), radial-gradient(ellipse at 20% 90%, rgba(220,38,38,0.30), transparent 55%), linear-gradient(180deg, #1a0f0a 0%, #0a0605 100%)",
-        }}
-      />
-      {/* stadium lights */}
-      {Array.from({ length: 3 }).map((_, i) => (
-        <div
-          key={i}
-          className="mw-spotbeam absolute"
-          style={{
-            left: `${20 + i * 30}%`,
-            top: 0,
-            animationDelay: `${i * 0.8}s`,
-          }}
-        />
-      ))}
-      {/* checker ribbon */}
-      <div
-        className="absolute inset-x-0 bottom-8 h-6 opacity-70"
-        style={{
-          backgroundImage:
-            "linear-gradient(45deg,#fff 25%,transparent 25%),linear-gradient(-45deg,#fff 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#fff 75%),linear-gradient(-45deg,transparent 75%,#fff 75%)",
-          backgroundSize: "20px 20px",
-          backgroundPosition: "0 0,0 10px,10px -10px,-10px 0",
-          backgroundColor: "#000",
-        }}
-      />
-      {/* balloons */}
-      {["#fbbf24", "#f59e0b", "#fde68a", "#dc2626", "#f97316", "#fbbf24"].map((c, i) => (
-        <span
-          key={i}
-          className="mw-balloon absolute"
-          style={{
-            left: `${5 + i * 15}%`,
-            top: `${10 + (i % 3) * 8}%`,
-            background: `radial-gradient(circle at 35% 30%, #ffffff88, ${c})`,
-            animationDelay: `${i * 0.3}s`,
-          }}
-        />
-      ))}
-      {/* fireworks */}
-      {Array.from({ length: 6 }).map((_, i) => (
-        <span
-          key={i}
-          className="mw-firework absolute"
-          style={{
-            left: `${15 + i * 14}%`,
-            top: `${20 + (i % 3) * 15}%`,
-            animationDelay: `${i * 0.7}s`,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function Scene({ scene }: { scene: Chapter["scene"] }) {
-  switch (scene) {
-    case "nursery": return <NurseryScene />;
-    case "playroom": return <PlayroomScene />;
-    case "outdoors": return <OutdoorsScene />;
-    case "dreams": return <DreamsScene />;
-    case "grand": return <GrandScene />;
-  }
-}
-
-/* --------------------------- CHAPTER PANEL --------------------------- */
-
-function ChapterPanel({ c, index, onActive }: { c: Chapter; index: number; onActive: (i: number) => void }) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting && e.intersectionRatio > 0.5) onActive(index);
-        });
-      },
-      { threshold: [0.5, 0.75] }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, [index, onActive]);
-
-  const isGrand = c.scene === "grand";
-  return (
-    <section
-      ref={ref}
-      className="relative flex min-h-[100vh] items-center justify-center overflow-hidden py-24"
-      data-chapter={index}
-    >
-      <Scene scene={c.scene} />
-      {/* atmosphere overlays */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{ background: "radial-gradient(ellipse at 50% 60%, transparent 20%, rgba(0,0,0,0.55) 100%)" }}
-      />
-      <div className="relative z-10 mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-6 md:grid-cols-2">
-        {/* Frame */}
-        <div className={`relative ${index % 2 ? "md:order-2" : ""}`}>
-          <div
-            className={`mw-frame relative mx-auto overflow-hidden ${isGrand ? "aspect-[4/5] max-w-md md:max-w-lg" : "aspect-[4/5] max-w-sm md:max-w-md"}`}
-            style={{
-              borderRadius: 20,
-            }}
-          >
-            <img src={MEMORY_IMAGES[c.age] ?? helmet} alt={c.title} className="h-full w-full object-cover" loading="lazy" />
-            <div
-              className="pointer-events-none absolute inset-0"
-              style={{ background: "radial-gradient(ellipse at 50% 25%, transparent 45%, rgba(20,10,5,0.75) 100%)" }}
-            />
-            <div className="mw-shine pointer-events-none absolute inset-0" aria-hidden />
-            {/* trophy corners */}
-            <span className="absolute left-2 top-2 h-6 w-6 rounded-tl-xl border-l-2 border-t-2 border-amber-300/70" />
-            <span className="absolute right-2 top-2 h-6 w-6 rounded-tr-xl border-r-2 border-t-2 border-amber-300/70" />
-            <span className="absolute bottom-2 left-2 h-6 w-6 rounded-bl-xl border-b-2 border-l-2 border-amber-300/70" />
-            <span className="absolute bottom-2 right-2 h-6 w-6 rounded-br-xl border-b-2 border-r-2 border-amber-300/70" />
-            {/* age tag */}
-            <div className="absolute left-4 top-4 flex items-center gap-2 rounded-full border border-amber-200/40 bg-black/50 px-3 py-1.5 backdrop-blur-md">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-300 shadow-[0_0_8px_#fbbf24]" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber-100">Age {c.age}</span>
-            </div>
-            {isGrand && (
-              <div className="absolute right-4 top-4 flex h-14 w-14 items-center justify-center rounded-full border-2 border-amber-300 bg-black/70 font-display text-2xl text-amber-200 shadow-[0_0_20px_#fbbf24]">
-                10
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Caption */}
-        <div className={`relative ${index % 2 ? "md:order-1 md:text-right" : ""}`}>
-          <div className="font-mono text-[11px] uppercase tracking-[0.5em] text-amber-200/80">
-            {c.chapter}
-          </div>
-          <h3
-            className={`mw-title mt-3 font-display uppercase leading-[1.02] ${isGrand ? "text-5xl md:text-7xl" : "text-4xl md:text-6xl"}`}
-          >
-            {c.title}
-          </h3>
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-amber-50/85 md:text-xl">
-            {c.caption}
-          </p>
-          {isGrand ? (
-            <div className={`mt-8 flex flex-wrap items-center gap-3 ${index % 2 ? "md:justify-end" : ""}`}>
-              <a
-                href="#rsvp"
-                className="rounded-full border border-amber-300/60 bg-gradient-to-r from-amber-400 to-amber-200 px-6 py-3 font-mono text-xs uppercase tracking-[0.3em] text-black transition-transform hover:scale-[1.04]"
-              >
-                Reserve Your Seat →
-              </a>
-              <span className="rounded-full border border-amber-300/40 bg-amber-300/10 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.3em] text-amber-100">
-                <Flag className="inline h-4 w-4" /> The Biggest Celebration Begins
-              </span>
-            </div>
-          ) : (
-            <div className={`mt-6 flex items-center gap-3 ${index % 2 ? "md:justify-end" : ""}`}>
-              <span className="h-px w-20 bg-gradient-to-r from-amber-300/70 to-transparent" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber-200/70">
-                Memory · {c.age} years
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* --------------------------- MAIN --------------------------- */
-
-export function MemoryWorld() {
-  const [active, setActive] = useState(0);
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const [progress, setProgress] = useState(0);
+export function MemoryWorld({ racerName }: { racerName: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const pathRef = useRef<SVGPathElement>(null);
+  const glowPathRef = useRef<SVGPathElement>(null);
+  const carRef = useRef<HTMLDivElement>(null);
+  
+  const [activeMemory, setActiveMemory] = useState(-1);
+  const [showFinish, setShowFinish] = useState(false);
+  const [points, setPoints] = useState<{x: number, y: number}[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (!pathRef.current) return;
+    const path = pathRef.current;
+    const len = path.getTotalLength();
+    
+    // Precompute checkpoint positions
+    const pts = MEMORIES.map(m => {
+       const p = path.getPointAtLength(len * m.progress);
+       return { x: p.x, y: p.y };
+    });
+    setPoints(pts);
+
+    let lastProgress = 0;
+
     const onScroll = () => {
-      const el = wrapRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const total = rect.height - vh;
-      const scrolled = Math.min(Math.max(-rect.top, 0), total);
-      setProgress(total > 0 ? scrolled / total : 0);
+      if (!containerRef.current || !pathRef.current || !carRef.current || !glowPathRef.current) return;
+      
+      const rect = containerRef.current.getBoundingClientRect();
+      const scrollY = -rect.top;
+      // We want the scroll to start when the container hits the top of the viewport
+      // and end when the bottom of the container hits the bottom of the viewport.
+      const maxScroll = rect.height - window.innerHeight;
+      
+      let p = scrollY / maxScroll;
+      p = Math.max(0, Math.min(1, p));
+
+      // Fire confetti if we just crossed the finish line
+      if (p > 0.95 && lastProgress <= 0.95) {
+         confetti({
+           particleCount: 150,
+           spread: 100,
+           origin: { y: 0.6 },
+           colors: ['#ff2020', '#ffcc40', '#00d2ff', '#ffffff', '#34d399']
+         });
+      }
+      lastProgress = p;
+
+      // Update React state sparsely
+      let active = -1;
+      MEMORIES.forEach((m, i) => {
+         // Activate memory when car is near it
+         if (p >= m.progress - 0.05 && p <= m.progress + 0.15) active = i;
+      });
+      setActiveMemory(active);
+      setShowFinish(p > 0.95);
+
+      // DOM Mutations for smooth 60fps tracking
+      const currentLen = len * p;
+      const pt = path.getPointAtLength(currentLen);
+      
+      // Calculate angle by looking slightly ahead
+      const nextPt = path.getPointAtLength(Math.min(currentLen + 1, len));
+      const dx = (nextPt.x - pt.x) * (window.innerWidth / 100);
+      const dy = (nextPt.y - pt.y) * (window.innerHeight / 100);
+      
+      // SVG Car points UP. To rotate it correctly:
+      const angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
+
+      carRef.current.style.transform = `translate(-50%, -50%) translate(${pt.x}vw, ${pt.y}vh) rotate(${angle}deg)`;
+      
+      // Animate track glow
+      glowPathRef.current.style.strokeDasharray = `${len}`;
+      glowPathRef.current.style.strokeDashoffset = `${len - currentLen}`;
     };
+
     window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
+    // Initial call to set positions
+    onScroll(); 
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
-    <section id="memories" className="relative overflow-hidden">
-      {/* Intro */}
-      <div className="relative flex min-h-[80vh] items-center justify-center overflow-hidden py-24">
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse at 50% 30%, rgba(253,230,138,0.28), transparent 60%), linear-gradient(180deg, #14090a 0%, #0a0605 100%)",
-          }}
-        />
-        {Array.from({ length: 40 }).map((_, i) => (
-          <span
-            key={i}
-            className="mw-goldparticle absolute"
-            style={{
-              left: `${(i * 41) % 100}%`,
-              top: `${(i * 23) % 100}%`,
-              animationDelay: `${(i % 10) * 0.5}s`,
-              animationDuration: `${10 + (i % 6)}s`,
-            }}
-          />
-        ))}
-        <div className="relative z-10 mx-auto max-w-3xl px-6 text-center">
-          <div className="font-mono text-[11px] uppercase tracking-[0.6em] text-amber-200/80">
-            — Exhibition 04 —
-          </div>
-          <h2 className="mw-title mt-5 font-display text-5xl uppercase leading-[1.02] md:text-7xl">
-            Aarav's Memory World
-          </h2>
-          <div className="mx-auto mt-6 flex max-w-md items-center gap-4">
-            <span className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-200/60 to-transparent" />
-            <span className="whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.4em] text-amber-100/80">
-              10 Years of Smiles
-            </span>
-            <span className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-200/60 to-transparent" />
-          </div>
-          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-amber-50/80 md:text-lg">
-            Every champion has a story. Let's revisit the unforgettable moments
-            that made Aarav's journey so special.
-          </p>
-          <div className="mt-10 flex flex-col items-center gap-3">
-            <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-amber-200/60">
-              Begin the Journey
-            </span>
-            <span className="mw-arrow text-2xl text-amber-200">↓</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Chapters wrapper with sticky navigator */}
-      <div ref={wrapRef} className="relative">
-        {/* Sticky navigator */}
-        <div className="pointer-events-none sticky top-0 z-30 hidden h-0 md:block">
-          <div className="pointer-events-auto absolute right-6 top-1/2 flex -translate-y-1/2 flex-col items-center gap-4">
-            <div className="relative h-64 w-[2px] overflow-hidden rounded-full bg-amber-200/15">
-              <div
-                className="absolute inset-x-0 top-0 rounded-full"
-                style={{
-                  height: `${progress * 100}%`,
-                  background:
-                    "linear-gradient(180deg, #fde68a, #f59e0b)",
-                  boxShadow: "0 0 12px rgba(251,191,36,0.7)",
-                }}
-              />
-              {/* mini race car */}
-              <span
-                className="absolute -left-3 text-base"
-                style={{
-                  top: `calc(${progress * 100}% - 10px)`,
-                  transition: "top 0.15s linear",
-                }}
-              >
-                <CarFront className="inline h-5 w-5 text-primary" />
-              </span>
-            </div>
-            <div className="flex flex-col items-center gap-3">
-              {CHAPTERS.map((c, i) => (
-                <a
-                  key={c.age}
-                  href={`#mw-${i}`}
-                  className={`flex h-7 w-7 items-center justify-center rounded-full border font-mono text-[10px] transition ${
-                    active === i
-                      ? "border-amber-300 bg-amber-300 text-black shadow-[0_0_16px_#fbbf24]"
-                      : "border-amber-200/40 bg-black/40 text-amber-200/70 hover:border-amber-200/70"
-                  }`}
-                  aria-label={`Age ${c.age}`}
-                >
-                  {c.age}
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {CHAPTERS.map((c, i) => (
-          <div key={c.age} id={`mw-${i}`}>
-            <ChapterPanel c={c} index={i} onActive={setActive} />
-          </div>
-        ))}
-      </div>
-
+    <section id="memories" ref={containerRef} className="relative w-full h-[600vh] bg-black text-white">
+      
       <style>{`
-        .mw-title {
-          background: linear-gradient(180deg,#fff8e1 0%,#fde68a 45%,#f59e0b 100%);
-          -webkit-background-clip: text; background-clip: text; color: transparent;
-          filter: drop-shadow(0 0 30px rgba(251,191,36,0.28));
+        @keyframes pulse-ring {
+          0% { transform: scale(0.8); opacity: 0.5; }
+          100% { transform: scale(2.5); opacity: 0; }
         }
-        .mw-frame {
-          border: 1px solid rgba(253,230,138,.55);
-          box-shadow:
-            0 0 0 1px rgba(253,230,138,.12) inset,
-            0 40px 80px -20px rgba(0,0,0,.8),
-            0 0 80px -10px rgba(251,191,36,.45);
-          background: linear-gradient(135deg, rgba(253,230,138,.1), rgba(0,0,0,0));
-          transition: transform .8s cubic-bezier(.16,1,.3,1);
-        }
-        .mw-frame:hover { transform: translateY(-6px) scale(1.01); }
-        .mw-shine::before {
-          content:""; position:absolute; inset:-20%;
-          background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.22) 50%, transparent 65%);
-          transform: translateX(-120%);
-          animation: mw-shine 6s ease-in-out infinite;
-        }
-        @keyframes mw-shine {
-          0%, 40% { transform: translateX(-120%); }
-          70%, 100% { transform: translateX(120%); }
-        }
-        .mw-star {
-          width:3px; height:3px; border-radius:9999px;
-          background:#fff8dc; box-shadow: 0 0 8px #fde68a;
-          animation: mw-twinkle 3s ease-in-out infinite;
-        }
-        @keyframes mw-twinkle {
-          0%,100% { opacity:.2; transform: scale(.7); }
-          50% { opacity:1; transform: scale(1.2); }
-        }
-        .mw-butterfly {
-          font-size: 22px; color: #fde68a;
-          animation: mw-fly 8s ease-in-out infinite;
-          text-shadow: 0 0 12px rgba(251,191,36,.5);
-        }
-        @keyframes mw-fly {
-          0%,100% { transform: translate(0,0) rotate(-5deg); }
-          50% { transform: translate(40px,-30px) rotate(10deg); }
-        }
-        .mw-balloon {
-          width: 44px; height: 56px; border-radius: 50%;
-          filter: drop-shadow(0 8px 12px rgba(0,0,0,.4));
-          animation: mw-balloon 6s ease-in-out infinite;
-        }
-        .mw-balloon::after {
-          content:""; position:absolute; left:50%; bottom:-30px;
-          width:1px; height:30px; background: rgba(255,255,255,.25);
-        }
-        @keyframes mw-balloon {
-          0%,100% { transform: translateY(0) rotate(-3deg); }
-          50% { transform: translateY(-18px) rotate(4deg); }
-        }
-        .mw-toycar {
-          animation: mw-drive 10s linear infinite;
-          filter: drop-shadow(0 4px 8px rgba(0,0,0,.5));
-        }
-        @keyframes mw-drive {
-          0% { transform: translateX(-10%); }
-          100% { transform: translateX(110vw); }
-        }
-        .mw-firefly {
-          width:4px; height:4px; border-radius:9999px;
-          background:#fff2b0; box-shadow: 0 0 12px #fbbf24, 0 0 24px #f59e0b;
-          animation: mw-firefly 4s ease-in-out infinite;
-        }
-        @keyframes mw-firefly {
-          0%,100% { opacity:0; transform: translateY(0); }
-          50% { opacity:1; transform: translateY(-20px); }
-        }
-        .mw-floatframe {
-          animation: mw-floatframe 7s ease-in-out infinite;
-        }
-        @keyframes mw-floatframe {
-          0%,100% { transform: translateY(0) rotate(-2deg); }
-          50% { transform: translateY(-16px) rotate(3deg); }
-        }
-        .mw-confetti {
-          width: 8px; height: 12px; border-radius: 1px;
-          animation: mw-confetti linear infinite;
-        }
-        @keyframes mw-confetti {
-          0% { transform: translateY(-20px) rotate(0deg); opacity:0; }
-          10% { opacity:.9; }
-          100% { transform: translateY(80vh) rotate(720deg); opacity:0; }
-        }
-        .mw-spotbeam {
-          width: 200px; height: 100vh;
-          background: linear-gradient(180deg, rgba(255,220,140,.35), transparent 70%);
-          filter: blur(20px);
-          transform-origin: top center;
-          animation: mw-spotbeam 6s ease-in-out infinite;
-        }
-        @keyframes mw-spotbeam {
-          0%,100% { transform: rotate(-8deg); opacity:.6; }
-          50% { transform: rotate(8deg); opacity:1; }
-        }
-        .mw-firework {
-          width: 6px; height: 6px; border-radius: 9999px;
-          background: #fde68a;
-          box-shadow:
-            0 0 0 0 rgba(251,191,36,.8),
-            20px -10px 0 rgba(244,114,182,.9),
-            -18px -12px 0 rgba(96,165,250,.9),
-            10px 18px 0 rgba(167,139,250,.9),
-            -14px 16px 0 rgba(251,146,60,.9);
-          animation: mw-firework 2.5s ease-out infinite;
-        }
-        @keyframes mw-firework {
-          0% { opacity:0; transform: scale(.2); }
-          40% { opacity:1; transform: scale(1); }
-          100% { opacity:0; transform: scale(2.2); }
-        }
-        .mw-goldparticle {
-          width:3px; height:3px; border-radius:9999px;
-          background: radial-gradient(circle, #fde68a, transparent 70%);
-          box-shadow: 0 0 10px rgba(253,230,138,.9);
-          animation: mw-gold linear infinite;
-          opacity:.6;
-        }
-        @keyframes mw-gold {
-          0% { transform: translate(0,0) scale(.8); opacity:0; }
-          15% { opacity:.9; }
-          100% { transform: translate(20px,-160px) scale(1.3); opacity:0; }
-        }
-        .mw-arrow {
-          animation: mw-arrow 1.8s ease-in-out infinite;
-        }
-        @keyframes mw-arrow {
-          0%,100% { transform: translateY(0); opacity:.6; }
-          50% { transform: translateY(10px); opacity:1; }
+        .checkpoint-active {
+          box-shadow: 0 0 30px 10px rgba(255, 60, 40, 0.6);
+          background: #ff3c28;
+          border-color: #fff;
         }
       `}</style>
+
+      {/* Sticky Viewport */}
+      <div className="sticky top-0 w-full h-screen overflow-hidden">
+        
+        {/* Intro Message (fades out as we scroll) */}
+        <div 
+          className="absolute inset-x-0 top-[15vh] flex flex-col items-center text-center z-10 transition-opacity duration-1000"
+          style={{ opacity: activeMemory === -1 && !showFinish ? 1 : 0, pointerEvents: "none" }}
+        >
+           <h2 className="font-display text-4xl sm:text-6xl text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] uppercase">
+             {racerName}'s Journey <br/> <span className="text-accent text-3xl sm:text-5xl">To The Championship</span>
+           </h2>
+           <p className="mt-4 max-w-md mx-auto text-white/70 font-mono text-sm sm:text-base px-4">
+             Every champion starts somewhere. Let's travel through the incredible journey from Age 1 to Age 10.
+           </p>
+        </div>
+
+        {/* The Racetrack */}
+        <div className="absolute inset-0 opacity-80" style={{ filter: showFinish ? "brightness(0.3)" : "none", transition: "filter 1s ease" }}>
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full">
+            {/* Background Track Line */}
+            <path 
+              d={TRACK_PATH} 
+              fill="none" stroke="#222" strokeWidth={isMobile ? "2" : "1.5"} 
+            />
+            {/* Dashed Center Line */}
+            <path 
+              d={TRACK_PATH} 
+              fill="none" stroke="#444" strokeWidth="0.2" strokeDasharray="1 2"
+            />
+            {/* Glowing Active Track */}
+            <path 
+              ref={glowPathRef}
+              d={TRACK_PATH} 
+              fill="none" stroke="#ff3c28" strokeWidth={isMobile ? "2" : "1.5"} 
+              strokeLinecap="round"
+              style={{ filter: "drop-shadow(0 0 8px #ff3c28)" }}
+            />
+            {/* Invisible path for length calculations */}
+            <path 
+              ref={pathRef}
+              d={TRACK_PATH} 
+              fill="none" stroke="transparent" strokeWidth="1" 
+            />
+          </svg>
+        </div>
+
+        {/* Checkpoints */}
+        {points.map((pt, i) => {
+          const isActive = activeMemory === i;
+          return (
+            <div key={`cp-${i}`} className="absolute z-20 transition-all duration-500"
+                 style={{ 
+                   left: `${pt.x}vw`, 
+                   top: `${pt.y}vh`,
+                   transform: 'translate(-50%, -50%)',
+                   opacity: showFinish ? 0 : 1
+                 }}>
+              
+              {/* Checkpoint Dot */}
+              <div className={`relative w-4 h-4 sm:w-6 sm:h-6 rounded-full border-2 border-white/40 bg-zinc-900 transition-all duration-500 ${isActive ? 'checkpoint-active scale-125' : ''}`}>
+                 {isActive && (
+                   <div className="absolute inset-0 rounded-full border border-white" style={{ animation: "pulse-ring 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) infinite" }} />
+                 )}
+              </div>
+
+              {/* Memory Card */}
+              <div className={`absolute w-[85vw] sm:w-[400px] p-4 sm:p-6 bg-zinc-900/95 border border-white/10 rounded-2xl backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.9)] transition-all duration-700 z-40
+                              ${isActive ? "opacity-100 scale-100" : "opacity-0 scale-90 pointer-events-none"}`}
+                   style={{
+                     ...(isMobile 
+                        ? { 
+                            left: `calc(50vw - ${pt.x}vw)`, 
+                            top: `calc(50vh - ${pt.y}vh)`, 
+                            transform: 'translate(-50%, -50%)',
+                            marginTop: pt.y > 50 ? '-15vh' : '15vh' // offset so car is visible
+                          } 
+                        : { 
+                            top: '50%', transform: 'translateY(-50%)',
+                            ...(pt.x > 50 ? { right: '200%' } : { left: '200%' })
+                          }
+                     )
+                   }}
+              >
+                 <div className="flex items-center gap-2 font-mono text-accent text-xs sm:text-sm tracking-widest mb-2">
+                    <Flag className="w-3 h-3" />
+                    PIT STOP 0{i + 1} · AGE {MEMORIES[i].age}
+                 </div>
+                 <h3 className="font-display text-2xl sm:text-3xl text-white mb-4">{MEMORIES[i].title}</h3>
+                 
+                 <div className="relative w-full aspect-square sm:aspect-[4/3] rounded-xl overflow-hidden shadow-2xl mb-4 border border-white/10 group">
+                   <div className="absolute inset-0 bg-accent/20 mix-blend-overlay z-10 group-hover:opacity-0 transition-opacity duration-500" />
+                   <img src={MEMORIES[i].img} alt={MEMORIES[i].title} className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105" />
+                 </div>
+                 
+                 <p className="text-white/80 text-sm sm:text-base leading-relaxed">{MEMORIES[i].caption}</p>
+                 
+                 {isActive && (
+                   <Sparkles className="absolute -top-4 -right-4 w-8 h-8 text-accent animate-pulse" />
+                 )}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* The Journey Car */}
+        <div ref={carRef} className="absolute left-0 top-0 z-30 transition-opacity duration-500" style={{ opacity: showFinish ? 0 : 1 }}>
+          {/* Subtle neon trail */}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 w-4 h-16 bg-gradient-to-t from-transparent to-[#ff3c28] blur-md opacity-60" />
+          
+          <svg width={isMobile ? "30" : "40"} height={isMobile ? "60" : "80"} viewBox="0 0 40 80" style={{ filter: "drop-shadow(0 10px 10px rgba(0,0,0,0.5))" }}>
+            <rect x="15" y="10" width="10" height="60" fill="#ff3c28" rx="2" />
+            {/* Front Wing */}
+            <path d="M 5 15 L 35 15 L 35 22 L 5 22 Z" fill="#111" stroke="#ff3c28" strokeWidth="0.5" />
+            {/* Rear Wing */}
+            <path d="M 5 65 L 35 65 L 35 75 L 5 75 Z" fill="#111" stroke="#ff3c28" strokeWidth="0.5" />
+            {/* Wheels */}
+            <rect x="3" y="25" width="6" height="12" fill="#000" rx="1" />
+            <rect x="31" y="25" width="6" height="12" fill="#000" rx="1" />
+            <rect x="3" y="55" width="6" height="12" fill="#000" rx="1" />
+            <rect x="31" y="55" width="6" height="12" fill="#000" rx="1" />
+            {/* Driver Helmet */}
+            <circle cx="20" cy="40" r="4.5" fill="#ffcc40" stroke="#000" strokeWidth="1" />
+            {/* Number 10 */}
+            <text x="20" y="52" fontSize="6" textAnchor="middle" fill="#fff" fontFamily="Impact" fontStyle="italic">10</text>
+          </svg>
+        </div>
+
+        {/* Grand Finish Line */}
+        <div className={`absolute inset-0 flex flex-col items-center justify-center z-40 bg-black/80 backdrop-blur-sm transition-all duration-1000 ${showFinish ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+          <div className="relative" style={{ animation: showFinish ? "ci-scale-up 1s cubic-bezier(0.2, 0.8, 0.2, 1) both" : "none" }}>
+            <div className="absolute inset-0 bg-accent blur-[100px] opacity-30 rounded-full" />
+            <Medal className="w-32 h-32 sm:w-48 sm:h-48 text-accent mx-auto mb-8 drop-shadow-[0_0_30px_rgba(255,200,60,0.8)]" />
+          </div>
+          
+          <h2 className="font-display text-5xl sm:text-8xl text-white text-center uppercase drop-shadow-2xl" style={{ animation: showFinish ? "ci-slide-up 1s ease-out 0.3s both" : "none" }}>
+            Aarav
+            <br/>
+            <span className="text-fire text-4xl sm:text-7xl">The Birthday Champion</span>
+          </h2>
+          
+          <p className="mt-8 text-white/80 font-mono text-sm sm:text-lg max-w-2xl text-center px-4 leading-relaxed" style={{ animation: showFinish ? "ci-slide-up 1s ease-out 0.6s both" : "none" }}>
+            From first steps to becoming a 10-year-old champion. <br/> What an incredible journey.
+          </p>
+          
+          <div className="mt-12 flex items-center justify-center gap-4 text-accent animate-pulse">
+            <Flag className="w-6 h-6" />
+            <span className="font-display text-2xl tracking-widest">FINISH LINE</span>
+            <Flag className="w-6 h-6" />
+          </div>
+        </div>
+
+      </div>
     </section>
   );
 }

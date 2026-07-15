@@ -201,7 +201,7 @@ function Index() {
 
       {/* MEMORY WORLD — immersive scroll journey through Aarav's years */}
       <div id="memories" className="scroll-mt-10" />
-      <MemoryWorld />
+      <MemoryWorld racerName={RACER_NAME} />
 
       {/* BLESSING WALL — Champions' Blessing Wall */}
       <BlessingWall />
