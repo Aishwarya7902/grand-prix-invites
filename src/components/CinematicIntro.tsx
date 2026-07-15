@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Flag, Trophy, Gift, PartyPopper } from "lucide-react";
 
 type StageKey =
-  | "headlight"  // Phase 1: Mystery, dark screen, distant rev, two headlights
-  | "delivery"   // Phase 2: Car slowly drives forward, carrying balloons/gifts
+  | "gridlights" // Phase 1: Grid Lights (0-5s)
+  | "burst"      // Phase 2: Lights out and burst (5-7.5s)
   | "journey"    // Phase 3: Magical birthday world (colorful raceway, stars)
   | "countdown"  // Phase 4: Giant illuminated gate, 3...2...1
   | "reveal"     // Phase 5: Gate opens, "HAPPY 10TH BIRTHDAY AARAV"
@@ -12,8 +12,8 @@ type StageKey =
   | "celebration"; // Phase 8 & 9: Confetti, balloons, and the CTA button
 
 const STAGES: { key: StageKey; at: number; end: number }[] = [
-  { key: "headlight",   at: 0,     end: 3500 },
-  { key: "delivery",    at: 3000,  end: 7500 },
+  { key: "gridlights",  at: 0,     end: 5000 },
+  { key: "burst",       at: 5000,  end: 7500 },
   { key: "journey",     at: 7000,  end: 13000 },
   { key: "countdown",   at: 12500, end: 17500 },
   { key: "reveal",      at: 17000, end: 23000 },
@@ -43,125 +43,7 @@ function useElapsed(active: boolean) {
   return t;
 }
 
-function F1Car({ mirror = false }: { mirror?: boolean }) {
-  return (
-    <svg width="360" height="140" viewBox="0 0 360 140" style={{ overflow: "visible", filter: mirror ? "none" : "drop-shadow(0 8px 18px rgba(255,60,40,0.35))" }}>
-      <defs>
-        <linearGradient id="f1body" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#ff6a3d" />
-          <stop offset="0.35" stopColor="#e0261a" />
-          <stop offset="1" stopColor="#3a0606" />
-        </linearGradient>
-        <linearGradient id="f1nose" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#1a1a1a" />
-          <stop offset="0.5" stopColor="#e0261a" />
-          <stop offset="1" stopColor="#ff8a5a" />
-        </linearGradient>
-        <radialGradient id="f1tire" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stopColor="#2a2a2a" />
-          <stop offset="0.7" stopColor="#0a0a0a" />
-          <stop offset="1" stopColor="#000" />
-        </radialGradient>
-        <linearGradient id="f1glass" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#0a2540" />
-          <stop offset="1" stopColor="#000" />
-        </linearGradient>
-      </defs>
 
-      {/* Underglow */}
-      <ellipse cx="180" cy="118" rx="140" ry="6" fill="#ff3c28" opacity="0.55" filter="blur(6px)" />
-      <ellipse cx="180" cy="120" rx="110" ry="3" fill="#ffcc40" opacity="0.6" filter="blur(3px)" />
-
-      {/* Front wing (low, wide) */}
-      <path d="M8 108 L60 108 L70 96 L58 96 L52 100 L14 100 Z" fill="#111" stroke="#e0261a" strokeWidth="1.2" />
-      <rect x="6" y="106" width="60" height="3" fill="#e0261a" />
-      <rect x="10" y="98" width="12" height="2" fill="#ffcc40" />
-
-      {/* Nose cone (long, pointed) */}
-      <path d="M40 96 Q95 84, 150 82 L150 96 L60 96 Z" fill="url(#f1nose)" />
-      <path d="M40 96 Q95 84, 150 82" stroke="#ffb090" strokeWidth="0.6" fill="none" opacity="0.6" />
-
-      {/* Sidepods */}
-      <path d="M150 96 Q180 78, 230 78 L280 82 L285 100 L150 100 Z" fill="url(#f1body)" stroke="#000" strokeWidth="0.6" />
-      {/* Sidepod intake */}
-      <path d="M158 92 Q175 84, 210 84 L210 92 Z" fill="#000" />
-      <path d="M162 90 Q178 86, 206 86" stroke="#ff8a5a" strokeWidth="0.8" fill="none" />
-
-      {/* Engine cover ridge */}
-      <path d="M195 78 Q235 66, 275 78 L275 84 Q235 74, 195 84 Z" fill="#1a1a1a" stroke="#e0261a" strokeWidth="0.6" />
-      {/* Airbox above cockpit */}
-      <path d="M195 78 Q205 60, 225 60 L235 62 L235 76 Z" fill="#0a0a0a" stroke="#e0261a" strokeWidth="0.6" />
-
-      {/* Cockpit + Halo */}
-      <path d="M160 82 Q180 68, 200 70 L200 84 L160 84 Z" fill="url(#f1glass)" stroke="#e0261a" strokeWidth="0.8" />
-      {/* Halo bar */}
-      <path d="M150 78 Q180 56, 210 78" stroke="#000" strokeWidth="4" fill="none" strokeLinecap="round" />
-      <path d="M150 78 Q180 56, 210 78" stroke="#ff8a5a" strokeWidth="0.8" fill="none" opacity="0.6" />
-      {/* Halo center strut */}
-      <line x1="180" y1="60" x2="180" y2="72" stroke="#000" strokeWidth="2.5" />
-
-      {/* Racing #10 on sidepod */}
-      <text x="205" y="97" fontFamily="Impact, 'Racing Sans One', sans-serif" fontSize="18" fill="#ffcc40" stroke="#000" strokeWidth="0.6" fontStyle="italic" fontWeight="900">10</text>
-      {/* Aarav GP decal */}
-      <text x="230" y="97" fontFamily="ui-monospace, monospace" fontSize="6" fill="#fff" opacity="0.9" letterSpacing="1.5">AARAV GP</text>
-
-      {/* Rear wing (large, dramatic) */}
-      <rect x="295" y="52" width="8" height="52" fill="#111" stroke="#e0261a" strokeWidth="0.5" />
-      <rect x="278" y="50" width="44" height="10" rx="1" fill="url(#f1body)" stroke="#000" strokeWidth="0.5" />
-      <rect x="282" y="62" width="36" height="4" rx="1" fill="#e0261a" opacity="0.85" />
-      <rect x="286" y="70" width="28" height="3" rx="1" fill="#3a0606" />
-      {/* DRS gap highlight */}
-      <line x1="280" y1="56" x2="320" y2="56" stroke="#ffcc40" strokeWidth="0.4" opacity="0.7" />
-
-      {/* Rear diffuser + brake light */}
-      <rect x="286" y="100" width="30" height="6" fill="#0a0a0a" stroke="#333" strokeWidth="0.4" />
-      <circle cx="301" cy="80" r="3" fill="#ff2020">
-        <animate attributeName="opacity" values="0.5;1;0.5" dur="1.2s" repeatCount="indefinite" />
-      </circle>
-
-      {/* Headlight signature (LED strip on nose) */}
-      <path d="M52 92 L64 92" stroke="#e6f4ff" strokeWidth="1.8" strokeLinecap="round" opacity="0.95" />
-      <circle cx="58" cy="92" r="2.4" fill="#fff" opacity="0.95">
-        <animate attributeName="opacity" values="0.7;1;0.7" dur="1.6s" repeatCount="indefinite" />
-      </circle>
-      <path d="M42 92 L54 92" stroke="#7ecbff" strokeWidth="0.6" opacity="0.7" />
-
-      {/* Front wheel */}
-      <g>
-        <circle cx="90" cy="110" r="20" fill="url(#f1tire)" />
-        <circle cx="90" cy="110" r="20" fill="none" stroke="#000" strokeWidth="1" />
-        <circle cx="90" cy="110" r="10" fill="#181818" stroke="#e0261a" strokeWidth="1.2" />
-        <g style={{ transformOrigin: "90px 110px", animation: "ci-wheel-spin 0.35s linear infinite" }}>
-          <line x1="80" y1="110" x2="100" y2="110" stroke="#ff8a5a" strokeWidth="1.2" />
-          <line x1="90" y1="100" x2="90" y2="120" stroke="#ff8a5a" strokeWidth="1.2" />
-          <line x1="83" y1="103" x2="97" y2="117" stroke="#ff8a5a" strokeWidth="0.8" />
-          <line x1="97" y1="103" x2="83" y2="117" stroke="#ff8a5a" strokeWidth="0.8" />
-        </g>
-        <circle cx="90" cy="110" r="2.5" fill="#ffcc40" />
-      </g>
-
-      {/* Rear wheel */}
-      <g>
-        <circle cx="280" cy="112" r="24" fill="url(#f1tire)" />
-        <circle cx="280" cy="112" r="24" fill="none" stroke="#000" strokeWidth="1" />
-        <circle cx="280" cy="112" r="12" fill="#181818" stroke="#e0261a" strokeWidth="1.4" />
-        <g style={{ transformOrigin: "280px 112px", animation: "ci-wheel-spin 0.35s linear infinite" }}>
-          <line x1="268" y1="112" x2="292" y2="112" stroke="#ff8a5a" strokeWidth="1.4" />
-          <line x1="280" y1="100" x2="280" y2="124" stroke="#ff8a5a" strokeWidth="1.4" />
-          <line x1="271" y1="103" x2="289" y2="121" stroke="#ff8a5a" strokeWidth="0.9" />
-          <line x1="289" y1="103" x2="271" y2="121" stroke="#ff8a5a" strokeWidth="0.9" />
-        </g>
-        <circle cx="280" cy="112" r="3" fill="#ffcc40" />
-      </g>
-
-      {/* Suspension arms */}
-      <line x1="90" y1="110" x2="120" y2="98" stroke="#222" strokeWidth="2" />
-      <line x1="90" y1="110" x2="120" y2="104" stroke="#222" strokeWidth="2" />
-      <line x1="280" y1="112" x2="260" y2="96" stroke="#222" strokeWidth="2" />
-      <line x1="280" y1="112" x2="260" y2="104" stroke="#222" strokeWidth="2" />
-    </svg>
-  );
-}
 
 export function CinematicIntro({ onDone, racerName, guestName }: { onDone: () => void; racerName: string; guestName: string }) {
   const [running, setRunning] = useState(true);
@@ -208,6 +90,11 @@ export function CinematicIntro({ onDone, racerName, guestName }: { onDone: () =>
   const cP = stageProgress("countdown");
   const count = cP < 0.3 ? 3 : cP < 0.6 ? 2 : cP < 0.9 ? 1 : 0;
 
+  const lightsProgress = stageProgress("gridlights");
+  const lightsOnCount = Math.floor(lightsProgress * 5.01);
+  const sLights = STAGES.find(x => x.key === "gridlights")!;
+  const isLightsOut = t > sLights.end && t < sLights.end + 200;
+
   return (
     <div className="fixed inset-0 z-[100] overflow-hidden bg-black text-foreground">
       {/* SKIP */}
@@ -221,115 +108,67 @@ export function CinematicIntro({ onDone, racerName, guestName }: { onDone: () =>
           pointerEvents: showSkip ? "auto" : "none",
         }}
       >
-        Skip Intro →
+        Skip Intro ΓåÆ
       </button>
 
       {/* Persistent vignette */}
       <div className="pointer-events-none absolute inset-0"
         style={{ background: "radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.95) 100%)" }} />
 
-      {/* ─────────── 1 · HEADLIGHT REVEAL ─────────── */}
-      <div className="absolute inset-0 flex items-center justify-center"
-        style={{ opacity: opacityFor("headlight"), transition: `opacity ${FADE}ms ${EASE}` }}>
-        <div className="relative flex w-64 justify-between">
-           {/* Two bright headlights */}
-           <div className="relative h-12 w-20 rounded-[50%] bg-white blur-md" style={{ boxShadow: "0 0 80px 30px rgba(255,255,255,0.8), 0 0 150px 40px rgba(100,200,255,0.4)", animation: "ci-headlight 2.5s ease-out both" }}>
-              <div className="absolute inset-2 rounded-full bg-white blur-[2px] shadow-[0_0_20px_10px_#fff]" />
-           </div>
-           <div className="relative h-12 w-20 rounded-[50%] bg-white blur-md" style={{ boxShadow: "0 0 80px 30px rgba(255,255,255,0.8), 0 0 150px 40px rgba(100,200,255,0.4)", animation: "ci-headlight 2.5s ease-out both" }}>
-              <div className="absolute inset-2 rounded-full bg-white blur-[2px] shadow-[0_0_20px_10px_#fff]" />
-           </div>
+      {/* ─── 1 · GRID LIGHTS ─── */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-200"
+           style={{ opacity: opacityFor("gridlights"), pointerEvents: "none" }}>
+        <div className="flex gap-4 sm:gap-6 p-6 sm:p-10 rounded-2xl bg-zinc-900/60 border border-zinc-800 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-md">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex flex-col gap-3 p-3 bg-black rounded-xl border-2 border-zinc-800/50 shadow-inner">
+               {Array.from({ length: 2 }).map((_, j) => (
+                  <div key={j} className="w-12 h-12 sm:w-16 sm:h-16 rounded-full transition-colors duration-75"
+                       style={{
+                         backgroundColor: i < lightsOnCount && !isLightsOut ? "#ff2020" : "#1a0505",
+                         boxShadow: i < lightsOnCount && !isLightsOut ? "0 0 30px #ff2020, inset 0 0 15px #ff8888" : "inset 0 0 10px #000",
+                         border: i < lightsOnCount && !isLightsOut ? "1px solid #ff6666" : "1px solid #111"
+                       }} 
+                  />
+               ))}
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* ─────────── 2 · THE SPECIAL DELIVERY ─────────── */}
-      <div className="absolute inset-0 flex items-center justify-center"
-        style={{ opacity: opacityFor("delivery"), transition: `opacity ${FADE}ms ${EASE}` }}>
-        {/* Racing tunnel environment */}
-        <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 40% at 50% 65%, rgba(255,60,40,0.18), transparent 70%)" }} />
-        {/* Tunnel light strips converging to vanishing point */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-60">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={`ts-${i}`} className="absolute left-1/2 top-1/2 h-[2px] w-[120vw] -translate-x-1/2 origin-center"
-              style={{
-                background: "linear-gradient(90deg, transparent, rgba(0,210,255,0.5), transparent)",
-                transform: `translate(-50%, -50%) rotate(${(i - 3.5) * 6}deg)`,
-                animation: `ci-tunnel-streak 1.4s linear ${i * 0.12}s infinite`,
-              }} />
-          ))}
-        </div>
-        {/* Ground plane with reflection gradient */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[42%]"
-          style={{ background: "linear-gradient(180deg, transparent 0%, rgba(255,60,40,0.05) 40%, rgba(0,0,0,0.9) 100%)" }} />
-        <div className="pointer-events-none absolute inset-x-0 bottom-[38%] h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-
-        <div className="absolute bottom-16 text-center font-display text-xl uppercase tracking-widest text-accent sm:text-2xl md:text-3xl" style={{ textShadow: "0 0 20px rgba(255,220,100,0.5)" }}>
-           A Special Delivery Arrives...
-        </div>
-
-        <div className="relative" style={{ animation: "ci-drive-forward 5s ease-out both" }}>
-          {/* Subtle vibration wrapper */}
-          <div style={{ animation: "ci-vibrate 0.12s ease-in-out infinite" }}>
-
-            {/* Ground reflection of the car (mirrored, blurred, faded) */}
-            <div className="absolute left-1/2 top-full -translate-x-1/2 opacity-30 blur-[3px]"
-              style={{ transform: "translateX(-50%) scaleY(-0.6)", maskImage: "linear-gradient(180deg, black, transparent 80%)" }}>
-              <F1Car mirror />
-            </div>
-
-            {/* Main F1 car */}
-            <F1Car />
-
-            {/* Headlight beams sweeping ground */}
-            <div className="pointer-events-none absolute left-[-40px] top-[54%] h-24 w-40 origin-left"
-              style={{ background: "conic-gradient(from 200deg at 0% 50%, transparent 0deg, rgba(200,230,255,0.35) 8deg, transparent 20deg)", filter: "blur(6px)" }} />
-
-            {/* Cargo platform on rear — celebration crate with gifts */}
-            <div className="absolute" style={{ left: "58%", top: "-6px" }}>
-              {/* Crate */}
-              <div className="relative h-10 w-24 rounded-md border border-accent/60 bg-gradient-to-b from-zinc-800 to-black shadow-[0_0_25px_rgba(255,60,40,0.4),inset_0_1px_0_rgba(255,255,255,0.15)]">
-                <div className="absolute inset-x-2 top-1 h-px bg-white/20" />
-                <div className="absolute inset-x-2 bottom-1 h-px bg-white/10" />
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-mono text-[8px] uppercase tracking-[0.25em] text-accent">Team Aarav</div>
-              </div>
-              {/* Stacked glowing gifts */}
-              <div className="absolute -top-6 left-3 h-8 w-10 rounded-sm border border-primary/80 bg-primary/30 shadow-[0_0_18px_rgba(255,60,40,0.7)] backdrop-blur-sm">
-                <div className="absolute left-1/2 top-0 h-full w-[3px] -translate-x-1/2 bg-accent" />
-                <div className="absolute left-0 top-1/2 h-[3px] w-full -translate-y-1/2 bg-accent" />
-              </div>
-              <div className="absolute -top-10 left-12 h-10 w-8 rounded-sm border border-accent/80 bg-accent/30 shadow-[0_0_18px_rgba(255,220,100,0.7)] backdrop-blur-sm">
-                <div className="absolute left-1/2 top-0 h-full w-[3px] -translate-x-1/2 bg-primary" />
-                <div className="absolute left-0 top-1/2 h-[3px] w-full -translate-y-1/2 bg-primary" />
-              </div>
-            </div>
-
-            {/* Balloons tied to the cargo with visible strings, swaying from speed */}
-            <div className="absolute" style={{ left: "62%", top: "-140px" }}>
-              <div className="relative flex items-end gap-3" style={{ transformOrigin: "bottom center", animation: "ci-balloon-sway 2.4s ease-in-out infinite" }}>
-                {[
-                  { c: "#34d399", h: 44, d: 0 },
-                  { c: "#60a5fa", h: 56, d: 0.4 },
-                  { c: "#c084fc", h: 44, d: 0.2 },
-                ].map((b, i) => (
-                  <div key={`bl-${i}`} className="relative" style={{ animation: `ci-float 3s ease-in-out ${b.d}s infinite` }}>
-                    <div className="rounded-[50%]"
-                      style={{ width: b.h * 0.75, height: b.h, background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.6), ${b.c} 55%, rgba(0,0,0,0.3) 100%)`, boxShadow: `0 0 24px ${b.c}` }}>
-                      <div className="mx-auto mt-[100%] h-1 w-2 -translate-y-2 rounded-b-sm" style={{ background: b.c, filter: "brightness(0.7)" }} />
-                    </div>
-                    {/* String */}
-                    <svg className="absolute left-1/2 top-full -translate-x-1/2" width="20" height="80" viewBox="0 0 20 80">
-                      <path d={`M10 0 Q ${10 + (i - 1) * 4} 40, ${10 + (i - 1) * 6} 80`} stroke="rgba(255,255,255,0.35)" strokeWidth="1" fill="none" />
-                    </svg>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+      {/* ─── 2 · BURST ─── */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none" 
+           style={{ opacity: opacityFor("burst"), transition: `opacity ${FADE}ms ${EASE}` }}>
+        <div style={{ animation: opacityFor("burst") > 0 ? "ci-scale-up 0.8s cubic-bezier(0.1, 0.7, 0.2, 1) both" : "none" }}>
+          {/* Giant 10 */}
+          <div className="relative text-center font-display text-[150px] sm:text-[250px] leading-none text-white z-20 drop-shadow-[0_0_60px_rgba(255,255,255,0.8)]">
+             10
+          </div>
+          <h2 className="font-display text-4xl sm:text-6xl text-white mt-4 z-20 text-center drop-shadow-md" style={{ animation: opacityFor("burst") > 0 ? "ci-slide-up 0.6s 0.3s ease-out both" : "none" }}>
+             Lights Out and Away We Go!
+          </h2>
+          <div className="absolute inset-0 z-10 overflow-hidden">
+             {Array.from({ length: 120 }).map((_, i) => {
+               const angle = Math.random() * Math.PI * 2;
+               const velocity = 30 + Math.random() * 70;
+               const tx = Math.cos(angle) * velocity;
+               const ty = Math.sin(angle) * velocity;
+               return (
+                 <div key={i} className="absolute left-1/2 top-1/2 w-3 h-3 rounded-sm"
+                      style={{
+                        backgroundColor: ['#ff2020', '#ffcc40', '#00d2ff', '#ffffff', '#34d399'][Math.floor(Math.random() * 5)],
+                        animation: opacityFor("burst") > 0 ? "ci-explode 3s ease-out forwards" : "none",
+                        animationDelay: `${Math.random() * 0.15}s`,
+                        '--tx': `${tx}vw`,
+                        '--ty': `${ty}vh`,
+                        '--r': `${Math.random() * 720 - 360}deg`
+                      } as any} />
+               );
+             })}
           </div>
         </div>
       </div>
 
-      {/* ─────────── 3 · BIRTHDAY JOURNEY ─────────── */}
+      {/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ 3 ┬╖ BIRTHDAY JOURNEY ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
       <div className="absolute inset-0 overflow-hidden"
         style={{ opacity: opacityFor("journey"), transition: `opacity ${FADE}ms ${EASE}` }}>
          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, #1a0826 0%, #050110 100%)" }} />
@@ -363,7 +202,7 @@ export function CinematicIntro({ onDone, racerName, guestName }: { onDone: () =>
          </div>
       </div>
 
-      {/* ─────────── 4 · COUNTDOWN MOMENT ─────────── */}
+      {/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ 4 ┬╖ COUNTDOWN MOMENT ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
       <div className="absolute inset-0 flex flex-col items-center justify-center"
         style={{ opacity: opacityFor("countdown"), transition: `opacity ${FADE}ms ${EASE}` }}>
         <div className="absolute inset-0"
@@ -379,7 +218,7 @@ export function CinematicIntro({ onDone, racerName, guestName }: { onDone: () =>
         </div>
       </div>
 
-      {/* ─────────── 5 · THE GRAND REVEAL ─────────── */}
+      {/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ 5 ┬╖ THE GRAND REVEAL ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
       <div className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden"
         style={{ opacity: opacityFor("reveal"), transition: `opacity ${FADE}ms ${EASE}` }}>
         
@@ -412,7 +251,7 @@ export function CinematicIntro({ onDone, racerName, guestName }: { onDone: () =>
         </div>
       </div>
 
-      {/* ─────────── 6 · PERSONALIZED WELCOME ─────────── */}
+      {/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ 6 ┬╖ PERSONALIZED WELCOME ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
       <div className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden"
         style={{ opacity: opacityFor("welcome"), transition: `opacity ${FADE}ms ${EASE}` }}>
         <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, rgba(10,30,50,0.5), #000 70%)" }} />
@@ -444,7 +283,7 @@ export function CinematicIntro({ onDone, racerName, guestName }: { onDone: () =>
         </div>
       </div>
 
-      {/* ─────────── 7, 8 & 9 · CHAMPION ARRIVAL, CELEBRATION MOMENT & CTA ─────────── */}
+      {/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ 7, 8 & 9 ┬╖ CHAMPION ARRIVAL, CELEBRATION MOMENT & CTA ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
       <div className="absolute inset-0 overflow-hidden"
         style={{ 
           opacity: opacityFor("champion") || opacityFor("celebration") ? 1 : 0, 
@@ -544,14 +383,18 @@ export function CinematicIntro({ onDone, racerName, guestName }: { onDone: () =>
       )}
 
       <style>{`
-        @keyframes ci-headlight {
-          0% { opacity: 0; transform: scale(0.2) translateY(20px); filter: brightness(0.5); }
-          50% { opacity: 1; transform: scale(1.1) translateY(-5px); filter: brightness(1.5); }
-          100% { opacity: 1; transform: scale(1) translateY(0); filter: brightness(1); }
+        @keyframes ci-explode {
+          0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 1; }
+          80% { opacity: 1; }
+          100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1) rotate(var(--r)); opacity: 0; }
         }
-        @keyframes ci-drive-forward {
-          0% { transform: scale(0.8) translateY(20px); opacity: 0; filter: blur(10px); }
-          100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
+        @keyframes ci-scale-up {
+          0% { transform: scale(0.8); opacity: 0; filter: blur(10px); }
+          100% { transform: scale(1); opacity: 1; filter: blur(0px); }
+        }
+        @keyframes ci-slide-up {
+          0% { transform: translateY(40px); opacity: 0; }
+          100% { transform: translateY(0); opacity: 1; }
         }
         @keyframes ci-arch-flyby {
           0% { transform: scale(0.1) translateY(100px); opacity: 0; border-width: 2px; }
