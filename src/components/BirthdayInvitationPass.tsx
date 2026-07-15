@@ -148,27 +148,9 @@ export function BirthdayInvitationPass({ racerName, guestName, raceDate, raceTim
                 <div className="absolute -left-4 -top-4 hidden h-8 w-8 rounded-full bg-[#050505] md:block" />
                 <div className="absolute -bottom-4 -left-4 hidden h-8 w-8 rounded-full bg-[#050505] md:block" />
                 
-                <div className={`flex flex-col items-center gap-4 transition-all duration-700 transform ${step >= 1 ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}`}>
-                  <div className="font-mono text-xs uppercase tracking-[0.4em] text-muted-foreground">Ticket No.</div>
-                  <div className="font-display text-4xl text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">010</div>
-                </div>
-
-                <div className={`flex flex-col items-center gap-8 mt-10 md:mt-0 transition-all duration-700 transform ${step >= 3 ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-                  <div className="rotate-0 md:-rotate-90 flex items-center md:items-end gap-[2px] overflow-hidden">
-                    {Array.from({ length: 48 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="bg-white/80"
-                        style={{
-                          width: (i % 5 === 0 ? 4 : i % 3 === 0 ? 2 : 1) + "px",
-                          height: 60 + ((i * 37) % 24) + "px",
-                          opacity: i % 7 === 0 ? 0.4 : 0.9,
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent text-center mt-2 md:mt-10 md:-rotate-90 md:translate-y-16 flex items-center justify-center gap-2">
-                    <Sparkles className="h-3 w-3" /> VIP ACCESS GRANTED <Sparkles className="h-3 w-3" />
+                <div className={`flex h-full flex-col items-center justify-center gap-8 mt-10 md:mt-0 transition-all duration-700 transform ${step >= 1 ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent text-center flex items-center justify-center gap-2 md:-rotate-90">
+                    <Sparkles className="h-4 w-4" /> VIP ACCESS GRANTED <Sparkles className="h-4 w-4" />
                   </div>
                 </div>
                 

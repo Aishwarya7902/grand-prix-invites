@@ -22,7 +22,7 @@ const STAGES: { key: StageKey; at: number; end: number }[] = [
   { key: "celebration", at: 32500, end: 10_000_000 },
 ];
 
-const CTA_READY_AT = 33000;
+const CTA_READY_AT = 29500;
 const FADE = 600;
 const SKIP_AT = 4000;
 const EASE = "cubic-bezier(0.65, 0, 0.35, 1)";
