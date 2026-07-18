@@ -134,78 +134,154 @@ function Index() {
           alt="Red Formula racing car speeding through neon-lit city"
           width={1920}
           height={1280}
-          className="absolute inset-0 h-full w-full object-cover opacity-70"
+          className="absolute inset-0 h-full w-full object-cover opacity-50 mix-blend-luminosity"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
-        <div className="absolute inset-x-0 top-0 z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
+        
+        {/* Giant Glowing 10 Background */}
+        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-display text-[30vw] leading-none text-transparent bg-clip-text bg-gradient-to-b from-accent/20 to-transparent opacity-40 blur-sm mix-blend-screen select-none">
+          10
+        </div>
+        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-display text-[30vw] leading-none text-accent/10 select-none" style={{ textShadow: '0 0 100px rgba(255, 200, 0, 0.3)' }}>
+          10
+        </div>
+
+        {/* Celebration Particles Background */}
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div
+              key={`sparkle-${i}`}
+              className="absolute rounded-full bg-accent animate-pulse-glow"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                width: `${Math.random() * 4 + 2}px`,
+                height: `${Math.random() * 4 + 2}px`,
+                opacity: Math.random() * 0.5 + 0.2,
+                animationDelay: `${Math.random() * 2}s`,
+                animationDuration: `${Math.random() * 3 + 2}s`,
+              }}
+            />
+          ))}
+          {Array.from({ length: 8 }).map((_, i) => (
+             <div
+               key={`streamer-${i}`}
+               className="absolute h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent"
+               style={{
+                 top: `${(i * 12) + 5}%`,
+                 left: 0,
+                 right: 0,
+                 animation: `speed-lines ${2 + (i % 3) * 1}s linear infinite`,
+                 animationDelay: `${i * 0.3}s`,
+               }}
+             />
+          ))}
+        </div>
+
+        <div className="absolute inset-x-0 top-0 z-20">
           <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
             <div className="flex items-center gap-2 font-display text-xl tracking-widest text-foreground">
-              <Flag className="h-5 w-5 text-primary" /> GRAND CELEBRATION
+              <Trophy className="h-5 w-5 text-accent" /> BIRTHDAY CHAMPIONSHIP
             </div>
             <div className="hidden gap-6 font-mono text-xs uppercase tracking-widest text-muted-foreground md:flex">
               <a href="#invitation" className="hover:text-accent">Invitation</a>
-              <a href="#journey" className="hover:text-accent">Race Day</a>
+              <a href="#journey" className="hover:text-accent">Party Day</a>
               <a href="#memories" className="hover:text-accent">Hall of Fame</a>
               <a href="#rsvp" className="hover:text-accent">RSVP</a>
             </div>
           </nav>
         </div>
 
-        <div className="relative z-10 mx-auto max-w-7xl px-6 pt-24">
+        <div className="relative z-20 mx-auto w-full max-w-7xl px-6 pt-24 grid lg:grid-cols-[1fr_auto] gap-12 items-center">
           <div className="max-w-3xl animate-race-in">
-            <div className="mb-6 inline-flex items-center gap-3 border border-primary/60 bg-background/60 px-4 py-2 backdrop-blur">
-              <span className="h-2 w-2 animate-pulse-glow rounded-full bg-primary" />
-              <span className="font-mono text-xs uppercase tracking-[0.3em] text-foreground">Season 2026 · Round 10</span>
+            <div className="mb-6 inline-flex items-center gap-3 border border-accent/40 bg-accent/10 px-4 py-2 backdrop-blur rounded-full">
+              <span className="h-2 w-2 animate-pulse-glow rounded-full bg-accent" />
+              <span className="font-mono text-xs uppercase tracking-[0.3em] text-accent">🎂 Celebrating 10 Amazing Years</span>
             </div>
-            <h1 className="font-display text-6xl uppercase leading-[0.9] text-foreground md:text-8xl">
+            
+            <h1 className="font-display text-5xl uppercase leading-[0.9] text-foreground md:text-7xl lg:text-8xl">
+              <span className="text-3xl md:text-5xl text-muted-foreground">🏆 Welcome to</span><br />
               {RACER_NAME}'s <br />
               <span className="text-fire">10th Birthday</span> <br />
-              Grand Celebration
+              Championship
             </h1>
+            
             <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-              You're on the VIP list, driver. Lock in your helmet, warm up the tyres and prepare for the fastest championship of the year.
+              Get ready for cake, games, surprises, laughter, and an unforgettable celebration. Join us as we celebrate 10 incredible years of {RACER_NAME}'s journey!
             </p>
+            
             <div className="mt-10 flex flex-wrap items-center gap-4">
-              <a href="#invitation" className="group relative inline-flex items-center gap-3 overflow-hidden bg-primary px-8 py-4 font-display text-lg uppercase tracking-wider text-primary-foreground shadow-[var(--shadow-glow)] transition-transform hover:scale-105">
-                <Zap className="h-5 w-5" /> Enter the Championship
-                <span className="absolute inset-y-0 -left-full w-1/2 skew-x-12 bg-white/20 transition-all duration-700 group-hover:left-full" />
-              </a>
-              <a href="#rsvp" className="inline-flex items-center gap-2 border border-border bg-background/50 px-6 py-4 font-mono text-xs uppercase tracking-widest text-foreground backdrop-blur hover:border-accent hover:text-accent">
-                Get your race pass →
-              </a>
+              <button 
+                onClick={(e) => {
+                  confetti({
+                    particleCount: 150,
+                    spread: 80,
+                    origin: { y: 0.6 },
+                    colors: ['#ffc800', '#ff0000', '#ffffff', '#ff007f']
+                  });
+                  document.getElementById('invitation')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="group relative inline-flex items-center gap-3 overflow-hidden rounded-md bg-accent px-8 py-4 font-display text-lg uppercase tracking-wider text-black shadow-[0_0_30px_rgba(255,200,0,0.4)] transition-transform hover:scale-105"
+              >
+                <PartyPopper className="h-5 w-5" /> 🎉 Open My VIP Party Pass
+                <span className="absolute inset-y-0 -left-full w-1/2 skew-x-12 bg-white/40 transition-all duration-700 group-hover:left-full" />
+              </button>
             </div>
 
-            <div className="mt-16 grid max-w-2xl grid-cols-3 gap-4 border border-border bg-background/60 p-4 backdrop-blur">
+            <div className="mt-16 grid max-w-2xl grid-cols-2 md:grid-cols-4 gap-4 border border-white/10 bg-black/40 p-4 backdrop-blur rounded-xl">
               <div>
-                <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Top Speed</div>
-                <div className="font-display text-3xl text-primary">340 <span className="text-sm text-muted-foreground">km/h</span></div>
+                <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">🎂 Age</div>
+                <div className="font-display text-2xl text-accent">10 <span className="text-sm text-muted-foreground">Years</span></div>
               </div>
               <div>
-                <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Laps</div>
-                <div className="font-display text-3xl text-accent">10</div>
+                <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">🎁 Surprises</div>
+                <div className="font-display text-2xl text-primary">LOTS</div>
               </div>
               <div>
-                <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Podium</div>
-                <div className="font-display text-3xl text-foreground">P1</div>
+                <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">🎉 Fun Level</div>
+                <div className="font-display text-2xl text-accent">100%</div>
+              </div>
+              <div>
+                <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">🍰 Cake Status</div>
+                <div className="font-display text-2xl text-green-400">READY</div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent"
-              style={{
-                top: `${(i * 8) + 5}%`,
-                left: 0,
-                right: 0,
-                animation: `speed-lines ${1 + (i % 3) * 0.4}s linear infinite`,
-                animationDelay: `${i * 0.1}s`,
-              }}
-            />
-          ))}
+          {/* Birthday Champion Card */}
+          <div className="hidden lg:block animate-[bw-float_4s_ease-in-out_infinite]">
+            <div className="relative w-72 rounded-2xl border-2 border-accent/50 bg-black/60 p-6 backdrop-blur-md shadow-[0_0_40px_rgba(255,200,0,0.15)] overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-transparent" />
+              
+              <div className="relative z-10 flex flex-col items-center text-center">
+                <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-accent bg-background shadow-[0_0_20px_rgba(255,200,0,0.5)]">
+                  {/* Avatar Placeholder */}
+                  <span className="text-5xl">👑</span>
+                </div>
+                
+                <div className="inline-block rounded-full bg-accent/20 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-accent mb-2">
+                  🏆 Birthday Champion
+                </div>
+                
+                <h3 className="font-display text-3xl uppercase text-white">{RACER_NAME}</h3>
+                
+                <div className="mt-6 w-full space-y-3 text-left">
+                  <div className="border-b border-white/10 pb-2">
+                    <div className="font-mono text-[10px] uppercase text-muted-foreground">Age</div>
+                    <div className="font-bold text-accent">10</div>
+                  </div>
+                  <div className="border-b border-white/10 pb-2">
+                    <div className="font-mono text-[10px] uppercase text-muted-foreground">Mission</div>
+                    <div className="font-bold text-primary">Have the best day ever</div>
+                  </div>
+                  <div>
+                    <div className="font-mono text-[10px] uppercase text-muted-foreground">Fun Level</div>
+                    <div className="font-bold text-white">100% Maximum</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
