@@ -116,6 +116,8 @@ function RootShell({ children }: { children: ReactNode }) {
     </html>
   );
 }
+import { MusicPlayer } from "../components/MusicPlayer";
+import birthdayAudio from "../assets/soft-birthday-piano.mp3";
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
@@ -124,6 +126,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <MusicPlayer url={birthdayAudio} />
     </QueryClientProvider>
   );
 }

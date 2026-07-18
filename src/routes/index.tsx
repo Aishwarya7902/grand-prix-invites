@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import confetti from "canvas-confetti";
 import { Flag, MapPin, Phone, MessageCircle, Trophy, Zap, Timer, Users, Gauge, Sparkles, Mail, Gift, PartyPopper, Heart } from "lucide-react";
 import heroRace from "@/assets/hero-race.jpg";
 import pitLane from "@/assets/pit-lane.jpg";
@@ -76,6 +77,38 @@ function Index() {
   const [intro, setIntro] = useState(ALWAYS_PLAY_INTRO);
   const [rsvpState, setRsvpState] = useState<'idle' | 'animating' | 'confirmed'>('idle');
   const [guestName, setGuestName] = useState("Rohan");
+  const rsvpRef = useRef<HTMLElement>(null);
+  const rsvpConfettiFired = useRef(false);
+
+  useEffect(() => {
+    if (!rsvpRef.current) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !rsvpConfettiFired.current) {
+          rsvpConfettiFired.current = true;
+          // Fire from bottom left
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { x: 0, y: 1 },
+            colors: ['#ff0000', '#ffa500', '#ffff00', '#ff007f']
+          });
+          // Fire from bottom right
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { x: 1, y: 1 },
+            colors: ['#ff0000', '#ffa500', '#ffff00', '#ff007f']
+          });
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    observer.observe(rsvpRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -207,7 +240,7 @@ function Index() {
       <BlessingWall />
 
       {/* RSVP */}
-      <section id="rsvp" className="relative overflow-hidden py-24">
+      <section id="rsvp" ref={rsvpRef} className="relative overflow-hidden py-24">
         <div className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(ellipse at center, oklch(0.75 0.19 55 / 0.5), transparent 70%)" }} />
         <div className="relative mx-auto max-w-4xl px-6">
           <SectionLabel num="06" title="Birthday RSVP" />
