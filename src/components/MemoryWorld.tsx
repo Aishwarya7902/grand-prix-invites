@@ -15,6 +15,7 @@ const MEMORIES = [
     caption: "Every great champion begins with one tiny step.",
     img: memYear1,
     progress: 0.15,
+    objectPosition: "object-top"
   },
   {
     age: "3",
@@ -22,6 +23,7 @@ const MEMORIES = [
     caption: "The adventure had only just begun. Always curious.",
     img: memYear3,
     progress: 0.35,
+    objectPosition: "object-center"
   },
   {
     age: "5",
@@ -29,6 +31,7 @@ const MEMORIES = [
     caption: "A milestone reached with boundless energy and the brightest smiles.",
     img: memYear5,
     progress: 0.55,
+    objectPosition: "object-top"
   },
   {
     age: "8",
@@ -36,6 +39,7 @@ const MEMORIES = [
     caption: "Growing fast, dreaming big, and conquering every turn.",
     img: memYear8,
     progress: 0.75,
+    objectPosition: "object-center"
   },
   {
     age: "10",
@@ -43,6 +47,7 @@ const MEMORIES = [
     caption: "A decade of incredible memories. The ultimate birthday champion!",
     img: memYear10,
     progress: 0.90,
+    objectPosition: "object-center"
   },
 ];
 
@@ -229,8 +234,8 @@ export function MemoryWorld({ racerName }: { racerName: string }) {
                             marginTop: pt.y > 50 ? '-15vh' : '15vh' // offset so car is visible
                           } 
                         : { 
-                            top: '50%', transform: 'translateY(-50%)',
-                            ...(pt.x > 50 ? { right: '200%' } : { left: '200%' })
+                            top: `calc(50vh - ${pt.y}vh)`, transform: 'translateY(-50%)',
+                            ...(pt.x > 50 ? { right: '40px' } : { left: '40px' })
                           }
                      )
                    }}
@@ -243,7 +248,7 @@ export function MemoryWorld({ racerName }: { racerName: string }) {
                  
                  <div className="relative w-full aspect-square sm:aspect-[4/3] rounded-xl overflow-hidden shadow-2xl mb-4 border border-white/10 group">
                    <div className="absolute inset-0 bg-accent/20 mix-blend-overlay z-10 group-hover:opacity-0 transition-opacity duration-500" />
-                   <img src={MEMORIES[i].img} alt={MEMORIES[i].title} className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105" />
+                   <img src={MEMORIES[i].img} alt={MEMORIES[i].title} className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${MEMORIES[i].objectPosition}`} />
                  </div>
                  
                  <p className="text-white/80 text-sm sm:text-base leading-relaxed">{MEMORIES[i].caption}</p>
