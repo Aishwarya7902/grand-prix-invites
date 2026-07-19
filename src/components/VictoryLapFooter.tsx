@@ -201,7 +201,6 @@ export function VictoryLapFooter() {
             } else if (entity.type === "ai") {
               // Game Over!
               setGameState("gameover");
-              setTimeLeft(0);
               
               // Screen shake effect on track
               if (trackBgRef.current) {
@@ -472,15 +471,15 @@ export function VictoryLapFooter() {
           )}
         </div>
 
-        {/* Mobile Touch Zones */}
+        {/* Control Zones */}
         {gameState === "playing" && (
-          <div className="absolute inset-0 z-10 flex pointer-events-auto md:hidden">
-            <div className="flex-1 h-full flex items-end justify-start p-4 pb-20" onTouchStart={handleMoveLeft}>
+          <div className="absolute inset-0 z-10 flex pointer-events-auto">
+            <div className="flex-1 h-full flex items-end justify-start p-4 pb-20 cursor-pointer" onTouchStart={handleMoveLeft} onClick={handleMoveLeft}>
               <div className="w-16 h-16 rounded-full bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur active:bg-white/30 transition-colors shadow-lg pointer-events-none">
                 <ChevronLeft className="w-10 h-10 text-white/70" />
               </div>
             </div>
-            <div className="flex-1 h-full flex items-end justify-end p-4 pb-20" onTouchStart={handleMoveRight}>
+            <div className="flex-1 h-full flex items-end justify-end p-4 pb-20 cursor-pointer" onTouchStart={handleMoveRight} onClick={handleMoveRight}>
               <div className="w-16 h-16 rounded-full bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur active:bg-white/30 transition-colors shadow-lg pointer-events-none">
                 <ChevronRight className="w-10 h-10 text-white/70" />
               </div>
